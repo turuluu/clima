@@ -214,3 +214,8 @@ Other options for full cli experience:
 * implicitly map `cmd` -h -> <cmd> -- -h
 * way to define schema within the cli class
 * fire doesn't handle well strings as arguments, when there's spaces
+* post schema init stuff
+  * validation (fields are what they're supposed to be, optional helper msg what it was and what it should be)
+  * post init hook for reassigning variables (...)
+  * type assurance as in if the attribute is of type Path, then c.attr is Path when using it
+  * optional configurations e.g. mac/win in build scripts
