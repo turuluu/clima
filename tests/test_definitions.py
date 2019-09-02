@@ -1,6 +1,12 @@
 from unittest import TestCase
 from clima import c, Schema
 from functools import partial
+import sys
+# Using Pure versions of paths allows testing cross platform code
+# Can't use just Path, because that will get rendered to a platform specific
+# subclass when validating (e.g. on windows Path('...') -> WindowsPath('...') )
+from pathlib import PureWindowsPath as WindowsPath
+from pathlib import PurePosixPath as PosixPath
 
 
 def test_schema_definition():
@@ -8,10 +14,12 @@ def test_schema_definition():
     class C(Schema):
         a: int = 1  # desctiption
 
+
 def test_schema_without_doc():
     @c
     class C(Schema):
         a: int = 1
+
 
 # TODO: sane exception for this scenario
 # def test_schema_without_default():
@@ -24,6 +32,82 @@ def test_schema_without_type():
     class C(Schema):
         a = 1
 
+    assert c.a == 1
+
+
+class TestSchemaNoType(TestCase):
+    default = 42
+
+    def setUp(self) -> None:
+        class C(Schema):
+            a = self.default
+
+    def test_default(self):
+        sys.argv = ['test', 'x']
+        assert (c.a == self.default)
+
+    def test_override(self):
+        sys.argv = ['test', 'x', '--a', '1']
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        assert (c.a == 1)
+
+
+class TestSchema(TestCase):
+    defaults = {
+        '_int': [42, int],
+        '_str': ['oh hi', str],
+        '_posix_path': [PosixPath('/tmp'), PosixPath],
+        '_win_path': [WindowsPath('/tmp'), WindowsPath],
+    }
+
+    def setUp(self) -> None:
+        class C(Schema):
+            _int: int = self.defaults['_int'][0]
+            _str: str = self.defaults['_str'][0]
+            _posix_path: PosixPath = self.defaults['_posix_path'][0]
+            _win_path: WindowsPath = self.defaults['_win_path'][0]
+
+    def test_default(self):
+        sys.argv = ['test', 'x']
+        for k, v in self.defaults.items():
+            assert (getattr(c, k) == v[0])
+            assert (type(getattr(c, k)) == v[1])
+
+    def test_override(self):
+        sys.argv = ['test', 'x', '--a', '1']
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        assert (c.a == 1)
+        assert (type(c.a) == int)
+
+
+def test_foo(capfd):
+    sys.argv = ['test', 'x']
+
+    class C(Schema):
+        a = 1
+
+    @c
+    class Cli:
+        def x(self):
+            """docstring"""
+            print(c.a)
+
+    assert (c.a == 1)
+    # captured = capfd.readouterr()
+    # assert captured.out == 'oh hi\nfoo\nbar'
+
 
 class TestConfigurable(TestCase):
 
@@ -34,6 +118,8 @@ class TestConfigurable(TestCase):
 
     def test_cli(self):
         """Basic Cli definition"""
+
+        sys.argv = ['test', '--a', 13]
 
         @partial(c, noprepare=True)
         class Cli:
@@ -48,4 +134,3 @@ class TestConfigurable(TestCase):
         class Cli:
             def x(self):
                 pass
-
