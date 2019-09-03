@@ -28,8 +28,27 @@ setup(
     author='Joni Turunen',
     author_email='rojun.itu@gmail.com',
     keywords='cli',
-    classifiers=['License :: OSI Approved :: MIT License'],
-    packages=['clima'],
+    classifiers=[
+        'License :: OSI Approved :: MIT License',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Topic :: Software Development :: Build Tools',
+        'Topic :: Software Development :: Libraries', 'Topic :: Utilities',
+        'Operating System :: POSIX :: Linux',
+        'Operating System :: Microsoft :: Windows :: Windows 10',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: MacOS :: MacOS X'
+    ],
+    packages=[
+        'clima', 'examples.advanced_module_example', 'examples.module_example'
+    ],
     package_data={},
     install_requires=['fire==0.1.3'],
+    extras_require={
+        'tests': ['pytest'],
+        'dev': ['pytest']
+    },
 )

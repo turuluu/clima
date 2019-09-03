@@ -2,12 +2,29 @@
    :format: html
 
 
-clima - Quick command line interfaces
-=====================================
+clima - command line interface with a schema
+============================================
 
-Create a semi-self-documenting command line interface that handles loading configuration
-files and enabling env variable overloading in addition to command line arguments
-by defining a simple schema of the configuration and a class with your "business logic".
+
+.. image:: https://travis-ci.com/d3rp/clima.svg?branch=master
+   :target: https://travis-ci.com/d3rp/clima
+   :alt: Build status
+ 
+.. image:: https://img.shields.io/pypi/pyversions/clima
+   :target: 
+   :alt: Python versions
+ 
+.. image:: https://img.shields.io/librariesio/github/d3rp/clima
+   :target: 
+   :alt: Dependencies
+ 
+.. image:: https://img.shields.io/pypi/l/clima
+   :target: 
+   :alt: PyPI license
+
+
+Create a command line interface out of your script with quick default behaviour for configuration, minimal setup and less maintenance. It handles loading and parsing configuration
+files and overriding it with env variables by defining a simple schema of the configuration and a class with your "business logic".
 
 Example: this is the required setup for having configurations and a command line interface ready for use:
 
@@ -26,16 +43,12 @@ Example: this is the required setup for having configurations and a command line
            print(c.a)
 
 
-In other words, use this to wrap your scripts as command line commands without
-fussing about and maintaining argument parsing and duplicating comments for help or remembering
-what the arguments were and did
-while still having the typical use experience of a cli program (e.g. --help, subcommands, ...).
-This implementation is focused on a premise that for a simple script you have a global configuration which
-would be used through out the user code i.e. a context for the program. That configuration
-is populated with given arguments falling back on
-defaults in the code and some further complimentary options.
+Long description
+----------------
 
-Should work for linux, macos and windows.
+In other words, use this to wrap your scripts as command line commands without resorting to bash or maintaining argument parsing in python. There shouldn't be a need of duplicating comments for ``--help`` to remember what the arguments were and did. This decorator magic offers the typical use experience of a cli program (e.g. argument parsing and validation, --help, subcommands, ...).
+
+The implementation is focused on a premise that for a simple script there's usually a script wide global configuration which would be used through out the user code i.e. a context for the program that is refered to in different parts of the code. That configuration is populated with given arguments falling back on defaults in the code and some further complimentary options and then made accessible via a simple global ``c`` variable around the code base with very little additional effort. With a small adjustment this can made to autocomplete in IDEs. This helps when the schema of the configuration grows larger.
 
 Installing
 ----------
@@ -45,13 +58,18 @@ Installing
    pip install --user clima
 
 
-See alternative options at the end of the README
+Installing from source
+^^^^^^^^^^^^^^^^^^^^^^
+
+Choose your favourite flavour of build system. Check their documentation if puzzled (poetry, flit, pip, pipx, pipenv..)
+
+The tooling here has been exported with `DepHell <https://github.com/dephell/dephell>`_ from the poetry declarations.
 
 Usage
 -----
 
-See the example file in ``tester/__main__.py``. Here's a run down of the individual
-parts in it.
+See the example file in `\ ``examples/script_example.py`` <examples/script_example.py>`_. Here's a run down of the individual
+parts in such a script (adapted from another example at `module example <examples/module_example>`_\ ).
 
 First import the required components:
 
@@ -60,7 +78,7 @@ First import the required components:
    from clima import c, Schema
 
 
-In your code define the schema as a Schema decorating it with ``c``\ :
+In your code define the ``Schema`` subclass by decorating the class with ``c``\ :
 
 .. code-block::
 
@@ -99,37 +117,46 @@ optional. All of these parts will be parsed for the '--help' for the subcommands
            print('bar')
 
 
-The methods are parsed as subcommands for the cli and their respective doc strings will show in the 
-subcommands' help print out. Note the usage of the parsed configuration ``c``\ :
+The methods are parsed as subcommands and their respective doc strings will show in the 
+subcommands' help printout. Note the usage of the parsed configuration ``c`` inside the method:
 
-.. code-block::
+    ...
+        ...
+        print(c.a)
+        print(c.x)
 
-   print(c.a)
-   print(c.x)
 
-
-Also, to enable autocompletion in IDEs, this hack is needed for the time being:
+Also, to enable autocompletion in IDEs, this hack suffices:
 
 .. code-block::
 
    c: Configuration = c
 
 
-Put it in the "global space" e.g. just after defining the template. See the ``tester/__main__.py`` for a specific example.
+Put it in the "global space" e.g. just after defining the template. See the `\ ``examples/script_example.py`` <examples/script_example.py>`_ for a specific example.
 
 When all is complete, the imported ``c`` variable should have all the bits and pieces for the configuration. It can be
 used inside the Cli class as well as imported around the codebase thus encapsulating all the configurations into one
 container with quick access with attributes ``c.a``\ , ``c.x``\ , etc...
 
-Running the cli
-^^^^^^^^^^^^^^^
+Examples and platforms
+----------------------
+
+Should work for linux, macos and windows.
+
+More examples in the `examples directory <examples>`_ with printouts of the defined subcommands and helps.
+
+Testing the examples
+^^^^^^^^^^^^^^^^^^^^
+
+The `examples <examples>`_ can be tried out by cloning the repo and running from repo directory root (on linux and the like):
 
 .. code-block::
 
-   # Test the damage (presuming you did the flit step below)
-   tester -- -h
-   tester subcommand-foo -- -h
-   tester subcommand-bar
+   PYTHONPATH=$PWD python ./examples/module_example/__main__.py -- -h
+   PYTHONPATH=$PWD python ./examples/module_example/__main__.py subcommand-foo -- -h
+   PYTHONPATH=$PWD python ./examples/module_example/__main__.py subcommand-bar
+   ...
 
 
 Output should resemble this (fire v0.1.3 prints out Args, fire v0.2.1 doesn't (though looks much nicer))
@@ -179,17 +206,8 @@ Same applies for the env variables.
    X=2 tester subcommand-foo
 
 
-Installing as command line program i.e. a command
--------------------------------------------------
-
-.. code-block::
-
-   # Install dev version (omit --symlink for more permanent solution):
-   flit install --symlink
-
-
-Out-of-the-box features via Fire
---------------------------------
+Additional features via Fire
+----------------------------
 
 See the `Python Fire's Flags <https://github.com/google/python-fire/blob/master/docs/using-cli.md#python-fires-flags>`_
 documentation for nice additional features such as:
@@ -205,53 +223,16 @@ documentation for nice additional features such as:
 Why another cli framework?
 --------------------------
 
-This is just a tool to slap together a cli program in python, so you don't have to resort to bash. The intention is to
-get something reasonably configurable and generic up and running as fast as possible. I can't bother to memorize
-argparses syntax, even though it's a very good package. Also click works nice for more elaborate things though fire is
-my personal favourite for the time being.
+This is just a tool to slap together a cli program in python instead that grew out of the need of having a build automation system and an entrypoint script to build various flavours of C++ projects. The intention is to get something reasonably configurable and generic up and running as fast as possible while still having the "power" of python. I can't bother to memorize argparses syntax, even though it's a very good package. Also click works nice for more elaborate things though fire is my personal favourite for the time being. Often times when I kick off a bash script for this it ends up too elaborate very quick and then I miss python.
 
 Also docopt looks very nice, but it doesn't provide autocompletion and all the configuration chaining magic I was after.
+
+Other options for full cli experience:
 
 
 * `docopt <https://docopt.org>`_
 * `fire <https://github.com/google/python-fire>`_
 * `click <https://click.palletsprojects.com>`_
-
-Installing from source
-----------------------
-
-**Note**\ :
-If you prefer some other tooling, maybe try out `DepHell <https://github.com/dephell/dephell>`_
-to transform this from pipenv to requirements.txt etc.. (or what ever floats you boat)
-
-pipenv
-^^^^^^
-
-.. code-block::
-
-   # From the beginning...
-   pip install -U pip pipenv
-
-   # on some mac configurations, when pipenv isn't included in the path..
-   sudo -H pip install -U pip pipenv
-
-
-pipenv environment
-^^^^^^^^^^^^^^^^^^
-
-.. code-block::
-
-   pipenv install
-
-   # activate the environment alternative 1
-   pipenv shell
-
-   # activate the environment alternative 2
-   pipenv run <command>
-
-
-**Note**\ : consecutive steps presume the pipenv environment is being
-used/activated
 
 Dependencies
 ^^^^^^^^^^^^
@@ -288,13 +269,16 @@ DONE:
 
   * would be nice to have a single point of access and import requirement
 
-* base level help (\ :raw-html-m2r:`<script>` -- -h) doesn't printout the subcommands
+* base level help (\ ``script`` -- -h) doesn't printout the subcommands
 
   * fixed in fire v0.2.1
 
 * look into autocompletion options (iirc, fire might have sth out-of-the-box)
 
   * documented
+
+* better name
+* readme's pipenv section doesn't make much sense..
 
 TODO:
 -----
@@ -304,7 +288,6 @@ TODO:
 
   * though fire v0.2.1 help looks like a man page
 
-* readme's pipenv section doesn't make much sense..
 * maybe a logging setup (--dryrun)
 
   * default debug logging wrapper that would log every function called
@@ -315,12 +298,18 @@ TODO:
   * dephell or alternative to allow dev with whatever setup
 
 * fix doc string and args/parameter help for fire v0.2.1
-* better name
 * some sane tests
 * clean code from ``__init__``
 * better output for subcommands
 
   * fire v0.2.1 has this, but hides the parameter parsing and looks awful on windows
 
-* implicitly map :raw-html-m2r:`<cmd>` -h -> :raw-html-m2r:`<cmd>` -- -h
+* implicitly map ``cmd`` -h -> :raw-html-m2r:`<cmd>` -- -h
 * way to define schema within the cli class
+* fire doesn't handle well strings as arguments, when there's spaces
+* post schema init stuff
+
+  * validation (fields are what they're supposed to be, optional helper msg what it was and what it should be)
+  * post init hook for reassigning variables (...)
+  * type assurance as in if the attribute is of type Path, then c.attr is Path when using it
+  * optional configurations e.g. mac/win in build scripts

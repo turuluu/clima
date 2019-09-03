@@ -35,6 +35,7 @@ test = ["pytest"]
 [tool.flit.scripts]
 
 [tool.flit.entrypoints]
+
 [tool.poetry]
 name = "clima"
 version = "0.1.0"

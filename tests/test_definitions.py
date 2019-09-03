@@ -11,16 +11,16 @@ from pathlib import PurePosixPath as PosixPath
 from pathlib import Path
 
 
-def test_schema_definition():
-    @c
-    class C(Schema):
-        a: int = 1  # desctiption
-
-
-def test_schema_without_doc():
-    @c
-    class C(Schema):
-        a: int = 1
+# def test_schema_definition():
+#     @c
+#     class C(Schema):
+#         a: int = 1  # desctiption
+#
+#
+# def test_schema_without_doc():
+#     @c
+#     class C(Schema):
+#         a: int = 1
 
 
 # TODO: sane exception for this scenario
@@ -29,18 +29,63 @@ def test_schema_without_doc():
 #     class C(Schema):
 #         a: int
 
-def test_schema_without_type():
-    @c
-    class C(Schema):
-        a = 1
 
-    assert c.a == 1
+class SysArgvRestore:
+    def setUp(self) -> None:
+        self.save_sysargv()
+
+    def save_sysargv(self):
+        self.sys_argv = sys.argv
+
+    def restore_sysargv(self):
+        sys.argv = self.sys_argv
+
+    def tearDown(self) -> None:
+        self.restore_sysargv()
 
 
-class TestSchemaNoType(TestCase):
+class TestSchemaX(TestCase, SysArgvRestore):
+    def test_schema_without_type(self):
+        sys.argv = ['test', 'x']
+
+        @c
+        class C(Schema):
+            a = 1
+            L = [1,2,3]
+
+        @c
+        class D:
+            def x(self):
+                assert c.a == 1
+                assert c.L == [1,2,3]
+
+        assert c.a == 1
+
+
+class TestSchemaY(TestCase, SysArgvRestore):
+    def test_schema_post_init(self):
+        sys.argv = ['test', 'x']
+
+        class C(Schema):
+            a = 1
+
+            def post_init(self, *args):
+                self.a = 2
+
+        @c
+        class D:
+            def x(self):
+                assert c.a == 2
+
+        assert c.a == 2
+
+
+class TestSchemaNoType(TestCase, SysArgvRestore):
     default = 42
 
     def setUp(self) -> None:
+        self.save_sysargv()
+
         class C(Schema):
             a = self.default
 
@@ -69,11 +114,16 @@ class TestSchema(TestCase):
     }
 
     def setUp(self) -> None:
+        self.sys_argv = sys.argv
+
         class C(Schema):
             _int: int = self.defaults['_int'][0]
             _str: str = self.defaults['_str'][0]
             _posix_path: PosixPath = self.defaults['_posix_path'][0]
             _win_path: WindowsPath = self.defaults['_win_path'][0]
+
+    def tearDown(self) -> None:
+        sys.argv = self.sys_argv
 
     def test_default(self):
         sys.argv = ['test', 'x']
@@ -94,26 +144,11 @@ class TestSchema(TestCase):
         assert (type(c.a) == int)
 
 
-def test_foo(capfd):
-    sys.argv = ['test', 'x']
-
-    class C(Schema):
-        a = 1
-
-    @c
-    class Cli:
-        def x(self):
-            """docstring"""
-            print(c.a)
-
-    assert (c.a == 1)
-    # captured = capfd.readouterr()
-    # assert captured.out == 'oh hi\nfoo\nbar'
-
-
-class TestConfigurable(TestCase):
+class TestConfigurable(TestCase, SysArgvRestore):
 
     def setUp(self) -> None:
+        self.save_sysargv()
+
         @c
         class C(Schema):
             a: int = 1  # description
@@ -138,10 +173,11 @@ class TestConfigurable(TestCase):
                 pass
 
 
-class TestConfigFromCwd(TestCase):
+class TestConfigFromCwd(TestCase, SysArgvRestore):
     test_cfg = Path.cwd() / 'foo.cfg'
 
     def setUp(self) -> None:
+        self.save_sysargv()
         with open(self.test_cfg, 'w', encoding='UTF-8') as wf:
             wf.write('[Default]\nbar = 42')
         sys.argv = ['test', '--cwd', os.fspath(self.test_cfg.parent)]
@@ -151,6 +187,7 @@ class TestConfigFromCwd(TestCase):
 
     def tearDown(self) -> None:
         self.test_cfg.unlink()
+        self.restore_sysargv()
 
     def test_configfile(self):
         @c
@@ -161,10 +198,11 @@ class TestConfigFromCwd(TestCase):
         assert c.bar == 42
 
 
-class TestConfigFromCwdPath(TestCase):
+class TestConfigFromCwdPath(TestCase, SysArgvRestore):
     test_cfg = Path.cwd() / 'foo.cfg'
 
     def setUp(self) -> None:
+        self.save_sysargv()
         with open(self.test_cfg, 'w', encoding='UTF-8') as wf:
             wf.write('[Default]\nbar = .')
         sys.argv = ['test', '--cwd', os.fspath(self.test_cfg.parent)]
@@ -174,6 +212,7 @@ class TestConfigFromCwdPath(TestCase):
 
     def tearDown(self) -> None:
         self.test_cfg.unlink()
+        self.restore_sysargv()
 
     def test_configfile(self):
         @c

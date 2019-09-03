@@ -144,6 +144,7 @@ class Schema(metaclass=MetaSchema):
         c(self)
         c.configured = self
 
+    @staticmethod
     def post_init(self, *args):
         pass
 
