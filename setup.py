@@ -21,7 +21,7 @@ if os.path.exists(readme_path):
 setup(
     long_description=readme,
     name='clima',
-    version='0.1.0',
+    version='0.2.0',
     description='Simple boilerplate for cli scripts',
     python_requires='>=3.5',
     project_urls={'homepage': 'https://github.com/d3rp/clima.git'},
@@ -49,6 +49,6 @@ setup(
     install_requires=['fire==0.1.3'],
     extras_require={
         'tests': ['pytest'],
-        'dev': ['pytest']
+        'dev': ['pytest', 'twine']
     },
 )
