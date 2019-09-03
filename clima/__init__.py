@@ -9,7 +9,7 @@ import os
 from clima.schema import MetaSchema
 from clima import doc, configfile
 
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
 decorators_state = {
     'schema': None,
@@ -69,11 +69,21 @@ class Configurable:
 
         return res
 
+    def _type_correct_with(self, cdict, cfg_tuple):
+        """Use type hints to cast variables into their intended types"""
+        # TODO: This would be cleaner, if the config would use Schema or derivative in the
+        # first place and use its validation process
+        res = {}
+        for k, v in cdict.items():
+            res.update({k: type(getattr(cfg_tuple, k))(v)})
+        return res
+
     def __initialize(self, params: dict, configuration_tuple):
         """Chains all configuration options together"""
         config_file = configfile.get_config_path(configuration_tuple)
         if config_file is not None:
             config_dict = self.__filter_fields(configfile.read_config(config_file), configuration_tuple)
+            config_dict = self._type_correct_with(config_dict, configuration_tuple)
         else:
             config_dict = {}
 
@@ -120,7 +130,6 @@ class Configurable:
         return res
 
     def __getitem__(self, item):
-        print(item)
         return self.configured[item]
 
 
@@ -128,14 +137,8 @@ c = Configurable()
 
 
 class Schema(metaclass=MetaSchema):
-    # print('<7>')
-
     def _asdict(self):
-        # TODO: Does this even work?
-        return {k: v for k, v in self.__class__.__dict__.items()
-                if not k.startswith('_')
-                and not inspect.isfunction(v)
-                and not inspect.ismethod(v)}
+        return schema.asdict(self)
 
     def _wrap(self):
         c(self)

@@ -40,10 +40,7 @@ def read_config(_filepath='test.cfg') -> dict:
 
 def get_config_path(configuration_tuple):
     client_file = Path(inspect.getfile(configuration_tuple.__class__))
-    # print(repr(client_file))
-    # print(repr(configuration_tuple._asdict()))
     if hasattr(configuration_tuple, 'cwd'):
-        # print('has cwd')
         p = Path(configuration_tuple._asdict()['cwd'])
         if not p.absolute():
             p = client_file / p

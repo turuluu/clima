@@ -2,11 +2,13 @@ from unittest import TestCase
 from clima import c, Schema
 from functools import partial
 import sys
+import os
 # Using Pure versions of paths allows testing cross platform code
 # Can't use just Path, because that will get rendered to a platform specific
 # subclass when validating (e.g. on windows Path('...') -> WindowsPath('...') )
 from pathlib import PureWindowsPath as WindowsPath
 from pathlib import PurePosixPath as PosixPath
+from pathlib import Path
 
 
 def test_schema_definition():
@@ -134,3 +136,50 @@ class TestConfigurable(TestCase):
         class Cli:
             def x(self):
                 pass
+
+
+class TestConfigFromCwd(TestCase):
+    test_cfg = Path.cwd() / 'foo.cfg'
+
+    def setUp(self) -> None:
+        with open(self.test_cfg, 'w', encoding='UTF-8') as wf:
+            wf.write('[Default]\nbar = 42')
+        sys.argv = ['test', '--cwd', os.fspath(self.test_cfg.parent)]
+
+        class C(Schema):
+            bar: int = 0
+
+    def tearDown(self) -> None:
+        self.test_cfg.unlink()
+
+    def test_configfile(self):
+        @c
+        class Cli:
+            def x(self):
+                pass
+
+        assert c.bar == 42
+
+
+class TestConfigFromCwdPath(TestCase):
+    test_cfg = Path.cwd() / 'foo.cfg'
+
+    def setUp(self) -> None:
+        with open(self.test_cfg, 'w', encoding='UTF-8') as wf:
+            wf.write('[Default]\nbar = .')
+        sys.argv = ['test', '--cwd', os.fspath(self.test_cfg.parent)]
+
+        class C(Schema):
+            bar: WindowsPath = ''
+
+    def tearDown(self) -> None:
+        self.test_cfg.unlink()
+
+    def test_configfile(self):
+        @c
+        class Cli:
+            def x(self):
+                pass
+
+        assert str(c.bar) == '.'
+        assert type(c.bar) == WindowsPath
