@@ -1,6 +1,6 @@
 # clima - command line interface with a schema
 
-[![Build status](https://travis-ci.com/d3rp/clima.svg?branch=master)](https://travis-ci.com/d3rp/clima) [![Python versions](https://img.shields.io/pypi/pyversions/clima)]() [![Dependencies](https://img.shields.io/librariesio/github/d3rp/clima)]() [![PyPI license](https://img.shields.io/pypi/l/clima)]()
+![PyPI](https://img.shields.io/pypi/v/clima) [![Python versions](https://img.shields.io/pypi/pyversions/clima)]() [![Build status](https://travis-ci.com/d3rp/clima.svg?branch=master)](https://travis-ci.com/d3rp/clima) [![Dependencies](https://img.shields.io/librariesio/github/d3rp/clima)]() [![PyPI license](https://img.shields.io/pypi/l/clima)]()
 
 Create a command line interface out of your script with quick default behaviour for configuration, minimal setup and less maintenance. It handles loading and parsing configuration
 files and overriding it with env variables by defining a simple schema of the configuration and a class with your "business logic".

@@ -48,6 +48,7 @@ So fresh and so lean, lean...
 * readme's pipenv section doesn't make much sense..
 * some sane tests
 * clean code from `__init__`
+* fix args parsing for help description. Something broke it in v0.2.1
 
 ## In Review
 
