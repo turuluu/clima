@@ -10,29 +10,41 @@ def wrap_method_docs(cls: object, nt):
         prepare_doc(nt, m)
 
 
-def params_with_defs(N):
-    """parse the source of the schema for its details"""
+def parse_source_for_params(params):
+    """
+    parse the source of the schema and split its
+    fields
+    """
+    split_parameters = tuple(
+        tuple(
+            str(argtype_and_defdesc).strip()
+            for argtype_and_defdesc in src_line.split('=', 1)
+        )
+        for src_line in params
+        if src_line.startswith(' ')
+    )
+    return OrderedDict(split_parameters)
+
+
+def filter_params(N):
+    """Filter source lines of the class
+    Returns:
+        fields as source lines
+    """
     filtered_source = []
     for line in inspect.getsourcelines(N.__class__)[0][1:]:
         # When parsing, post_init would bleed into the attributes without this hack
         if line.strip().startswith('def '):
             break
         filtered_source.append(line)
-    params_with_definitions = tuple(
-        tuple(
-            str(argtype_and_defdesc).strip()
-            for argtype_and_defdesc in src_line.split('=', 1)
-        )
-        for src_line in filtered_source
-        if src_line.startswith(' ')
-    )
-    return OrderedDict(params_with_definitions)
+    return filtered_source
 
 
 def attr_map(N):
-    """Mapping for the schema's details"""
+    """Mapping for the schema's fields (parameters)"""
     _attr_map = {}
-    for param_type, def_desc in params_with_defs(N).items():
+    filtered = filter_params(N)
+    for param_type, def_desc in parse_source_for_params(filtered).items():
         if ':' in param_type:
             param, _type = param_type.split(':', 1)
             _type = _type.strip()

@@ -1,6 +1,5 @@
 import sys
 import inspect
-from typing import NamedTuple
 
 
 def asdict(cls):
@@ -9,6 +8,12 @@ def asdict(cls):
             if not k.startswith('_')
             and not inspect.isfunction(v)
             and not inspect.ismethod(v)}
+
+
+def schema_decorator(decorators_state, cls):
+    """Adds cls to decorator_state"""
+    decorators_state['schema'] = cls()
+    return cls
 
 
 class MetaSchema(type):
