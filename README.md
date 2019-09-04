@@ -28,13 +28,15 @@ The implementation is focused on a premise that for a simple script there's usua
 
     pip install --user clima
     
+or with [pipx](https://pipxproject.github.io/pipx/) to use dedicated virtualenv:
+    
+    pipx install --user clima
+    
 ### Installing from source
 
-Choose your favourite flavour of build system. Check their documentation if puzzled (poetry, flit, pip, pipx, pipenv..)
+Choose your favourite flavour of build system. Check their documentation if puzzled ([poetry](https://poetry.eustace.io), [flit](https://flit.readthedocs.io/en/latest), [pipx](https://pipxproject.github.io/pipx/), [pipx](https://pipxproject.github.io/pipx/), [pipenv](https://docs.pipenv.org/en/latest)..)
 
-The tooling here has been exported with [DepHell](https://github.com/dephell/dephell) from the poetry declarations.
-
-See the `publish.py` for its `convert` subcommand, which should convert to all the possible alternatives once dephell is installed
+The tooling here has been exported with [DepHell](https://github.com/dephell/dephell) from the poetry declarations. In case your favourite build tool flavour files are not up to date, see the `publish.py` for its `convert` subcommand, which should convert to all the possible alternatives once dephell is installed.
 
 ## Usage
 
@@ -47,7 +49,6 @@ First import the required components:
     
 In your code define the `Schema` subclass by decorating the class with `c`:
 
-    @c
     class Configuration(Schema):
         a: str = 'A'  # a description
         x: int = 1  # x description
@@ -98,6 +99,22 @@ container with quick access with attributes `c.a`, `c.x`, etc...
 Should work for linux, macos and windows.
 
 More examples in the [examples directory](examples) with printouts of the defined subcommands and helps.
+
+### Post init hook
+
+In some occasions it's useful to deduce specific defaults from the given parameters e.g. in a cross platform build allowing
+only minimal cli arguments. For those cases there's an `post_init` hook in which the fields can be refered to as in a
+typical class, but that still allows validation and type casting etc.:
+
+    class SoAdvanced(Schema):
+        platform: str = 'win'  # a description
+        bin_path: pathlib.Path = ''  # x description
+        
+        def post_init(self, *args):
+            if self.platform = 'win':
+                self.bin_path = 'c:/Users/foo/bar'
+            else:
+                self.bin_path = '/Users/mac/sth'
 
 ### Testing the examples
 
