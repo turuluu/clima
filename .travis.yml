@@ -51,3 +51,13 @@ matrix:
       install:
         - dephell venv create --env=$ENV --python=/usr/local/bin/python3
         - dephell deps install --env=$ENV
+
+    - name: "Python 3.7.4 on Windows"
+      os: windows           # Windows 10.0.17134 N/A Build 17134
+      language: shell       # 'language: python' is an error on Travis CI Windows
+      before_install:
+        - choco install python
+        - curl https://raw.githubusercontent.com/dephell/dephell/master/install.py | python
+        - dephell inspect self
+        - python -m pip install --upgrade pip pytest
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH ENV=pytest
