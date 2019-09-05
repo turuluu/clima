@@ -63,6 +63,8 @@ matrix:
       install:
         - dephell venv create --env=$ENV --python=/usr/local/bin/python3
         - dephell deps install --env=$ENV
+      script:
+        - dephell venv run --env=$ENV
 
     - name: "Python 3.7.4 on Windows"
       os: windows           # Windows 10.0.17134 N/A Build 17134
