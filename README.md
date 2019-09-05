@@ -1,6 +1,6 @@
 # clima - command line interface with a schema
 
-![PyPI](https://img.shields.io/pypi/v/clima) [![Build status](https://travis-ci.com/d3rp/clima.svg?branch=master)](https://travis-ci.com/d3rp/clima) [![PyPI license](https://img.shields.io/pypi/l/clima)]()
+[![PyPI](https://img.shields.io/pypi/v/clima)](https://pypi.org/project/clima/) [![Build status](https://travis-ci.com/d3rp/clima.svg?branch=master)](https://travis-ci.com/d3rp/clima) [![PyPI license](https://img.shields.io/pypi/l/clima)]()
 
 [![Scrutinizer score](https://img.shields.io/scrutinizer/quality/g/d3rp/clima)](https://scrutinizer-ci.com/g/d3rp/clima) [![Dependencies](https://img.shields.io/librariesio/github/d3rp/clima)]()
 
