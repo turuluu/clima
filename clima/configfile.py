@@ -34,7 +34,7 @@ def read_config(_filepath='test.cfg') -> dict:
     if 'Default' in file_config:
         return dict(file_config['Default'])
     else:
-        print(f'warning: config file found at {str(filepath)}, but it was missing section named [Default]')
+        print('warning: config file found at {}, but it was missing section named [Default]'.format(str(filepath)))
         return {}
 
 

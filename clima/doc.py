@@ -83,8 +83,13 @@ def prepare_doc(N, f):
             if attr is None:
                 continue
 
-            _type = attr['type']
-            ps_doc.append(f'    --{attr_name} ({_type if _type is not None else ""}): {attr["description"]} (Default is {attr["default"]})')
+            _type = attr['type'] if attr['type'] is not None else ""
+
+            fmt = '    --{} ({}): {} (Default is {})'
+            argument_help = fmt.format(attr_name, _type, attr['description'], attr['default'])
+            ps_doc.append(argument_help)
+            # Wanted to make clima py >= 3.4 compliant, and f-string require 3.6
+            # ps_doc.append(f'    --{attr_name} ({_type if _type is not None else ""}): {attr["description"]} (Default is {attr["default"]})')
 
     ps_doc = '\n'.join(ps_doc)
     doc = f.__doc__

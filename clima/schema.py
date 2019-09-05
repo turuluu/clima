@@ -36,8 +36,9 @@ class MetaSchema(type):
                 try:
                     setattr(cls, ann, t(namespace[ann]))
                 except TypeError as ex:
-                    print(f'given parameters or defined defaults were of incorrect type:')
-                    print(f'{cls.__qualname__}.{ann} -> {ex.args}')
+                    print('given parameters or defined defaults were of incorrect type:')
+                    # print(f'{cls.__qualname__}.{ann} -> {ex.args}')  # f-strings require >=3.6
+                    print('{}.{} -> {}'.format(cls.__qualname__, ann, ex.args))
                     sys.exit(1)
 
         # TODO: Maybe check that given parameters matched the schema?
