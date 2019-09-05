@@ -10,7 +10,7 @@ home-page = "https://github.com/d3rp/clima.git"
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.4",
     "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
@@ -38,13 +38,13 @@ test = ["pytest"]
 
 [tool.poetry]
 name = "clima"
-version = "0.2.2"
+version = "0.2.3"
 description = "Simple boilerplate for cli scripts"
 keywords = ["cli"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.4",
     "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
@@ -61,7 +61,7 @@ authors = ["Joni Turunen <rojun.itu@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.5"
+python = ">=3.4"
 fire = "==0.1.3"
 
 [tool.poetry.dev-dependencies]
