@@ -5,3 +5,4 @@ dist/
 **/playground.py
 pip-wheel-metadata/
 clima.egg-info/
+.coverage

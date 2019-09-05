@@ -5,23 +5,72 @@
 language: python
 dist: xenial
 
-before_install:
-  # show a little bit more information about environment
-  - sudo apt-get install -y tree
-  - env
-  - tree
-  # install DepHell
-  # https://github.com/travis-ci/travis-ci/issues/8589
-  - curl -L dephell.org/install | /opt/python/3.7/bin/python
-  - dephell inspect self
+python:
+  - "3.6"      # current default Python on Travis CI
+  - "3.7"
+  - "3.7-dev"  # 3.7 development branch
+  - "3.8-dev"  # 3.8 development branch
+  - "nightly"  # nightly build
+# command to install dependencies
 install:
-  - dephell venv create --env=$ENV --python="/opt/python/$TRAVIS_PYTHON_VERSION/bin/python"
-  - dephell deps install --env=$ENV
+  - pip install -r requirements.txt
+# command to run tests
 script:
-  - dephell venv run --env=$ENV
+  - pytest
+#before_install:
+#  # show a little bit more information about environment
+#  - sudo apt-get install -y tree
+#  - env
+#  - tree
+#  # install DepHell
+#  # https://github.com/travis-ci/travis-ci/issues/8589
+#  - curl -L dephell.org/install | /opt/python/3.7/bin/python
+#  - dephell inspect self
+#install:
+#  - dephell venv create --env=$ENV --python="/opt/python/$TRAVIS_PYTHON_VERSION/bin/python"
+#  - dephell deps install --env=$ENV
+#script:
+#  - dephell venv run --env=$ENV
 
 matrix:
   include:
-
+#    - name: security
+#      install:
+#        - "true"
+#      script:
+#        - dephell deps audit
+#
+#    - python: "3.4"
+#      env: ENV=pytest
+#    - python: "3.5"
+#      env: ENV=pytest
+    - python: "3.6"
+      env: ENV=pytest
     - python: "3.7"
       env: ENV=pytest
+#    - python: "3.7-dev"
+#      env: ENV=pytest
+#    - python: "3.8-dev"
+#      env: ENV=pytest
+
+    - name: "Mac Build"
+      os: osx
+      language: generic
+      env: ENV=pytest
+      before_install:
+        - curl https://raw.githubusercontent.com/dephell/dephell/master/install.py | /usr/local/bin/python3
+        - dephell inspect self
+      install:
+        - dephell venv create --env=$ENV --python=/usr/local/bin/python3
+        - dephell deps install --env=$ENV
+      script:
+        - dephell venv run --env=$ENV
+
+    - name: "Python 3.7.4 on Windows"
+      os: windows           # Windows 10.0.17134 N/A Build 17134
+      language: shell       # 'language: python' is an error on Travis CI Windows
+      before_install:
+        - choco install python
+        - python -m pip install --upgrade pip pytest
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+      script: python -m pytest

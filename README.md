@@ -1,11 +1,15 @@
 # clima - command line interface with a schema
 
-![PyPI](https://img.shields.io/pypi/v/clima) [![Python versions](https://img.shields.io/pypi/pyversions/clima)]() [![Build status](https://travis-ci.com/d3rp/clima.svg?branch=master)](https://travis-ci.com/d3rp/clima) [![Dependencies](https://img.shields.io/librariesio/github/d3rp/clima)]() [![PyPI license](https://img.shields.io/pypi/l/clima)]()
+![PyPI](https://img.shields.io/pypi/v/clima) [![Build status](https://travis-ci.com/d3rp/clima.svg?branch=master)](https://travis-ci.com/d3rp/clima) [![PyPI license](https://img.shields.io/pypi/l/clima)]()
+
+[![Scrutinizer score](https://img.shields.io/scrutinizer/quality/g/d3rp/clima)](https://scrutinizer-ci.com/g/d3rp/clima) [![Dependencies](https://img.shields.io/librariesio/github/d3rp/clima)]()
+
+[![Python versions](https://img.shields.io/pypi/pyversions/clima)]()
 
 Create a command line interface out of your script with quick default behaviour for configuration, minimal setup and less maintenance. It handles loading and parsing configuration
 files and overriding it with env variables by defining a simple schema of the configuration and a class with your "business logic".
 
-Example: this is the required setup for having configurations and a command line interface ready for use:
+Example: to setup a configuration and a command line interface ready to go:
 
     from clima import c, Schema
     
@@ -18,11 +22,16 @@ Example: this is the required setup for having configurations and a command line
             # using configuration
             print(c.a)
  
+Usage would then be e.g.:
+
+    ./script.py foo
+    ./script.py foo --a 42
+    
 ## Long description
 
-In other words, use this to wrap your scripts as command line commands without resorting to bash or maintaining argument parsing in python. There shouldn't be a need of duplicating comments for `--help` to remember what the arguments were and did. This decorator magic offers the typical use experience of a cli program (e.g. argument parsing and validation, --help, subcommands, ...).
+In other words, you can use this to wrap your scripts as command line commands without resorting to bash or maintaining argument parsing in python. This removes the need of duplicating comments in order `--help` to remember what the arguments were and what they did. Sprinkling some decorator magic offers a typical use experience of a cli program (e.g. argument parsing and validation, --help, subcommands, ...).
 
-The implementation is focused on a premise that for a simple script there's usually a script wide global configuration which would be used through out the user code i.e. a context for the program that is refered to in different parts of the code. That configuration is populated with given arguments falling back on defaults in the code and some further complimentary options and then made accessible via a simple global `c` variable around the code base with very little additional effort. With a small adjustment this can made to autocomplete in IDEs. This helps when the schema of the configuration grows larger.
+The implementation is focused on a premise that for a simple script there's usually a script wide global configuration which would be used through out the user code i.e. a context for the program that is refered to in different parts of the code. That configuration is populated with given arguments falling back on defaults in the code and some further complimentary options. Those are then made accessible via a global `c` variable that can be tossed around the code base with very little additional effort. With a small adjustment this can made to autocomplete in IDEs (as attributes). This helps when the schema of the configuration grows larger as the autocomplete kicks in after typing `c.` offering those fields in your "schema" as attributes.
 
 ## Installing
 

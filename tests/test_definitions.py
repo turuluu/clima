@@ -1,26 +1,16 @@
 from unittest import TestCase
-from clima import c, Schema
 from functools import partial
 import sys
-import os
+
 # Using Pure versions of paths allows testing cross platform code
 # Can't use just Path, because that will get rendered to a platform specific
 # subclass when validating (e.g. on windows Path('...') -> WindowsPath('...') )
 from pathlib import PureWindowsPath as WindowsPath
 from pathlib import PurePosixPath as PosixPath
-from pathlib import Path
 
+from clima import c, Schema
 
-# def test_schema_definition():
-#     @c
-#     class C(Schema):
-#         a: int = 1  # desctiption
-#
-#
-# def test_schema_without_doc():
-#     @c
-#     class C(Schema):
-#         a: int = 1
+from tests import SysArgvRestore
 
 
 # TODO: sane exception for this scenario
@@ -30,20 +20,6 @@ from pathlib import Path
 #         a: int
 
 
-class SysArgvRestore:
-    def setUp(self) -> None:
-        self.save_sysargv()
-
-    def save_sysargv(self):
-        self.sys_argv = sys.argv
-
-    def restore_sysargv(self):
-        sys.argv = self.sys_argv
-
-    def tearDown(self) -> None:
-        self.restore_sysargv()
-
-
 class TestSchemaX(TestCase, SysArgvRestore):
     def test_schema_without_type(self):
         sys.argv = ['test', 'x']
@@ -51,13 +27,13 @@ class TestSchemaX(TestCase, SysArgvRestore):
         @c
         class C(Schema):
             a = 1
-            L = [1,2,3]
+            L = [1, 2, 3]
 
         @c
         class D:
             def x(self):
                 assert c.a == 1
-                assert c.L == [1,2,3]
+                assert c.L == [1, 2, 3]
 
         assert c.a == 1
 
@@ -78,6 +54,24 @@ class TestSchemaY(TestCase, SysArgvRestore):
                 assert c.a == 2
 
         assert c.a == 2
+
+    def test_schema_post_init_adding_attr(self):
+        sys.argv = ['test', 'x']
+
+        class C(Schema):
+            a = 1
+
+            def post_init(self, *args):
+                self.b = 2
+
+        @c
+        class D:
+            def x(self):
+                assert c.a == 1
+                assert c.b == 2
+
+        assert c.a == 1
+        assert c.b == 2
 
 
 class TestSchemaNoType(TestCase, SysArgvRestore):
@@ -105,7 +99,7 @@ class TestSchemaNoType(TestCase, SysArgvRestore):
         assert (c.a == 1)
 
 
-class TestSchema(TestCase):
+class TestSchema(TestCase, SysArgvRestore):
     defaults = {
         '_int': [42, int],
         '_str': ['oh hi', str],
@@ -114,16 +108,13 @@ class TestSchema(TestCase):
     }
 
     def setUp(self) -> None:
-        self.sys_argv = sys.argv
+        self.save_sysargv()
 
         class C(Schema):
             _int: int = self.defaults['_int'][0]
             _str: str = self.defaults['_str'][0]
             _posix_path: PosixPath = self.defaults['_posix_path'][0]
             _win_path: WindowsPath = self.defaults['_win_path'][0]
-
-    def tearDown(self) -> None:
-        sys.argv = self.sys_argv
 
     def test_default(self):
         sys.argv = ['test', 'x']
@@ -142,6 +133,50 @@ class TestSchema(TestCase):
 
         assert (c.a == 1)
         assert (type(c.a) == int)
+
+
+class TestTypeCasting(TestCase, SysArgvRestore):
+    def test_builtins(self):
+        sys.argv = ['test', 'x']
+
+        @c
+        class TypeGalore(Schema):
+            a: bool = 0
+            b: bytearray = 0
+            c: bytes = 0
+            d: complex = 0
+            e: dict = tuple(zip('aa', 'bb'))
+            f: float = 0
+            g: frozenset = {}
+            h: int = 0.0
+            i: list = 'aa'
+            # k: property = 0
+            l: set = [1, 2]
+            m: str = 0
+            n: tuple = []
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        for k, valid in zip('abcdefghilmn', [
+            bool,
+            bytearray,
+            bytes,
+            complex,
+            dict,
+            float,
+            frozenset,
+            int,
+            list,
+            # property,
+            set,
+            str,
+            tuple,
+        ]):
+            assert type(getattr(c, k)) == valid
 
 
 class TestConfigurable(TestCase, SysArgvRestore):
@@ -173,52 +208,3 @@ class TestConfigurable(TestCase, SysArgvRestore):
                 pass
 
 
-class TestConfigFromCwd(TestCase, SysArgvRestore):
-    test_cfg = Path.cwd() / 'foo.cfg'
-
-    def setUp(self) -> None:
-        self.save_sysargv()
-        with open(self.test_cfg, 'w', encoding='UTF-8') as wf:
-            wf.write('[Default]\nbar = 42')
-        sys.argv = ['test', '--cwd', os.fspath(self.test_cfg.parent)]
-
-        class C(Schema):
-            bar: int = 0
-
-    def tearDown(self) -> None:
-        self.test_cfg.unlink()
-        self.restore_sysargv()
-
-    def test_configfile(self):
-        @c
-        class Cli:
-            def x(self):
-                pass
-
-        assert c.bar == 42
-
-
-class TestConfigFromCwdPath(TestCase, SysArgvRestore):
-    test_cfg = Path.cwd() / 'foo.cfg'
-
-    def setUp(self) -> None:
-        self.save_sysargv()
-        with open(self.test_cfg, 'w', encoding='UTF-8') as wf:
-            wf.write('[Default]\nbar = .')
-        sys.argv = ['test', '--cwd', os.fspath(self.test_cfg.parent)]
-
-        class C(Schema):
-            bar: WindowsPath = ''
-
-    def tearDown(self) -> None:
-        self.test_cfg.unlink()
-        self.restore_sysargv()
-
-    def test_configfile(self):
-        @c
-        class Cli:
-            def x(self):
-                pass
-
-        assert str(c.bar) == '.'
-        assert type(c.bar) == WindowsPath

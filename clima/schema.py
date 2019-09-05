@@ -1,6 +1,5 @@
 import sys
 import inspect
-from typing import NamedTuple
 
 
 def asdict(cls):
@@ -11,15 +10,17 @@ def asdict(cls):
             and not inspect.ismethod(v)}
 
 
+def schema_decorator(decorators_state, cls):
+    """Adds cls to decorator_state"""
+    decorators_state['schema'] = cls()
+    return cls
+
+
 class MetaSchema(type):
     """
     Validate, cast types, wrap configuration and invoke 'post_hook' method for
     the Schema class
     """
-
-    @classmethod
-    def __prepare__(*args, **kwargs):
-        return {'a': 0}
 
     def __new__(mcs, name, bases, namespace, **kwds):
         cls = type.__new__(mcs, name, bases, namespace)
@@ -31,8 +32,9 @@ class MetaSchema(type):
                 try:
                     setattr(cls, ann, t(namespace[ann]))
                 except TypeError as ex:
-                    print(f'given parameters or defined defaults were of incorrect type:')
-                    print(f'{cls.__qualname__}.{ann} -> {ex.args}')
+                    print('given parameters or defined defaults were of incorrect type:')
+                    # print(f'{cls.__qualname__}.{ann} -> {ex.args}')  # f-strings require >=3.6
+                    print('{}.{} -> {}'.format(cls.__qualname__, ann, ex.args))
                     sys.exit(1)
 
         # TODO: Maybe check that given parameters matched the schema?

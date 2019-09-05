@@ -8,16 +8,16 @@ def is_in_module(f):
     return len(list(Path(f).parent.glob('__init__.py')))
 
 
-def cfgs_gen(f):
-    yield from Path(f).parent.glob('*.cfg')
+def cfgs_gen(p):
+    yield from Path(p).parent.glob('*.cfg')
 
 
-def find_cfg(f):
-    f = Path(f)
-    cfgs = list(cfgs_gen(f))
+def find_cfg(p):
+    p = Path(p)
+    cfgs = list(cfgs_gen(p))
     if len(cfgs) == 0:
-        if is_in_module(f):
-            return find_cfg(f.parent)
+        if is_in_module(p):
+            return find_cfg(p.parent)
         else:
             return None
     else:
@@ -34,7 +34,7 @@ def read_config(_filepath='test.cfg') -> dict:
     if 'Default' in file_config:
         return dict(file_config['Default'])
     else:
-        print(f'warning: config file found at {str(filepath)}, but it was missing section named [Default]')
+        print('warning: config file found at {}, but it was missing section named [Default]'.format(str(filepath)))
         return {}
 
 
