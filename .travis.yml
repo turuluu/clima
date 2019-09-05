@@ -22,6 +22,32 @@ script:
 
 matrix:
   include:
+    - name: security
+      install:
+        - "true"
+      script:
+        - dephell deps audit
 
+    - python: "3.4"
+      env: ENV=pytest
+    - python: "3.5"
+      env: ENV=pytest
+    - python: "3.6"
+      env: ENV=pytest
     - python: "3.7"
       env: ENV=pytest
+    - python: "3.7-dev"
+      env: ENV=pytest
+    - python: "3.8-dev"
+      env: ENV=pytest
+
+    - name: "Mac Build"
+      os: osx
+      language: generic
+      env: ENV=pytest
+      before_install:
+        - curl https://raw.githubusercontent.com/dephell/dephell/master/install.py | /usr/local/bin/python3
+        - dephell inspect self
+      install:
+        - dephell venv create --env=$ENV --python=/usr/local/bin/python3
+        - dephell deps install --env=$ENV
