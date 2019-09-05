@@ -6,41 +6,38 @@ from functools import partial
 from fire import Fire
 
 from clima import schema, utils
-from clima import doc, configfile
+from clima import docstring, configfile
 
-decorators_state = {
+DECORATORS_STATE = {
     'schema': None,
     'generated': None,
 }
 
-schema_decorator = partial(schema.schema_decorator, decorators_state)
+schema_decorator = partial(schema.schema_decorator, DECORATORS_STATE)
 
 
 def add_to_decorators(key, value):
-    decorators_state[key] = value
+    DECORATORS_STATE[key] = value
 
 
-class Decorators:
-    """Decorator helpers for the client interface (Configurable)"""
+def cli(cls):
+    """Decorator for the class to create a cli interface with"""
+    state = DECORATORS_STATE
 
-    @staticmethod
-    def cli(cls):
-        state = decorators_state
+    def init(self, **cli_args):
+        """Generated init"""
+        c(cli_args, state['schema'])
 
-        def init(self, **cli_args):
-            """Generated init"""
-            c(cli_args, state['schema'])
+    cls_attrs = dict(
+        __init__=init,
+        __repr__=cls.__repr__,
+        **{k: v for k, v in cls.__dict__.items() if not k.startswith('_')}
+    )
 
-        cls_attrs = dict(
-            __init__=init,
-            __repr__=cls.__repr__,
-            **{k: v for k, v in cls.__dict__.items() if not k.startswith('_')}
-        )
+    _Cli = type('Cli', (cls,), cls_attrs)
+    state['generated'] = _Cli
 
-        _Cli = type('Cli', (cls,), cls_attrs)
-        state['generated'] = _Cli
-
-        return _Cli
+    return _Cli
 
 
 class Configurable:
@@ -66,12 +63,12 @@ class Configurable:
                 # Allows deoorator usage with @c
                 return schema_decorator(a)
             else:
-                cli = Decorators.cli(a)
+                _cli = cli(a)
                 if not noprepare:
-                    global decorators_state
-                    prepare(decorators_state['generated'], decorators_state['schema'])
+                    global DECORATORS_STATE
+                    prepare(DECORATORS_STATE['generated'], DECORATORS_STATE['schema'])
 
-                return cli
+                return _cli
 
     def __repr__(self):
         return repr(self.__configured)
@@ -112,6 +109,8 @@ c = Configurable()
 
 
 class Schema(metaclass=schema.MetaSchema):
+    """Base class for the user's configuration class"""
+
     def _asdict(self):
         return schema.asdict(self)
 
@@ -140,7 +139,6 @@ def prepare_signatures(cls, nt):
 
     Works in-place, returns None
     """
-    # methods = {k: cls.__dict__[k] for k in inspect.getmembers(cls, inspect.ismethod)}
     methods = {
         k: v for k, v in cls.__dict__.items()
         if not k.startswith('_') and inspect.isfunction(v)
@@ -160,7 +158,5 @@ def prepare_signatures(cls, nt):
 def prepare(cls, nt):
     """Beef: prepares signatures, docstrings and initiates fire for the cli-magic"""
     prepare_signatures(cls, nt)
-    doc.wrap_method_docs(cls, nt)
+    docstring.wrap_method_docstring(cls, nt)
     Fire(cls)
-
-# S = partial(c, Schema)

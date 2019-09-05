@@ -22,10 +22,6 @@ class MetaSchema(type):
     the Schema class
     """
 
-    @classmethod
-    def __prepare__(*args, **kwargs):
-        return {'a': 0}
-
     def __new__(mcs, name, bases, namespace, **kwds):
         cls = type.__new__(mcs, name, bases, namespace)
 
