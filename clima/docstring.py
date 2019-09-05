@@ -5,8 +5,12 @@ import inspect
 
 def wrap_method_docstring(cls: object, nt):
     """
-    In Place util function that prepares the docstrings of the given class
-    so that it includes the parameters and details from given object `nt`
+    In place mutation of 'nt'
+
+    Uses the implicit Schema's fields as the
+    classes methods' signatures i.e. helps fire to show up the
+    defined arguments in Schema instead of a generic "**params" for the
+    subcommands on command line.
 
     Returns:
         None

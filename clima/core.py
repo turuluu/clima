@@ -132,13 +132,12 @@ class Schema(metaclass=schema.MetaSchema):
 
 
 def prepare_signatures(cls, nt):
-    """Uses the implicit Schema's fields as the
-    classes methods' signatures i.e. helps fire to show up the
-    defined arguments in Schema instead of a generic "**params" for the
-    subcommands on command line.
-
-    Works in-place, returns None
+    """Adds possible parameters gathered from Schema to all methods
+    defined in the 'Cli' class (decorated with @c). This way the parameters
+    are the same for all methods, but at the same time they don't need to
+    be duplicated in every method signature.
     """
+
     methods = {
         k: v for k, v in cls.__dict__.items()
         if not k.startswith('_') and inspect.isfunction(v)
