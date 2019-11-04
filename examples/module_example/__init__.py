@@ -1,5 +1,6 @@
 from clima import c, Schema
 
+
 @c
 class Configuration(Schema):
     a: str = 'A'  # a description
@@ -8,4 +9,3 @@ class Configuration(Schema):
 
 # Hack to enable autocompletion in IDEs
 c: Configuration = c
-

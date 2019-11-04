@@ -21,12 +21,15 @@ def add_to_decorators(key, value):
 
 
 def cli(cls):
-    """Decorator for the class to create a cli interface with"""
+    """Decorator that wraps the command line interface
+     specific class with fire
+    """
     state = DECORATORS_STATE
 
     def init(self, **cli_args):
         """Generated init"""
-        c(cli_args, state['schema'])
+        initialize_cli(cli_args, state['schema'])
+        # c(cli_args, state['schema'])
 
     cls_attrs = dict(
         __init__=init,
@@ -45,48 +48,7 @@ class Configurable:
     # TODO: idiomatic handling for use cases that apply to NamedTuple
     __configured = None
 
-    def __call__(self, a=None, b=None, *, noprepare=False):
-        """
-        Handles delegating method overloading acting as a decorator and initiator for the
-        chaining of parameters with the configuration
-        """
-        is_initializing = (a is not None and b is not None)
-        if is_initializing:
-            return self.__initialize(params=a, configuration_tuple=b)
-
-        is_decorating = (a is not None and b is None)
-        if is_decorating:
-            is_schema = isinstance(a, schema.MetaSchema)
-            if is_schema:
-                # Allows using Schema as a subclass only
-                c.__configured = a
-                # Allows deoorator usage with @c
-                return schema_decorator(a)
-            else:
-                _cli = cli(a)
-                if not noprepare:
-                    global DECORATORS_STATE
-                    prepare(DECORATORS_STATE['generated'], DECORATORS_STATE['schema'])
-
-                return _cli
-
-    def __repr__(self):
-        return repr(self.__configured)
-
-    def __getattr__(self, item):
-        res = None
-        if self.__configured is not None:
-            try:
-                res = self.__configured[item]
-            except Exception:
-                res = getattr(self.__configured, item)
-
-        return res
-
-    def __getitem__(self, item):
-        return self.__configured[item]
-
-    def __initialize(self, params: dict, configuration_tuple):
+    def _setup(self, params: dict, configuration_tuple):
         """Chains all configuration options together"""
         config_file = configfile.get_config_path(configuration_tuple)
         if config_file is not None:
@@ -104,8 +66,47 @@ class Configurable:
 
         return self.__configured
 
+    def __call__(self, cls, *, noprepare=False):
+        """
+        Decorator for chaining parameters with the configuration
+        """
+        is_schema = isinstance(cls, schema.MetaSchema)
+        if is_schema:
+            # Allows using Schema as a subclass only
+            c.__configured = cls
+            # Allows deoorator usage with @c
+            return schema_decorator(cls)
+        else:
+            _cli = cli(cls)
+            if not noprepare:
+                global DECORATORS_STATE
+                prepare(DECORATORS_STATE['generated'], DECORATORS_STATE['schema'])
+
+            return _cli
+
+    def __repr__(self):
+        return repr(self.__configured)
+
+    def __getattr__(self, item):
+        res = None
+        if self.__configured is not None:
+            try:
+                res = self.__configured[item]
+            except Exception:
+                res = getattr(self.__configured, item)
+
+        return res
+
+    def __getitem__(self, item):
+        return self.__configured[item]
+
 
 c = Configurable()
+
+
+def initialize_cli(a, b):
+    global c
+    c._setup(a, b)
 
 
 class Schema(metaclass=schema.MetaSchema):
@@ -125,10 +126,12 @@ class Schema(metaclass=schema.MetaSchema):
     def _fields(self):
         fields = [
             k for k in self.__dir__()
-            if not k.startswith('_')
-               and not inspect.ismethod(getattr(self, k))
+            if not k.startswith('_') and not inspect.ismethod(getattr(self, k))
         ]
         return fields
+
+    def __call__(self, *args, **kwargs):
+        pass
 
 
 def prepare_signatures(cls, nt):

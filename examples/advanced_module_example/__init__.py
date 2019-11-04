@@ -1,6 +1,7 @@
 from clima import c, Schema
 from pathlib import Path
 
+
 @c
 class Configuration(Schema):
     a: str = 'A'  # a description
@@ -16,7 +17,5 @@ class Configuration(Schema):
         return cls(d)
 
 
-
 # Hack to enable autocompletion in IDEs
 c: Configuration = c
-

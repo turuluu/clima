@@ -9,6 +9,7 @@ class C(Schema):
     convert_cmd = ['dephell', 'deps', 'convert', '--env']
     version = 'fix'  # bump version one of {major, minor, fix}
 
+
 c: C = c
 
 
@@ -18,7 +19,7 @@ class Cli:
         for e in ['pip', 'setuppy', 'pipenv']:
             print(f'generating {e}')
             R(c.convert_cmd + [e], cwd=Path.cwd())
-    
+
     def bump(self):
         R(['dephell', 'project', 'bump', '--tag=v.', c.version])
 

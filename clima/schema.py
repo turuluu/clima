@@ -15,7 +15,6 @@ def schema_decorator(decorators_state, cls):
     decorators_state['schema'] = cls()
     return cls
 
-
 class MetaSchema(type):
     """
     Validate, cast types, wrap configuration and invoke 'post_hook' method for
@@ -25,12 +24,18 @@ class MetaSchema(type):
     def __new__(mcs, name, bases, namespace, **kwds):
         cls = type.__new__(mcs, name, bases, namespace)
 
+        # post init hook
+        cls.post_init(cls)
+
         # Parsing type descriptors
         if '__annotations__' in namespace:
             for ann, t in namespace['__annotations__'].items():
                 # Validation
                 try:
-                    setattr(cls, ann, t(namespace[ann]))
+                    if t(namespace[ann]) == t(getattr(cls, ann)):
+                        setattr(cls, ann, t(namespace[ann]))
+                    else:
+                        setattr(cls, ann, t(getattr(cls, ann)))
                 except TypeError as ex:
                     print('given parameters or defined defaults were of incorrect type:')
                     # print(f'{cls.__qualname__}.{ann} -> {ex.args}')  # f-strings require >=3.6
@@ -40,10 +45,9 @@ class MetaSchema(type):
         # TODO: Maybe check that given parameters matched the schema?
         # Even a fuzzy search to suggest close matches
 
+        # Wrap schema with c (configuration decorator
         cls._wrap(cls)
 
-        # post init hook
-        cls.post_init(cls)
         return cls
 
     def __init__(cls, name, bases, namespace, **kwds):
