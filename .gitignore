@@ -6,3 +6,6 @@ dist/
 pip-wheel-metadata/
 clima.egg-info/
 .coverage
+*.css
+*.html
+.cache
