@@ -2,7 +2,6 @@
 from clima import c, Schema
 
 
-@c
 class C(Schema):
     name: str = 'Klimenko'  # Your first name
     surname: str = 'Ma'  # Surname

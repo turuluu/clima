@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from clima import c, Schema
 from pathlib import Path
 from subprocess import run as R

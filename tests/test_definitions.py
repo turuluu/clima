@@ -15,7 +15,6 @@ from tests import SysArgvRestore
 
 # TODO: sane exception for this scenario
 # def test_schema_without_default():
-#     @c
 #     class C(Schema):
 #         a: int
 
@@ -24,7 +23,6 @@ class TestSchemaX(TestCase, SysArgvRestore):
     def test_schema_without_type(self):
         sys.argv = ['test', 'x']
 
-        @c
         class C(Schema):
             a = 1
             L = [1, 2, 3]
@@ -134,12 +132,20 @@ class TestSchema(TestCase, SysArgvRestore):
         assert (c.a == 1)
         assert (type(c.a) == int)
 
+    def test_no_docstring(self):
+        """Not defining a docstring should not crash the script"""
+        sys.argv = ['test', 'x', '--a', '1']
+
+        @c
+        class Cli:
+            def x(self):
+                pass
+
 
 class TestTypeCasting(TestCase, SysArgvRestore):
     def setUp(self) -> None:
         sys.argv = ['test', 'x']
 
-        @c
         class TypeGalore(Schema):
             a: bool = 0
             b: bytearray = 0
@@ -156,7 +162,6 @@ class TestTypeCasting(TestCase, SysArgvRestore):
             n: tuple = []
 
     def test_builtins(self):
-
         @c
         class Cli:
             def x(self):
@@ -180,6 +185,7 @@ class TestTypeCasting(TestCase, SysArgvRestore):
         ]):
             assert type(getattr(c, k)) == valid
 
+
 class TestTypeCastingWith(TestCase, SysArgvRestore):
     def setUp(self) -> None:
         sys.argv = ['test', 'x']
@@ -194,15 +200,16 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
                 """docstring"""
                 pass
 
-        assert(type(c.p) == WindowsPath)
+        assert (type(c.p) == WindowsPath)
 
     def test_builtins_post_init(self):
         values = {
             'a': True,
             'f': 1.0,
-            'i': ['b','b','b'],
+            'i': ['b', 'b', 'b'],
             'm': '1',
         }
+
         class TypeGalore(Schema):
             a: bool = 0
             b: bytearray = 0
@@ -237,7 +244,7 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
             list,
             str,
         ]):
-            assert type(getattr(c, k)) == valid
+            assert type(getattr(c, k)) is valid
             assert getattr(c, k) == values[k]
 
 
@@ -246,7 +253,6 @@ class TestConfigurable(TestCase, SysArgvRestore):
     def setUp(self) -> None:
         self.save_sysargv()
 
-        @c
         class C(Schema):
             a: int = 1  # description
 
@@ -268,5 +274,3 @@ class TestConfigurable(TestCase, SysArgvRestore):
         class Cli:
             def x(self):
                 pass
-
-
