@@ -4,16 +4,13 @@ So fresh and so lean, lean...
 
 ## TODO:
 
+- way to define required parameters in subcommand context
+    - nested schema classes
 * generate man page in a reasonable fashion
   * though fire v0.2.1 help looks like a man page
 * maybe a logging setup (--dryrun)
   * default debug logging wrapper that would log every function called
-* fix doc string and args/parameter help for fire v0.2.1
-* better output for subcommands
-  * fire v0.2.1 has this, but hides the parameter parsing and looks awful on windows
-* implicitly map `cmd` -h -> <cmd> -- -h
 * way to define schema within the cli class
-* fire doesn't handle well strings as arguments, when there's spaces
 * clean the implementation
 - cwd argument is not respected (special parameter)
 - NamedTuple could simplify things, but it's tricky to get past the annotations etc.
@@ -21,7 +18,20 @@ So fresh and so lean, lean...
     - NamedTuple doesn't respect the type hints
 - Validation of undefined parameters (should advice that they're not defined in the config)
 - configfile helper to advice fixes in parameters etc.
+- better error reporting by dynamically handling error objects
 - maybe also look into tox testing to verify actual cli running
+- fork 0.1.3 - prefer the output
+    - Need to parse the parameters
+    - implicitly map `cmd` -h -> <cmd> -- -h
+    * fire doesn't handle well strings as arguments, when there's spaces
+    * better output for subcommands
+      * fire v0.2.1 has this, but hides the parameter parsing and looks awful on windows
+- better name - again
+- script named .conf preferation - multiple conf file selection logic
+
+## Won't fix
+* fix doc string and args/parameter help for fire v0.2.1
+    * 0.3.0 now. diverged a lot from what I wanted initially (0.1.3 type formatting)
     
 ## DONE:
 
