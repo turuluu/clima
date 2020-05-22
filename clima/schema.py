@@ -32,9 +32,12 @@ class MetaSchema(type):
             for ann, t in namespace['__annotations__'].items():
                 # Validation
                 try:
+                    # Type casting
                     if t(namespace[ann]) == t(getattr(cls, ann)):
-                        setattr(cls, ann, t(namespace[ann]))
+                        if getattr(cls, ann) is not None:
+                            setattr(cls, ann, t(namespace[ann]))
                     else:
+                        print(f'{ann} was not of type {t}')
                         setattr(cls, ann, t(getattr(cls, ann)))
                 except TypeError as ex:
                     print('given parameters or defined defaults were of incorrect type:')
@@ -52,3 +55,5 @@ class MetaSchema(type):
 
     def __init__(cls, name, bases, namespace, **kwds):
         super().__init__(name, bases, namespace)
+
+
