@@ -9,3 +9,4 @@ clima.egg-info/
 *.css
 *.html
 .cache
+**/*.log

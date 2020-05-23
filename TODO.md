@@ -4,27 +4,40 @@ So fresh and so lean, lean...
 
 ## TODO:
 
+* way to define required parameters in subcommand context for the subcommands help
+  * probably some syntax for starters, that then is compared with and parsed for every method
 * generate man page in a reasonable fashion
   * though fire v0.2.1 help looks like a man page
 * maybe a logging setup (--dryrun)
   * default debug logging wrapper that would log every function called
-* fix doc string and args/parameter help for fire v0.2.1
-* better output for subcommands
-  * fire v0.2.1 has this, but hides the parameter parsing and looks awful on windows
-* implicitly map `cmd` -h -> <cmd> -- -h
 * way to define schema within the cli class
-* fire doesn't handle well strings as arguments, when there's spaces
 * clean the implementation
 - cwd argument is not respected (special parameter)
-- NamedTuple could simplify things, but it's tricky to get past the annotations etc.
-    - Could look into how it's implemented..
-    - NamedTuple doesn't respect the type hints
 - Validation of undefined parameters (should advice that they're not defined in the config)
 - configfile helper to advice fixes in parameters etc.
 - maybe also look into tox testing to verify actual cli running
+- fork python-fire 0.1.3 (-> forked, branch clima)
+    * fire doesn't handle well strings as arguments, when there's spaces
+- better name - again
+- script named .conf preferation - multiple conf file selection logic
+
+## Won't fix
+* fix doc string and args/parameter help for fire v0.2.1
+    * 0.3.0 now. diverged a lot from what I wanted initially (0.1.3 type formatting)
     
 ## DONE:
 
+- better error reporting by dynamically handling error objects
+- way to define required parameters in subcommand context
+    - nested schema classes
+- fork python-fire 0.1.3 - prefer the output
+    - Need to parse the parameters
+    - implicitly map `cmd` -h -> <cmd> -- -h
+    * better output for subcommands
+      * fire v0.2.1 has this, but hides the parameter parsing and looks awful on windows
+- NamedTuple could simplify things, but it's tricky to get past the annotations etc.
+    - Could look into how it's implemented..
+    - NamedTuple doesn't respect the type hints
 * Show params in help / How to pass namedtuple's signature programmatically to the Cli functions?    
   * Need to do code generation i.e. write the signature into a separate python file and eval that?
   * Any fire-specific tricks to use for this? Cli(C) definition doesn't work..

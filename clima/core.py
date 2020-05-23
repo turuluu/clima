@@ -8,10 +8,15 @@ from fire import Fire
 from clima import schema, utils
 from clima import docstring, configfile
 
+
+class RequiredParameterException(Exception):
+    pass
+
+
 DECORATORS_STATE = {
-        'schema': None,
-        'generated': None,
-        }
+    'schema': None,
+    'generated': None,
+}
 
 schema_decorator = partial(schema.schema_decorator, DECORATORS_STATE)
 
@@ -32,16 +37,18 @@ def cli(cls):
         # c(cli_args, state['schema'])
 
     cls_attrs = dict(
-            __init__=init,
-            __repr__=cls.__repr__,
-            **{k: v for k, v in cls.__dict__.items() if not k.startswith('_')}
-            )
+        __init__=init,
+        __repr__=cls.__repr__,
+        **{k: v for k, v in cls.__dict__.items() if not k.startswith('_')}
+    )
 
     _Cli = type('Cli', (cls,), cls_attrs)
     state['generated'] = _Cli
 
     return _Cli
 
+
+# TODO: config dict and parameter parsing have diverged type casting processes
 def config_dict(configuration_tuple):
     config_dict = {}
 
@@ -53,7 +60,6 @@ def config_dict(configuration_tuple):
     return config_dict
 
 
-
 class Configurable:
     """Configuration management"""
     # TODO: idiomatic handling for use cases that apply to NamedTuple
@@ -62,13 +68,13 @@ class Configurable:
     def _setup(self, params: dict, configuration_tuple):
         """Chains all configuration options together"""
         self.__configured = dict(
-                ChainMap(
-                    params,
-                    config_dict(configuration_tuple),
-                    utils.filter_fields(os.environ, configuration_tuple),
-                    configuration_tuple._asdict()
-                    )
-                )
+            ChainMap(
+                params,
+                config_dict(configuration_tuple),
+                utils.filter_fields(os.environ, configuration_tuple),
+                configuration_tuple._asdict()
+            )
+        )
 
         return self.__configured
 
@@ -104,10 +110,15 @@ class Configurable:
             except Exception:
                 res = getattr(self.__configured, item)
 
+        if res is None:
+            raise RequiredParameterException(f'Missing argument for "{item}"')
         return res
 
     def __getitem__(self, item):
-        return self.__configured[item]
+        c_item = self.__configured[item]
+        if c_item is None:
+            print('none')
+        return c_item
 
 
 c = Configurable()
@@ -118,7 +129,7 @@ def initialize_cli(a, b):
     c._setup(a, b)
 
 
-class Schema(metaclass=schema.MetaSchema):
+class Schema(object, metaclass=schema.MetaSchema):
     """Base class for the user's configuration class"""
 
     def _asdict(self):
@@ -134,9 +145,9 @@ class Schema(metaclass=schema.MetaSchema):
     @property
     def _fields(self):
         fields = [
-                k for k in self.__dir__()
-                if not k.startswith('_') and not inspect.ismethod(getattr(self, k))
-                ]
+            k for k in self.__dir__()
+            if not k.startswith('_') and not inspect.ismethod(getattr(self, k))
+        ]
         return fields
 
     def __call__(self, *args, **kwargs):
@@ -151,23 +162,24 @@ def prepare_signatures(cls, nt):
     """
 
     methods = {
-            k: v for k, v in cls.__dict__.items()
-            if not k.startswith('_') and inspect.isfunction(v)
-            }
+        k: v for k, v in cls.__dict__.items()
+        if not k.startswith('_') and inspect.isfunction(v)
+    }
     for m_name, method in methods.items():
         params = [
-                inspect.Parameter(name=field, kind=inspect._VAR_KEYWORD)
-                for field in nt._fields
-                ]
+            inspect.Parameter(name=field, kind=inspect._VAR_KEYWORD)
+            for field in nt._fields
+        ]
         sig = inspect.signature(method)
         method.__signature__ = sig.replace(parameters=[
             inspect.Parameter(name='self', kind=inspect._VAR_KEYWORD),
             *params
-            ])
+        ])
 
 
 def prepare(cls, nt):
     """Beef: prepares signatures, docstrings and initiates fire for the cli-magic"""
     prepare_signatures(cls, nt)
     docstring.wrap_method_docstring(cls, nt)
-    Fire(cls)
+    with utils.suppress_traceback():
+        Fire(cls)

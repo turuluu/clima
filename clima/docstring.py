@@ -22,9 +22,12 @@ def wrap_method_docstring(cls: object, nt):
         replace_docstring(m, args)
 
 
+# TODO: rename - append args to docstring
 def replace_docstring(func, args):
+    # TODO: subcommand level args replacement with something (see TODO)
     docstring = func.__doc__
     docstring = (docstring if docstring is not None else '') + '\nArgs:\n' + args
+    # print(f'{func.__name__} docstring {docstring}')
     func.__doc__ = docstring
 
 
@@ -82,6 +85,7 @@ def argument_help(attr_name, attr):
     return fmt.format(attr_name, _type, attr['description'], attr['default'])
 
 
+# TODO: rename - list_of_source_lines
 def filter_params(N):
     """Filter source lines of the class
     Returns:
@@ -96,8 +100,10 @@ def filter_params(N):
     return filtered_source
 
 
+# TODO: rename - parse_args_for_help
 def prepare_docstring_help(N):
     """Replace docstrings to include the parameters (schema)"""
+    # at this point, the params have not yet been populated
 
     args = []
     if hasattr(N, '__annotations__'):
