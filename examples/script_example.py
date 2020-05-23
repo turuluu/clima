@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from clima import c, Schema
 
+
 class C(Schema):
     name: str = 'Klimenko'  # Your first name
     surname: str = 'Ma'  # Surname
@@ -19,7 +20,6 @@ class Something:
     def print_age(self):
         """This here, prints my age"""
         print(c.age)
-
 
 ############################################################
 # $ ./script_example.py
@@ -58,5 +58,3 @@ class Something:
 # $ ./script_example.py print-name --name YoYo
 #
 # YoYo Ma
-
-
