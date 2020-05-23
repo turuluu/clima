@@ -3,27 +3,38 @@ clima - command line interface with a schema
 ============================================
 
 
-.. image:: https://travis-ci.com/d3rp/clima.svg?branch=master
-   :target: https://travis-ci.com/d3rp/clima
-   :alt: Build status
- 
+.. image:: https://img.shields.io/pypi/v/clima
+   :target: https://pypi.org/project/clima/
+   :alt: PyPI
+
+
 .. image:: https://img.shields.io/pypi/pyversions/clima
    :target: 
    :alt: Python versions
- 
+
+
+
+.. image:: https://travis-ci.com/d3rp/clima.svg?branch=master
+   :target: https://travis-ci.com/d3rp/clima
+   :alt: Build status
+
+
 .. image:: https://img.shields.io/librariesio/github/d3rp/clima
    :target: 
    :alt: Dependencies
  
+
+
 .. image:: https://img.shields.io/pypi/l/clima
    :target: 
    :alt: PyPI license
 
 
-Create a command line interface out of your script with quick default behaviour for configuration, minimal setup and less maintenance. It handles loading and parsing configuration
-files and overriding it with env variables by defining a simple schema of the configuration and a class with your "business logic".
+Create a command line interface and a configuration object with minimal setup and less maintenance.
+It handles loading and parsing configuration files and overriding it with env variables by defining 
+a simple schema of the configuration and a class with your "business logic".
 
-Example: this is the required setup for having configurations and a command line interface ready for use:
+Example: to setup a configuration and a command line interface ready to go:
 
 .. code-block::
 
@@ -39,12 +50,22 @@ Example: this is the required setup for having configurations and a command line
            print(c.a)
 
 
+Command line usage in a terminal would then be e.g.:
+
+.. code-block::
+
+   ./script.py foo
+   ./script.py foo --a 42
+
+
+See the example scripts and other sections for more examples.
+
 Long description
 ----------------
 
-In other words, use this to wrap your scripts as command line commands without resorting to bash or maintaining argument parsing in python. There shouldn't be a need of duplicating comments for ``--help`` to remember what the arguments were and did. This decorator magic offers the typical use experience of a cli program (e.g. argument parsing and validation, --help, subcommands, ...).
+In other words, you can use this to wrap your scripts as command line commands without resorting to bash or maintaining argument parsing in python. This removes the need of duplicating comments in order ``--help`` to remember what the arguments were and what they did. Sprinkling some decorator magic offers a typical use experience of a cli program (e.g. argument parsing and validation, --help, subcommands, ...).
 
-The implementation is focused on a premise that for a simple script there's usually a script wide global configuration which would be used through out the user code i.e. a context for the program that is refered to in different parts of the code. That configuration is populated with given arguments falling back on defaults in the code and some further complimentary options and then made accessible via a simple global ``c`` variable around the code base with very little additional effort. With a small adjustment this can made to autocomplete in IDEs. This helps when the schema of the configuration grows larger.
+The implementation is focused on a premise that for a simple script there's usually a script wide global configuration which would be used through out the user code i.e. a context for the program that is refered to in different parts of the code. That configuration is populated with given arguments falling back on defaults in the code and some further complimentary options. Those are then made accessible via a global ``c`` variable that can be tossed around the code base with very little additional effort. With a small adjustment this can made to autocomplete in IDEs (as attributes). This helps when the schema of the configuration grows larger as the autocomplete kicks in after typing ``c.`` offering those fields in your "schema" as attributes.
 
 Installing
 ----------
@@ -54,14 +75,19 @@ Installing
    pip install --user clima
 
 
+or with `pipx <https://pipxproject.github.io/pipx/>`_ to use dedicated virtualenv:
+
+.. code-block::
+
+   pipx install --user clima
+
+
 Installing from source
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Choose your favourite flavour of build system. Check their documentation if puzzled (poetry, flit, pip, pipx, pipenv..)
+Choose your favourite flavour of build system. Check their documentation if puzzled (\ `poetry <https://poetry.eustace.io>`_\ , `flit <https://flit.readthedocs.io/en/latest>`_\ , `pipx <https://pipxproject.github.io/pipx/>`_\ , `pipx <https://pipxproject.github.io/pipx/>`_\ , `pipenv <https://docs.pipenv.org/en/latest>`_..)
 
-The tooling here has been exported with `DepHell <https://github.com/dephell/dephell>`_ from the poetry declarations.
-
-See the ``publish.py`` for its ``convert`` subcommand, which should convert to all the possible alternatives once dephell is installed
+The tooling here has been exported with `DepHell <https://github.com/dephell/dephell>`_ from the poetry declarations. In case your favourite build tool flavour files are not up to date, see the ``publish.py`` for its ``convert`` subcommand, which should convert to all the possible alternatives once dephell is installed.
 
 Usage
 -----
@@ -80,7 +106,6 @@ In your code define the ``Schema`` subclass by decorating the class with ``c``\ 
 
 .. code-block::
 
-   @c
    class Configuration(Schema):
        a: str = 'A'  # a description
        x: int = 1  # x description
@@ -143,6 +168,26 @@ Examples and platforms
 Should work for linux, macos and windows.
 
 More examples in the `examples directory <examples>`_ with printouts of the defined subcommands and helps.
+
+Post init hook
+^^^^^^^^^^^^^^
+
+In some occasions it's useful to deduce specific defaults from the given parameters e.g. in a cross platform build allowing
+only minimal cli arguments. For those cases there's an ``post_init`` hook in which the fields can be refered to as in a
+typical class, but that still allows validation and type casting etc.:
+
+.. code-block::
+
+   class SoAdvanced(Schema):
+       platform: str = 'win'  # a description
+       bin_path: pathlib.Path = ''  # x description
+
+       def post_init(self, *args):
+           if self.platform = 'win':
+               self.bin_path = 'c:/Users/foo/bar'
+           else:
+               self.bin_path = '/Users/mac/sth'
+
 
 Testing the examples
 ^^^^^^^^^^^^^^^^^^^^

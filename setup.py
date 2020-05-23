@@ -21,20 +21,19 @@ if os.path.exists(readme_path):
 setup(
     long_description=readme,
     name='clima',
-    version='0.2.0',
+    version='0.4.1',
     description='Simple boilerplate for cli scripts',
-    python_requires='>=3.5',
-    project_urls={'homepage': 'https://github.com/d3rp/clima.git'},
+    python_requires='>=3.6',
+    project_urls={"homepage": "https://github.com/d3rp/clima.git"},
     author='Joni Turunen',
     author_email='rojun.itu@gmail.com',
     keywords='cli',
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Software Development :: Build Tools',
         'Topic :: Software Development :: Libraries', 'Topic :: Utilities',
         'Operating System :: POSIX :: Linux',
@@ -42,13 +41,13 @@ setup(
         'Operating System :: Microsoft :: Windows',
         'Operating System :: MacOS :: MacOS X'
     ],
-    packages=[
-        'clima', 'examples.advanced_module_example', 'examples.module_example'
-    ],
+    packages=['clima'],
+    package_dir={"": "."},
     package_data={},
-    install_requires=['fire==0.1.3'],
+    install_requires=['bleach>=3.1.4', 'fire', 'pytest-watch==4.*,>=4.2.0'],
+    dependency_links=['/home/jt/src/py/clima/python-fire'],
     extras_require={
-        'tests': ['pytest'],
-        'dev': ['pytest', 'twine']
+        "dev": ["hypothesis", "mock", "pytest", "python-levenshtein", "twine"],
+        "tests": ["pytest"]
     },
 )
