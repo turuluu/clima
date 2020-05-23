@@ -1,4 +1,4 @@
-from examples.module_example import c
+from module_example import c
 
 
 def print_configuration():

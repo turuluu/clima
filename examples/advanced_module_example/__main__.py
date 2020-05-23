@@ -1,14 +1,13 @@
-from examples.advanced_module_example import c       # Configuration defined in __init__.py
-from examples.advanced_module_example import baz     # Using c module wise
+from advanced_module_example import c       # Configuration defined in __init__.py
+from advanced_module_example import baz     # Using 'c' module-wise
 
 
 @c
 class Cli:
     def subcommand_foo(self):
         """This will be shown in --help for subcommand-foo"""
-        print('foo: ')
-        print(type(c.p))
-        print(c.p)
+        print(f'type {type(c.a)}')
+        print(c.a)
         baz.print_configuration()
 
     def subcommand_bar(self):

@@ -2,6 +2,7 @@ import traceback
 from contextlib import contextmanager
 import sys
 import re
+from tabulate import tabulate
 
 def filter_fields(d: dict, nt):
     """Excludes fields not found in the schema/namedtuple"""
@@ -74,14 +75,15 @@ def suppress_traceback():
         filedesc = [f'{desc}'.replace('in ', '').replace('line ', '') for desc in filedesc]
 
         filename = f'{filename:35}'
-        return f'{" :: ".join([filename, *filedesc])}'
+        return [filename, *filedesc]
 
     def format_line(line):
-        return ''.join([format_file_desc(line), '  - ', *split_traceback(line, 1)[-1:]])
+        return [*format_file_desc(line), *split_traceback(line, 1)[-1:]]
 
     try:
         yield
     except Exception:
+        from copy import deepcopy
         exc_type, exc_value, exc_traceback = sys.exc_info()
 
         traceback_file = 'exception_traceback.log'
@@ -92,13 +94,14 @@ def suppress_traceback():
         print('\nTruncated traceback:')
 
         tb = traceback.extract_tb(exc_traceback, limit=-2)
-        concat = ''
+        truncated_error_table = []
+        error_cell = []
         for line in tb.format():
             if line.strip(' ').startswith('File'):
-                print(concat)
-                concat = format_line(line)
+                truncated_error_table.append(deepcopy(error_cell))
+                error_cell = format_line(line)
             else:
-                concat += line
-        print(concat)
+                error_cell.append(line)
+        print(tabulate(truncated_error_table, tablefmt='plain'))
 
         sys.exit(exc_value)

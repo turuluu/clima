@@ -10,3 +10,4 @@ clima.egg-info/
 *.html
 .cache
 **/*.log
+.hypothesis

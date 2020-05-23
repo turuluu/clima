@@ -1,9 +1,10 @@
 from collections import ChainMap
 import inspect
+import sys
 import os
 from functools import partial
 
-from fire import Fire
+from clima.fire import Fire
 
 from clima import schema, utils
 from clima import docstring, configfile
@@ -165,12 +166,37 @@ def prepare_signatures(cls, nt):
         k: v for k, v in cls.__dict__.items()
         if not k.startswith('_') and inspect.isfunction(v)
     }
+
+    params = [
+        inspect.Parameter(name=field, kind=inspect._VAR_KEYWORD)
+        for field in nt._fields
+    ]
+
+    # pop the post_init from the end of parameters
+    params.pop()
+
+    # Hacking sys.argv to include positional keywords with assumed keyword names
+    # as I couldn't find another workaround to tell python-fire how to parse these
+    # The alternative had been to integrate python-fire with tighter coupling into this
+    if len(sys.argv) > 2 and not any(['-h' in sys.argv, '--help' in sys.argv]):
+        new_args = sys.argv[0:2]
+        i = 2
+        while i < len(sys.argv):
+            arg = sys.argv[i]
+            prm = params[i - 2]
+
+            if arg.startswith('--') and not arg.endswith('--'):
+                new_args += sys.argv[i:i + 2]
+                i += 2
+            else:
+                new_args.append(f'--{prm.name}')
+                new_args.append(f'{arg}')
+                i += 1
+        sys.argv = new_args
+
     for m_name, method in methods.items():
-        params = [
-            inspect.Parameter(name=field, kind=inspect._VAR_KEYWORD)
-            for field in nt._fields
-        ]
         sig = inspect.signature(method)
+
         method.__signature__ = sig.replace(parameters=[
             inspect.Parameter(name='self', kind=inspect._VAR_KEYWORD),
             *params

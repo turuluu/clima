@@ -1,4 +1,0 @@
-[submodule "python-fire"]
-	path = python-fire
-	url = https://github.com/d3rp/python-fire.git
-	branch = clima

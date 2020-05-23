@@ -4,7 +4,6 @@ import requests
 import logging
 
 
-@c
 class C(Schema):
     debug: bool = False  # Enable verbose printout
     url: str = 'https://pypi.org'  # This will be overriden by foo.cfg

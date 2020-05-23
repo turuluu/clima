@@ -1,5 +1,5 @@
-from examples.module_example import c       # Configuration defined in __init__.py
-from examples.module_example import baz     # Using c module wise
+from module_example import c       # Configuration defined in __init__.py
+from module_example import baz     # Using c module wise
 
 
 @c
