@@ -5,4 +5,4 @@ from clima.utils import suppress_traceback
 from clima import fire
 from clima.helputils import print_help, HelpString
 
-__version__ = '0.5.5'
+__version__ = '0.5.6'
