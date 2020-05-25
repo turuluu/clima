@@ -99,20 +99,20 @@ class TestSchemaNoType(TestCase, SysArgvRestore):
 
 class TestSchema(TestCase, SysArgvRestore):
     defaults = {
-        '_int': [42, int],
-        '_str': ['oh hi', str],
-        '_posix_path': [PosixPath('/tmp'), PosixPath],
-        '_win_path': [WindowsPath('/tmp'), WindowsPath],
+        'test_int': [42, int],
+        'test_str': ['oh hi', str],
+        'test_posix_path': [PosixPath('/tmp'), PosixPath],
+        'test_win_path': [WindowsPath('/tmp'), WindowsPath],
     }
 
     def setUp(self) -> None:
-        self.save_sysargv()
+        super().save_sysargv()
 
         class C(Schema):
-            _int: int = self.defaults['_int'][0]
-            _str: str = self.defaults['_str'][0]
-            _posix_path: PosixPath = self.defaults['_posix_path'][0]
-            _win_path: WindowsPath = self.defaults['_win_path'][0]
+            test_int: int = self.defaults['test_int'][0]
+            test_str: str = self.defaults['test_str'][0]
+            test_posix_path: PosixPath = self.defaults['test_posix_path'][0]
+            test_win_path: WindowsPath = self.defaults['test_win_path'][0]
 
     def test_default(self):
         sys.argv = ['test', 'x']
@@ -121,7 +121,7 @@ class TestSchema(TestCase, SysArgvRestore):
             assert (type(getattr(c, k)) == v[1])
 
     def test_override(self):
-        sys.argv = ['test', 'x', '--a', '1']
+        sys.argv = ['test', 'x', '--test_int', '1']
 
         @c
         class Cli:
@@ -129,18 +129,35 @@ class TestSchema(TestCase, SysArgvRestore):
                 """docstring"""
                 pass
 
-        assert (c.a == 1)
-        assert (type(c.a) == int)
+        assert (c.test_int == 1)
+        assert (type(c.test_int) == int)
 
     def test_no_docstring(self):
-        """Not defining a docstring should not crash the script"""
-        sys.argv = ['test', 'x', '--a', '1']
+        """Not defining a docstring in Configuration(Schema) should not crash the script"""
+        sys.argv = ['test', 'x', '--test_str', 'no moi']
 
         @c
         class Cli:
             def x(self):
                 pass
 
+        assert (c.test_int == 42)
+        assert (c.test_str == 'no moi')
+
+    def test_positional(self):
+        """Positional arguments should be parsed from Configuration(Schema) layout order"""
+        _int = 96
+        _str = 'numberwang'
+        sys.argv = ['test', 'x', _int, _str]
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        assert (c.test_int == _int)
+        assert (c.test_str == _str)
 
 class TestTypeCasting(TestCase, SysArgvRestore):
     def setUp(self) -> None:

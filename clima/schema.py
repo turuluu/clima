@@ -37,7 +37,7 @@ class MetaSchema(type):
                         if getattr(cls, ann) is not None:
                             setattr(cls, ann, t(namespace[ann]))
                     else:
-                        print(f'{ann} was not of type {t}')
+                        # print(f'{ann} was not of type {t}')
                         setattr(cls, ann, t(getattr(cls, ann)))
                 except TypeError as ex:
                     print('given parameters or defined defaults were of incorrect type:')

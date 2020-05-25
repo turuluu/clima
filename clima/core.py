@@ -167,13 +167,13 @@ def prepare_signatures(cls, nt):
         if not k.startswith('_') and inspect.isfunction(v)
     }
 
-    params = [
+    params_with_post_init = [
         inspect.Parameter(name=field, kind=inspect._VAR_KEYWORD)
         for field in nt._fields
     ]
 
     # pop the post_init from the end of parameters
-    params.pop()
+    params = [prm for prm in params_with_post_init if prm.name != 'post_init']
 
     # Hacking sys.argv to include positional keywords with assumed keyword names
     # as I couldn't find another workaround to tell python-fire how to parse these
@@ -185,7 +185,7 @@ def prepare_signatures(cls, nt):
             arg = sys.argv[i]
             prm = params[i - 2]
 
-            if arg.startswith('--') and not arg.endswith('--'):
+            if isinstance(arg, str) and arg.startswith('--') and not arg.endswith('--'):
                 new_args += sys.argv[i:i + 2]
                 i += 2
             else:
