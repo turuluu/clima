@@ -46,7 +46,7 @@ def SeparateFlagArgs(args: list):
   Returns:
     A tuple with the Fire args (a list), followed by the Flag args (a list).
   """
-  if len(args) > 1 and (args[-1] == '-h' or args[-1] == '--help') and '--' not in args:
+  if len(args) > 0 and (args[-1] == '-h' or args[-1] == '--help') and '--' not in args:
     args.pop()
     args.append('--')
     args.append('-h')

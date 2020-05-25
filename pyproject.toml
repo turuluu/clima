@@ -1,15 +1,15 @@
 # dephell deps convert --env flit
-[tool.dephell.flit]
+[tool.dephell.ptryflit]
 from = {format = "poetry", path = "pyproject.toml"}
 to = {format = "flit", path = "pyproject.toml"}
 
 # dephell deps convert --env pip
-[tool.dephell.pip]
+[tool.dephell.ptrypip]
 from = {format = "poetry", path = "pyproject.toml"}
 to = {format = "pip", path = "requirements.txt"}
 
 # dephell deps convert --env setuppy
-[tool.dephell.setuppy]
+[tool.dephell.ptrysetuppy]
 from = {format = "poetry", path = "pyproject.toml"}
 to = {format = "setuppy", path = "setup.py"}
 

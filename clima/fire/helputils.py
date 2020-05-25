@@ -38,7 +38,7 @@ def _NormalizeField(field):
   """
   if field == 'type_name':
     field = 'type'
-  return (field[0].upper() + field[1:]).replace('_', ' ')
+  return (field[0].upper() + field[1:]).replace('_', ' ') if not field == 'docstring' else 'Description'
 
 
 def _DisplayValue(info, field, padding):

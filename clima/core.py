@@ -35,7 +35,6 @@ def cli(cls):
     def init(self, **cli_args):
         """Generated init"""
         initialize_cli(cli_args, state['schema'])
-        # c(cli_args, state['schema'])
 
     cls_attrs = dict(
         __init__=init,
@@ -53,7 +52,10 @@ def cli(cls):
 def config_dict(configuration_tuple):
     config_dict = {}
 
-    config_file = configfile.get_config_path(configuration_tuple)
+    config_file = configuration_tuple._asdict().get('CFG')
+    if config_file is None:
+        config_file = configfile.get_config_path(configuration_tuple)
+
     if config_file is not None:
         config_dict = utils.filter_fields(configfile.read_config(config_file), configuration_tuple)
         config_dict = utils.type_correct_with(config_dict, configuration_tuple)
@@ -137,6 +139,7 @@ class Schema(object, metaclass=schema.MetaSchema):
         return schema.asdict(self)
 
     def _wrap(self):
+        # TODO: Figure this out so Schema could live inside schema.py file
         c._init(self)
 
     @staticmethod
@@ -196,11 +199,10 @@ def prepare_signatures(cls, nt):
 
     for m_name, method in methods.items():
         sig = inspect.signature(method)
+        new_parameters = [v for v in sig.parameters.values()]
+        new_parameters += params
 
-        method.__signature__ = sig.replace(parameters=[
-            inspect.Parameter(name='self', kind=inspect._VAR_KEYWORD),
-            *params
-        ])
+        method.__signature__ = sig.replace(parameters=new_parameters)
 
 
 def prepare(cls, nt):

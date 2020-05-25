@@ -17,7 +17,7 @@ c: C = c
 @c
 class Cli:
     def convert(self):
-        for e in ['pip', 'setuppy', 'pipenv', 'flit']:
+        for e in ['ptrypip', 'ptrysetuppy', 'pipenv', 'ptryflit']:
             print(f'generating {e}')
             R(c.convert_cmd + [e], cwd=Path.cwd())
 

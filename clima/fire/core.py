@@ -130,9 +130,9 @@ def Fire(component=None, command=None, name=None):
     for help_flag in ['-h', '--help']:
       if help_flag in component_trace.elements[-1].args:
         command = '{cmd} -- --help'.format(cmd=component_trace.GetCommand())
-        print(('WARNING: The proper way to show help is {cmd}.\n'
-               'Showing help anyway.\n').format(cmd=pipes.quote(command)),
-              file=sys.stderr)
+        # print(('WARNING: The proper way to show help is {cmd}.\n'
+        #        'Showing help anyway.\n').format(cmd=pipes.quote(command)),
+        #       file=sys.stderr)
 
     print('Fire trace:\n{trace}\n'.format(trace=component_trace),
           file=sys.stderr)

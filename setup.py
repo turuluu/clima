@@ -21,7 +21,7 @@ if os.path.exists(readme_path):
 setup(
     long_description=readme,
     name='clima',
-    version='0.5.4',
+    version='0.5.5',
     description='Simple boilerplate for cli scripts',
     python_requires='>=3.6',
     project_urls={"homepage": "https://github.com/d3rp/clima.git"},
