@@ -31,7 +31,7 @@ command = "python -m pytest -x tests/"
 
 [tool.poetry]
 name = "clima"
-version = "0.5.4"
+version = "0.5.5"
 description = "Simple boilerplate for cli scripts"
 keywords = ["cli"]
 classifiers = [
@@ -69,6 +69,7 @@ python-Levenshtein = "*"
 
 [tool.poetry.extras]
 tests = ["pytest"]
+
 
 
 
