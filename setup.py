@@ -45,7 +45,8 @@ setup(
     package_dir={"": "."},
     package_data={},
     install_requires=[
-        'bleach>=3.1.5', 'pytest-watch==4.*,>=4.2.0', 'tabulate==0.*,>=0.8.7'
+        'bleach>=3.1.5', 'pytest-watch==4.*,>=4.2.0', 'six',
+        'tabulate==0.*,>=0.8.7'
     ],
     extras_require={
         "dev": ["hypothesis", "mock", "pytest", "python-levenshtein", "twine"],
