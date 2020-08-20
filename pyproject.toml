@@ -31,7 +31,7 @@ command = "python -m pytest -x tests/"
 
 [tool.poetry]
 name = "clima"
-version = "0.5.8"
+version = "0.5.9"
 description = "Simple boilerplate for cli scripts"
 keywords = ["cli"]
 classifiers = [
@@ -61,7 +61,6 @@ six = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
-pytest-watch = "^4.2"
 twine = "*"
 hypothesis = "*"
 mock = "*"
