@@ -75,7 +75,7 @@ keywords = "cli"
 classifiers = ["License :: OSI Approved :: MIT License", "Intended Audience :: Developers", "Programming Language :: Python :: 3.6", "Programming Language :: Python :: 3.7", "Programming Language :: Python :: 3.8", "Topic :: Software Development :: Build Tools", "Topic :: Software Development :: Libraries", "Topic :: Utilities", "Operating System :: POSIX :: Linux", "Operating System :: Microsoft :: Windows :: Windows 10", "Operating System :: Microsoft :: Windows", "Operating System :: MacOS :: MacOS X"]
 description-file = "README.md"
 requires-python = ">=3.6"
-requires = ["bleach>=3.1.5", "pytest-watch==4.*,>=4.2.0", "six", "tabulate==0.*,>=0.8.7"]
+requires = ["bleach>=3.1.5", "six", "tabulate==0.*,>=0.8.7"]
 
 [tool.flit.metadata.urls]
 homepage = "https://github.com/d3rp/clima.git"
