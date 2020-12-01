@@ -159,6 +159,7 @@ class TestSchema(TestCase, SysArgvRestore):
         assert (c.test_int == _int)
         assert (c.test_str == _str)
 
+
 class TestTypeCasting(TestCase, SysArgvRestore):
     def setUp(self) -> None:
         sys.argv = ['test', 'x']

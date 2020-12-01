@@ -1,6 +1,12 @@
 import sys
 import inspect
 
+# Until poetry fixes this https://github.com/python-poetry/poetry/issues/144
+# This hack is necessary to report correct __version__
+# inside the project
+import configparser
+
+
 
 def asdict(cls):
     """Helper to create a dictionary out of the class attributes (fields/variables)"""
@@ -47,6 +53,18 @@ class MetaSchema(type):
 
         # TODO: Maybe check that given parameters matched the schema?
         # Even a fuzzy search to suggest close matches
+
+        # Version printing part 1
+        # Enables version printing out of the box
+        # Idea is, that when poetry is used, this will look up the version
+        # in its configuration.
+        try:
+            parser = configparser.ConfigParser()
+            parser.read("pyproject.toml")
+            PKG_VERSION = parser["tool.poetry"]["version"]
+            setattr(cls, 'version', PKG_VERSION)
+        except:
+            setattr(cls, 'version', '0.0.1')
 
         # Wrap schema with c (configuration decorator
         cls._wrap(cls)

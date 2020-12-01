@@ -9,6 +9,8 @@ from clima.fire import Fire
 from clima import schema, utils
 from clima import docstring, configfile
 
+from typing import Dict
+
 
 class RequiredParameterException(Exception):
     pass
@@ -50,17 +52,17 @@ def cli(cls):
 
 # TODO: config dict and parameter parsing have diverged type casting processes
 def config_dict(configuration_tuple):
-    config_dict = {}
+    result: Dict = {}
 
-    config_file = configuration_tuple._asdict().get('CFG')
-    if config_file is None:
-        config_file = configfile.get_config_path(configuration_tuple)
+    _config_file = configuration_tuple._asdict().get('CFG')
+    if _config_file is None:
+        _config_file = configfile.get_config_path(configuration_tuple)
 
-    if config_file is not None:
-        config_dict = utils.filter_fields(configfile.read_config(config_file), configuration_tuple)
-        config_dict = utils.type_correct_with(config_dict, configuration_tuple)
+    if _config_file is not None:
+        result = utils.filter_fields(configfile.read_config(_config_file), configuration_tuple)
+        result = utils.type_correct_with(result, configuration_tuple)
 
-    return config_dict
+    return result
 
 
 class Configurable:
@@ -205,9 +207,13 @@ def prepare_signatures(cls, nt):
         method.__signature__ = sig.replace(parameters=new_parameters)
 
 
-def prepare(cls, nt):
+def prepare(cls, schema: Schema):
     """Beef: prepares signatures, docstrings and initiates fire for the cli-magic"""
-    prepare_signatures(cls, nt)
-    docstring.wrap_method_docstring(cls, nt)
+    prepare_signatures(cls, schema)
+    docstring.wrap_method_docstring(cls, schema)
     with utils.suppress_traceback():
-        Fire(cls)
+        if len(sys.argv) > 1 and sys.argv[-1] == 'version':
+            # Version printing part 2
+            print(schema.version)
+        else:
+            Fire(cls)

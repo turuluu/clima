@@ -12,6 +12,7 @@ from clima import c, Schema
 
 from tests import SysArgvRestore
 
+
 class TestConfigFromWorkingDir(TestCase, SysArgvRestore):
     test_cfg = Path.cwd() / 'foo.cfg'
 
@@ -35,6 +36,7 @@ class TestConfigFromWorkingDir(TestCase, SysArgvRestore):
                 pass
 
         assert c.bar == 42
+
 
 class TestConfigFromCwd(TestCase, SysArgvRestore):
     test_cfg = Path.cwd() / 'foo.cfg'
