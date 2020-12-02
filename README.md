@@ -9,9 +9,9 @@
 [![PyPI license](https://img.shields.io/pypi/l/clima)]()
 
 
-Create a command line interface and a configuration object with minimal setup and less maintenance.
-It handles loading and parsing configuration files and overriding it with env variables by defining 
-a simple schema of the configuration and a class with your "business logic".
+Create a command line interface with minimal setup and less maintenance. Clima handles loading and parsing command
+line arguments complimenting them with definitions found in optional configuration files, env files, env variables and
+secrets stored with [pass](https://www.passwordstore.org/).
 
 Example: to setup a configuration and a command line interface ready to go:
 
@@ -31,9 +31,18 @@ Command line usage in a terminal would then be e.g.:
     ./script.py foo
     ./script.py foo --a 42
 
+Or as packaged with for example [poetry](https://python-poetry.org)
+
+    my_tool foo
+    my_tool foo --a 42
+    
 See the example scripts and other sections for more examples.
 
 ## Long description
+
+The subcommands are written as a class encapsulating the "business logic". The class' methods are handled as
+subcommands. You can define a simple schema of the configuration which will be populated by clima with the
+aforementioned command line arguments and other definitions.
 
 In other words, you can use this to wrap your scripts as command line commands without resorting to bash or maintaining argument parsing in python. This removes the need of duplicating comments in order `--help` to remember what the arguments were and what they did. Sprinkling some decorator magic offers a typical use experience of a cli program (e.g. argument parsing and validation, --help, subcommands, ...).
 
@@ -62,22 +71,39 @@ First import the required components:
 
     from clima import c, Schema
     
-In your code define the `Schema` subclass by decorating the class with `c`:
+In your code define the `Schema` subclass:
 
     class Configuration(Schema):
         a: str = 'A'  # a description
         x: int = 1  # x description
 
-"Configuration" is an arbitrary name, no magic there. The inherited `Schema` class
-simplifies the schema's templating to defining just the attributes (i.e. `a` and `x` in this
-example). Those have a set way:
+Here "Configuration" is an arbitrary name, no magic there. The inherited `Schema` class
+defines the attributes (i.e. `a` and `x` in this example). 
+
+Note the specific formatting of the `Schema` subclass:
 
         # attribute[: type] = default value  [# Description for the --help]
         a: str = 'A'  # a description
        
-`a` is the attribute which can be called in the code later with `c.a`. It has a type of 'str', default
-value of 'A'. The comment after it is parsed for the command line so it's not redundant. The values in square brackets `[]` are
-optional. All of these parts will be parsed for the '--help' for the subcommands of the cli, which should be defined as follows:
+`a` is the attribute which can be called in the code later with `c.a`. In this example, it has a type of 'str' and a default
+value of 'A'. The comment after is not redundant in the sense that it is parsed for the command line help. The values in square brackets `[]` are
+optional.
+
+All of these parts will be parsed for the '--help' for the subcommands of the cli, for example:
+
+    ./script.py foo -h
+    
+Will now produce:
+
+     Usage:       script.py foo [ARGS]
+     
+     Description: Args:
+         --a (str): a description (Default is 'A')
+         --x (int): x description (Default is 1)    
+
+The example in the readme can be found at `examples/readme_example.py`.
+
+The subcommands - or commands of the script - should be defined somewhat as follows:
 
     @c
     class Cli:
@@ -92,51 +118,34 @@ optional. All of these parts will be parsed for the '--help' for the subcommands
             print('bar')
 
 The methods are parsed as subcommands and their respective doc strings will show in the 
-subcommands' help printout. Note the usage of the parsed configuration `c` inside the method:
+subcommands' help printout. Note the double usage of the `c` - first as a decorated and later as the parsed configuration
+inside the method:
 
     ...
         ...
         print(c.a)
         print(c.x)
-   
-Also, to enable autocompletion in IDEs, this hack suffices:
-
-    c: Configuration = c
-
-Put it in the "global space" e.g. just after defining the template. See the [`examples/script_example.py`](examples/script_example.py) for a specific example.
-
-When all is complete, the imported `c` variable should have all the bits and pieces for the configuration. It can be
-used inside the Cli class as well as imported around the codebase thus encapsulating all the configurations into one
-container with quick access with attributes `c.a`, `c.x`, etc...
-
+        
 ## Examples and platforms
 
-Should work for linux, macos and windows.
+Tried and used on linux, macos and windows. However, python packaging and dependency management is sometimes hairy and
+your mileage may vary.
 
 More examples in the [examples directory](examples) with printouts of the defined subcommands and helps.
 
-### Post init hook
-
-In some occasions it's useful to deduce specific defaults from the given parameters e.g. in a cross platform build allowing
-only minimal cli arguments. For those cases there's an `post_init` hook in which the fields can be refered to as in a
-typical class, but that still allows validation and type casting etc.:
-
-    class SoAdvanced(Schema):
-        platform: str = 'win'  # a description
-        bin_path: pathlib.Path = ''  # x description
-        
-        def post_init(self, *args):
-            if self.platform = 'win':
-                self.bin_path = 'c:/Users/foo/bar'
-            else:
-                self.bin_path = '/Users/mac/sth'
 
 ### Testing the examples
 
 The [examples](examples) can be tried out by cloning the repo and running from repo directory root (on linux and the like):
 
-    PYTHONPATH=$PWD python ./examples/module_example/__main__.py -- -h
-    PYTHONPATH=$PWD python ./examples/module_example/__main__.py subcommand-foo -- -h
+    git clone https://github.com/d3rp/clima.git 
+    cd clima
+    PYTHONPATH=$PWD python ./examples/readme_example.py foo -h
+
+Running the examples that wrap a module:
+
+    PYTHONPATH=$PWD python ./examples/module_example/__main__.py -h
+    PYTHONPATH=$PWD python ./examples/module_example/__main__.py subcommand-foo -h
     PYTHONPATH=$PWD python ./examples/module_example/__main__.py subcommand-bar
     ...
 
@@ -156,6 +165,45 @@ Args:
 
 Usage:       __main__.py subcommand-foo [--X ...]
 ```
+   
+## Version printing
+
+Version printing works via the `version` subcommand. This is intended for scripts that are packaged as command line tools
+with poetry. Thus with bumping the version with poetry, clima will handle parsing the current version of your tool so
+it can be queried with:
+
+    my_tool version
+   
+The actual version is parsed into the `c` so overwrite it with `post_init` or something if you want control over it.
+
+## Autocompletion in IDEs (wip)
+
+Also, to enable autocompletion in IDEs, this hack suffices:
+
+    c: Configuration = c
+
+Put it in the "global space" e.g. just after defining the template. See the [`examples/script_example.py`](examples/script_example.py) for a specific example.
+
+When all is complete, the imported `c` variable should have all the bits and pieces for the configuration. It can be
+used inside the Cli class as well as imported around the codebase thus encapsulating all the configurations into one
+container with quick access with attributes `c.a`, `c.x`, etc...
+
+## Post init hook
+
+In some occasions it's useful to deduce specific defaults from the given parameters e.g. in a cross platform build allowing
+only minimal cli arguments. For those cases there's an `post_init` hook in which the fields can be refered to as in a
+typical class, but that still allows validation and type casting etc.:
+
+    class SoAdvanced(Schema):
+        platform: str = 'win'  # a description
+        bin_path: pathlib.Path = ''  # x description
+        
+        def post_init(self, *args):
+            if self.platform = 'win':
+                self.bin_path = 'c:/Users/foo/bar'
+            else:
+                self.bin_path = '/Users/mac/sth'
+               
 
 ## Configuration file and environment variables
 
@@ -188,6 +236,32 @@ documentation for nice additional features such as:
     tester.py subcommand-foo -- --trace
     tester.py -- --interactive
     tester.py -- --completion
+    
+## Password unwrapping/decryption with pass
+
+Note: Currently this works only for gpg-keys without password. It's not ideal, but it's better than plain text `.env`
+files ;)
+
+[pass](https://passwordstore.org) can be used to store passwords as gpg encrypted files under the home directory. Clima
+uses the default path of ~/.password-store and the files found within. It will then match the arguments with the 
+stored passwords, for example:
+
+    tree -A ~/.password-store                                                                                                                                                                                                                                                                             ✔ | 41s | anaconda3 
+    /Users/me/.password-store
+    ├── work
+    │   ├── ci
+    │   │   ├── sign_id.gpg
+    │   │   ├── sign_pw.gpg
+    ... ... ...
+
+And an according `Schema` definition:
+
+    class Conf(Schema):
+        sign_id: str = ''  # signing id for the CI
+        sign_pw: str = ''  # signing pw for the CI
+
+Would accept those arguments as cli arguments, or if omitted, would traverse through the `.password-store` and decrypt the
+found `sign_id.gpg` and `sign_pw.gpg` placing the values found in the configuration object `c`.
     
 ## Why another cli framework?
 

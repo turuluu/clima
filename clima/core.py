@@ -92,10 +92,16 @@ c = Configurable()
 def get_secrets(configuration_tuple):
     params = [t for t in configuration_tuple._asdict()]
     secrets = {}
-    for p in params:
-        secret = password_store.decrypt(p)
-        if len(secret) > 0:
-            secrets.update({p: secret})
+    try:
+        for p in params:
+            secret = password_store.decrypt(p)
+            if len(secret) > 0:
+                secrets.update({p: secret})
+    except:
+        # TODO: Wanted to keep this lean, as one might not have gpg installed and what not..
+        # Need to provide for example a configuration key 'use gpg' that the user can use to
+        # enable this feature. This way it won't get in the way of other use cases.
+        pass
 
     return secrets
 
