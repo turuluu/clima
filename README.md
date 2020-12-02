@@ -263,6 +263,33 @@ And an according `Schema` definition:
 Would accept those arguments as cli arguments, or if omitted, would traverse through the `.password-store` and decrypt the
 found `sign_id.gpg` and `sign_pw.gpg` placing the values found in the configuration object `c`.
     
+## Truncated error printing
+
+Even though I've used python for a few years professionally, I'm still not satisfied with its error printing. Clima
+truncates the error lists and tries to provide a more readable version of the "first" point of failure. The whole
+traceback is written into a logfile `exception_traceback.log` so it can be examined when the truncated output is not
+enough.
+
+## Type casting with configuration definition
+
+The `Schema` definition can have type annotations, which are used to cast the given arguments. For example
+
+    class C(Schema):
+        p: Path = ''  # Path to something
+
+Results in `c.p`'s type cast as `Path`.
+
+Note: Currently type casting to anything other than Path seems broken, though the tests are passing.. Run the
+`example/type_casting_example.py` to validate the current state of things:
+
+    # cloned repo
+    poetry run bash -c 'cd examples; python type_casting_example.py run'
+    
+    # pip installed clima
+    cd examples; python type_casting_example.py run
+    
+The `exception_traceback.log` file will be written inside the `examples` directory
+
 ## Why another cli framework?
 
 This is just a tool to slap together a cli program in python instead that grew out of the need of having a build automation system and an entrypoint script to build various flavours of C++ projects. The intention is to get something reasonably configurable and generic up and running as fast as possible while still having the "power" of python. I can't bother to memorize argparses syntax, even though it's a very good package. Also click works nice for more elaborate things though fire is my personal favourite for the time being. Often times when I kick off a bash script for this it ends up too elaborate very quick and then I miss python.
