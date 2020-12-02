@@ -7,7 +7,6 @@ import inspect
 import configparser
 
 
-
 def asdict(cls):
     """Helper to create a dictionary out of the class attributes (fields/variables)"""
     return {k: v for k, v in cls.__class__.__dict__.items()
@@ -20,6 +19,7 @@ def schema_decorator(decorators_state, cls):
     """Adds cls to decorator_state"""
     decorators_state['schema'] = cls()
     return cls
+
 
 class MetaSchema(type):
     """
@@ -73,5 +73,3 @@ class MetaSchema(type):
 
     def __init__(cls, name, bases, namespace, **kwds):
         super().__init__(name, bases, namespace)
-
-

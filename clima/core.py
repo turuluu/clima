@@ -6,7 +6,7 @@ from functools import partial
 
 from clima.fire import Fire
 
-from clima import schema, utils
+from clima import schema, utils, password_store
 from clima import docstring, configfile
 
 from typing import Dict
@@ -24,47 +24,6 @@ DECORATORS_STATE = {
 schema_decorator = partial(schema.schema_decorator, DECORATORS_STATE)
 
 
-def add_to_decorators(key, value):
-    DECORATORS_STATE[key] = value
-
-
-def cli(cls):
-    """Decorator that wraps the command line interface
-     specific class with fire
-    """
-    state = DECORATORS_STATE
-
-    def init(self, **cli_args):
-        """Generated init"""
-        initialize_cli(cli_args, state['schema'])
-
-    cls_attrs = dict(
-        __init__=init,
-        __repr__=cls.__repr__,
-        **{k: v for k, v in cls.__dict__.items() if not k.startswith('_')}
-    )
-
-    _Cli = type('Cli', (cls,), cls_attrs)
-    state['generated'] = _Cli
-
-    return _Cli
-
-
-# TODO: config dict and parameter parsing have diverged type casting processes
-def config_dict(configuration_tuple):
-    result: Dict = {}
-
-    _config_file = configuration_tuple._asdict().get('CFG')
-    if _config_file is None:
-        _config_file = configfile.get_config_path(configuration_tuple)
-
-    if _config_file is not None:
-        result = utils.filter_fields(configfile.read_config(_config_file), configuration_tuple)
-        result = utils.type_correct_with(result, configuration_tuple)
-
-    return result
-
-
 class Configurable:
     """Configuration management"""
     # TODO: idiomatic handling for use cases that apply to NamedTuple
@@ -77,6 +36,7 @@ class Configurable:
                 params,
                 config_dict(configuration_tuple),
                 utils.filter_fields(os.environ, configuration_tuple),
+                get_secrets(configuration_tuple),
                 configuration_tuple._asdict()
             )
         )
@@ -129,6 +89,58 @@ class Configurable:
 c = Configurable()
 
 
+def get_secrets(configuration_tuple):
+    params = [t for t in configuration_tuple._asdict()]
+    secrets = {}
+    for p in params:
+        secret = password_store.decrypt(p)
+        if len(secret) > 0:
+            secrets.update({p: secret})
+
+    return secrets
+
+
+def add_to_decorators(key, value):
+    DECORATORS_STATE[key] = value
+
+
+def cli(cls):
+    """Decorator that wraps the command line interface
+     specific class with fire
+    """
+    state = DECORATORS_STATE
+
+    def init(self, **cli_args):
+        """Generated init"""
+        initialize_cli(cli_args, state['schema'])
+
+    cls_attrs = dict(
+        __init__=init,
+        __repr__=cls.__repr__,
+        **{k: v for k, v in cls.__dict__.items() if not k.startswith('_')}
+    )
+
+    _Cli = type('Cli', (cls,), cls_attrs)
+    state['generated'] = _Cli
+
+    return _Cli
+
+
+# TODO: config dict and parameter parsing have diverged type casting processes
+def config_dict(configuration_tuple):
+    result: Dict = {}
+
+    _config_file = configuration_tuple._asdict().get('CFG')
+    if _config_file is None:
+        _config_file = configfile.get_config_path(configuration_tuple)
+
+    if _config_file is not None:
+        result = utils.filter_fields(configfile.read_config(_config_file), configuration_tuple)
+        result = utils.type_correct_with(result, configuration_tuple)
+
+    return result
+
+
 def initialize_cli(a, b):
     global c
     c._setup(a, b)
@@ -160,7 +172,7 @@ class Schema(object, metaclass=schema.MetaSchema):
         pass
 
 
-def prepare_signatures(cls, nt):
+def prepare_signatures(cls, schema):
     """Adds possible parameters gathered from Schema to all methods
     defined in the 'Cli' class (decorated with @c). This way the parameters
     are the same for all methods, but at the same time they don't need to
@@ -174,7 +186,7 @@ def prepare_signatures(cls, nt):
 
     params_with_post_init = [
         inspect.Parameter(name=field, kind=inspect._VAR_KEYWORD)
-        for field in nt._fields
+        for field in schema._fields
     ]
 
     # pop the post_init from the end of parameters
