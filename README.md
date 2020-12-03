@@ -1,5 +1,9 @@
 # clima - command line interface with a schema
 
+Create a command line interface with minimal setup and less maintenance. Clima handles loading and parsing command
+line arguments complimenting them with definitions found in optional configuration files, env files, env variables and
+secrets stored with [pass](https://www.passwordstore.org/).
+
 [![PyPI](https://img.shields.io/pypi/v/clima)](https://pypi.org/project/clima/)
 [![Python versions](https://img.shields.io/pypi/pyversions/clima)]()
 
@@ -9,9 +13,31 @@
 [![PyPI license](https://img.shields.io/pypi/l/clima)]()
 
 
-Create a command line interface with minimal setup and less maintenance. Clima handles loading and parsing command
-line arguments complimenting them with definitions found in optional configuration files, env files, env variables and
-secrets stored with [pass](https://www.passwordstore.org/).
+## Table of contents
+
+   * [clima - command line interface with a schema](#clima---command-line-interface-with-a-schema)
+      * [Table of contents](#table-of-contents)
+      * [Short examples](#short-examples)
+      * [Installing](#installing)
+      * [Long description](#long-description)
+      * [Usage](#usage)
+      * [Examples and platforms](#examples-and-platforms)
+         * [Testing the examples](#testing-the-examples)
+      * [Version printing](#version-printing)
+      * [Autocompletion](#autocompletion)
+         * [..in IDEs (wip)](#in-ides-wip)
+         * [..in bash](#in-bash)
+      * [Post init hook](#post-init-hook)
+      * [Configuration file and environment variables](#configuration-file-and-environment-variables)
+      * [Additional features via Fire](#additional-features-via-fire)
+      * [Password unwrapping/decryption with pass](#password-unwrappingdecryption-with-pass)
+      * [Truncated error printing](#truncated-error-printing)
+      * [Type casting with configuration definition](#type-casting-with-configuration-definition)
+      * [Building/Installing from source](#buildinginstalling-from-source)
+      * [Why another cli framework?](#why-another-cli-framework)
+         * [Dependencies](#dependencies)
+         
+## Short examples
 
 Example: to setup a configuration and a command line interface ready to go:
 
@@ -31,40 +57,29 @@ Command line usage in a terminal would then be e.g.:
     ./script.py foo
     ./script.py foo --a 42
 
-Or as packaged with for example [poetry](https://python-poetry.org)
-
+Or as packaged:
+ 
     my_tool foo
     my_tool foo --a 42
     
-See the example scripts and other sections for more examples.
-
-## Long description
-
-The subcommands are written as a class encapsulating the "business logic". The class' methods are handled as
-subcommands. You can define a simple schema of the configuration which will be populated by clima with the
-aforementioned command line arguments and other definitions.
-
-In other words, you can use this to wrap your scripts as command line commands without resorting to bash or maintaining argument parsing in python. This removes the need of duplicating comments in order `--help` to remember what the arguments were and what they did. Sprinkling some decorator magic offers a typical use experience of a cli program (e.g. argument parsing and validation, --help, subcommands, ...).
-
-The implementation is focused on a premise that for a simple script there's usually a script wide global configuration which would be used through out the user code i.e. a context for the program that is refered to in different parts of the code. That configuration is populated with given arguments falling back on defaults in the code and some further complimentary options. Those are then made accessible via a global `c` variable that can be tossed around the code base with very little additional effort. With a small adjustment this can made to autocomplete in IDEs (as attributes). This helps when the schema of the configuration grows larger as the autocomplete kicks in after typing `c.` offering those fields in your "schema" as attributes.
+See the `examples` folder and other sections for more examples.
 
 ## Installing
 
     pip install --user clima
-    
-or with [pipx](https://pipxproject.github.io/pipx/) to use dedicated virtualenv:
-    
-    pipx install --user clima
-    
-### Building/Installing from source
 
-This repo is based on [poetry](https://poetry.eustace.io).
+[toc](#table-of-contents)
 
-    git clone https://github.com/d3rp/clima.git 
-    cd clima
-    poetry install --no-dev
+## Long description
 
-The `--no-dev` is for to install the running environment without development tooling.
+The subcommands are written as a class encapsulating the "business logic".
+You can define a simple schema of the configuration that maps to the command line arguments.
+
+In other words, you can use this to wrap your scripts as command line commands without resorting to bash or
+maintaining argument parsing in python. This removes the need of duplicating comments in order `--help` to remember what the arguments were and what they did. Sprinkling some decorator magic offers a typical use experience of a cli program (e.g. argument parsing and validation, --help, subcommands, ...).
+
+The implementation is focused on a premise that for a simple script there's usually a script wide global configuration which would be used through out the user code i.e. a context for the program that is refered to in different parts of the code. That configuration is populated with given arguments falling back on defaults in the code and some further complimentary options. Those are then made accessible via a global `c` variable that can be tossed around the code base with very little additional effort. With a small adjustment this can made to autocomplete in IDEs (as attributes). This helps when the schema of the configuration grows larger as the autocomplete kicks in after typing `c.` offering those fields in your "schema" as attributes.
+    
 
 ## Usage
 
@@ -130,6 +145,8 @@ inside the method:
         print(c.a)
         print(c.x)
         
+[toc](#table-of-contents)
+
 ## Examples and platforms
 
 Tried and used on linux, macos and windows. However, python packaging and dependency management is sometimes hairy and
@@ -170,6 +187,8 @@ Args:
 Usage:       __main__.py subcommand-foo [--X ...]
 ```
    
+[toc](#table-of-contents)
+
 ## Version printing
 
 Version printing works via the `version` subcommand. This is intended for scripts that are packaged as command line tools
@@ -180,7 +199,9 @@ it can be queried with:
    
 The actual version is parsed into the `c` so overwrite it with `post_init` or something if you want control over it.
 
-## Autocompletion in IDEs (wip)
+## Autocompletion
+ 
+### ..in IDEs (wip)
 
 Also, to enable autocompletion in IDEs, this hack suffices:
 
@@ -191,6 +212,16 @@ Put it in the "global space" e.g. just after defining the template. See the [`ex
 When all is complete, the imported `c` variable should have all the bits and pieces for the configuration. It can be
 used inside the Cli class as well as imported around the codebase thus encapsulating all the configurations into one
 container with quick access with attributes `c.a`, `c.x`, etc...
+
+### ..in bash
+
+Run your script with `-- --completion` arguments:
+
+    my_tool -- --completion
+  
+This should print an autocompletion definition to include in your bash completions.
+
+TBD: zsh etc. completions
 
 ## Post init hook
 
@@ -207,7 +238,11 @@ typical class, but that still allows validation and type casting etc.:
                 self.bin_path = 'c:/Users/foo/bar'
             else:
                 self.bin_path = '/Users/mac/sth'
+                
+Note: post_init() does not have access to the cli arguments. 
+Post init hook is run after schema initialization, but BEFORE the cli initialization. 
                
+[toc](#table-of-contents)
 
 ## Configuration file and environment variables
 
@@ -231,6 +266,9 @@ Same applies for the env variables.
     # linux example
     X=2 tester subcommand-foo
     
+    
+
+
 ## Additional features via Fire
 
 See the [Python Fire's Flags](https://github.com/google/python-fire/blob/master/docs/using-cli.md#python-fires-flags)
@@ -267,12 +305,16 @@ And an according `Schema` definition:
 Would accept those arguments as cli arguments, or if omitted, would traverse through the `.password-store` and decrypt the
 found `sign_id.gpg` and `sign_pw.gpg` placing the values found in the configuration object `c`.
     
+[toc](#table-of-contents)
+
 ## Truncated error printing
 
 Even though I've used python for a few years professionally, I'm still not satisfied with its error printing. Clima
 truncates the error lists and tries to provide a more readable version of the "first" point of failure. The whole
 traceback is written into a logfile `exception_traceback.log` so it can be examined when the truncated output is not
 enough.
+
+Note: When running the examples, the `exception_traceback.log` file will be written inside the `examples` directory
 
 ## Type casting with configuration definition
 
@@ -283,16 +325,17 @@ The `Schema` definition can have type annotations, which are used to cast the gi
 
 Results in `c.p`'s type cast as `Path`.
 
-Note: Currently type casting to anything other than Path seems broken, though the tests are passing.. Run the
-`example/type_casting_example.py` to validate the current state of things:
+## Building/Installing from source
 
-    # cloned repo
-    poetry run bash -c 'cd examples; python type_casting_example.py run'
-    
-    # pip installed clima
-    cd examples; python type_casting_example.py run
-    
-The `exception_traceback.log` file will be written inside the `examples` directory
+This repo is based on [poetry](https://poetry.eustace.io).
+
+    git clone https://github.com/d3rp/clima.git 
+    cd clima
+    poetry install --no-dev
+
+The `--no-dev` is for to install the running environment without development tooling.
+
+[toc](#table-of-contents)
 
 ## Why another cli framework?
 
@@ -304,10 +347,15 @@ Other options for full cli experience:
 
 * [docopt](https://docopt.org)
 * [fire](https://github.com/google/python-fire)
+* [cleo](https://github.com/sdispater/cleo)
 * [click](https://click.palletsprojects.com)
+* [typer](https://github.com/tiangolo/typer)
 
 
 ### Dependencies
 
-* fire - [python-fire](https://github.com/google/python-fire) from google does the cli wrapping
+* fire - [python-fire](https://github.com/google/python-fire) from google does the cli wrapping / forked into the repo
+    - I wanted to have the version 0.1.x formatting and help output with few hacks of my own
 
+
+[toc](#table-of-contents)
