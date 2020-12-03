@@ -12,7 +12,7 @@ class Configuration(Schema):
         print('post init')
         if cls.a == 'A':
             print('default "A" is set for c.a. Setting c.a to "123"')
-            print('This should be cast as a string even if assigned as an integer')
+            print('This should be cast as a string even if assigned as an integer in post_init()')
             cls.a = 123
 
 

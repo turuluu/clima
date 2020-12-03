@@ -43,15 +43,15 @@ class Configurable:
 
         return self.__configured
 
-    def _init(self, cls: schema.MetaSchema):
-        is_schema = isinstance(cls, schema.MetaSchema)
+    def _init(self, _schema: schema.MetaSchema):
+        is_schema = isinstance(_schema, schema.MetaSchema)
         if not is_schema:
             raise TypeError('The configuration should inherit Schema')
 
         # Allows using Schema as a subclass only
-        c.__configured = cls
+        c.__configured = _schema
         # Allows deoorator usage with @c.init
-        return schema_decorator(cls)
+        return schema_decorator(_schema)
 
     def __call__(self, cls, *, noprepare=False):
         """
@@ -118,12 +118,20 @@ def cli(cls):
 
     def init(self, **cli_args):
         """Generated init"""
-        initialize_cli(cli_args, state['schema'])
+        s = state['schema']
+        if hasattr(type(s), '__annotations__'):
+            for attr, cls in type(s).__annotations__.items():
+                if attr in cli_args:
+                    cli_args[attr] = cls(cli_args[attr])
+
+        # TODO: TBD - cli arguments available for post_init
+        # s.post_init(s)
+        initialize_cli(cli_args, s)
 
     cls_attrs = dict(
         __init__=init,
         __repr__=cls.__repr__,
-        **{k: v for k, v in cls.__dict__.items() if not k.startswith('_')}
+        **{m_name: m for m_name, m in cls.__dict__.items() if not m_name.startswith('_')}
     )
 
     _Cli = type('Cli', (cls,), cls_attrs)
@@ -229,9 +237,12 @@ def prepare(cls, schema: Schema):
     """Beef: prepares signatures, docstrings and initiates fire for the cli-magic"""
     prepare_signatures(cls, schema)
     docstring.wrap_method_docstring(cls, schema)
+
     with utils.suppress_traceback():
+
         if len(sys.argv) > 1 and sys.argv[-1] == 'version':
             # Version printing part 2
             print(schema.version)
+
         else:
             Fire(cls)

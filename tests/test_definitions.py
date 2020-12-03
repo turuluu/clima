@@ -7,6 +7,7 @@ import sys
 # subclass when validating (e.g. on windows Path('...') -> WindowsPath('...') )
 from pathlib import PureWindowsPath as WindowsPath
 from pathlib import PurePosixPath as PosixPath
+from pathlib import Path
 
 from clima import c, Schema
 
@@ -178,6 +179,7 @@ class TestTypeCasting(TestCase, SysArgvRestore):
             l: set = [1, 2]
             m: str = 0
             n: tuple = []
+            o: int = '1'
 
     def test_builtins(self):
         @c
@@ -186,7 +188,7 @@ class TestTypeCasting(TestCase, SysArgvRestore):
                 """docstring"""
                 pass
 
-        for k, valid in zip('abcdefghilmn', [
+        for k, valid in zip('abcdefghilmno', [
             bool,
             bytearray,
             bytes,
@@ -200,6 +202,7 @@ class TestTypeCasting(TestCase, SysArgvRestore):
             set,
             str,
             tuple,
+            int
         ]):
             assert type(getattr(c, k)) == valid
 
@@ -208,7 +211,7 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
     def setUp(self) -> None:
         sys.argv = ['test', 'x']
 
-    def test_std(self):
+    def test_win_path(self):
         class TestTypes(Schema):
             p: WindowsPath = '.'
 
@@ -219,6 +222,18 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
                 pass
 
         assert (type(c.p) == WindowsPath)
+
+    def test_posix_path(self):
+        class TestTypes(Schema):
+            p: PosixPath = '.'
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        assert (type(c.p) == PosixPath)
 
     def test_builtins_post_init(self):
         values = {
@@ -264,6 +279,53 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
         ]):
             assert type(getattr(c, k)) is valid
             assert getattr(c, k) == values[k]
+
+
+class TestTypeCastingWithArgs(TestCase, SysArgvRestore):
+    def setUp(self) -> None:
+        sys.argv = ['test', 'x', '--a', '0', '--path', 'foobar']
+
+    def test_casting_cli_args(self):
+        class TestTypes(Schema):
+            a: bool = True
+            path: PosixPath = ''
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        # for attr, cls in TestTypes.__annotations__.items():
+        #     if hasattr(c, attr):
+        #         setattr(c, attr, cls(getattr(c, attr)))
+
+        assert (type(c.a) == bool), f'Casting of cli args should follow schema {type(c.a)} != bool'
+        assert (type(c.path) == PosixPath), f'Casting of cli args should follow schema {type(c.path)} != Path'
+
+    # TODO: TBD
+    # def test_postinit_after_cli_args(self):
+    #     class TestTypes(Schema):
+    #         a: bool = True
+    #         path: PosixPath = ''
+    #
+    #         def post_init(self, *args):
+    #             assert type(self.a) == bool, 'post_init args should have been cast correctly'
+    #             assert not self.a, f'post_init should have access to cli args ({self.a} != False)'
+    #
+    #             assert type(
+    #                 self.path) == PosixPath, f'Casting of cli args should follow schema {type(self.path)} != Path'
+    #             assert self.path.name == 'foobar'
+    #
+    #             self.path = Path('baz')
+    #
+    #     @c
+    #     class Cli:
+    #         def x(self):
+    #             """docstring"""
+    #             pass
+    #
+    #     assert c.path.name == 'baz', 'post_init should override values'
 
 
 class TestConfigurable(TestCase, SysArgvRestore):

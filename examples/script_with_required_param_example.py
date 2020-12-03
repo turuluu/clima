@@ -17,7 +17,11 @@ class Something:
         throw an error upon usage (in code). In other words, the check for the required parameters
         is defined by using 'None' as the default value in the configuration class i.e. C(Schema).
         """
-        print(f'{c.name} {c.surname}')
+        try:
+            print(f'{c.name} {c.surname}')
+        except:
+            print('This is showing an expected error as a required parameter has not been provided')
+            raise
 
     def print_age(self):
         """This here, prints my age. This shouldn't trigger an error even if 'name' is not provided

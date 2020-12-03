@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "clima"
-version = "0.6.1"
+version = "0.6.2"
 description = "Simple boilerplate for cli scripts"
 keywords = ["cli"]
 classifiers = [
@@ -15,8 +15,7 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: Microsoft :: Windows :: Windows 10",
     "Operating System :: Microsoft :: Windows",
-    "Operating System :: MacOS :: MacOS X",
-]
+    "Operating System :: MacOS :: MacOS X", ]
 homepage = "https://github.com/d3rp/clima.git"
 authors = ["Joni Turunen <rojun.itu@gmail.com>"]
 readme = "README.md"
@@ -32,6 +31,7 @@ six = "*"
 pytest = "*"
 hypothesis = "*"
 mock = "*"
+requests = "^2.25.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
