@@ -56,11 +56,13 @@ or with [pipx](https://pipxproject.github.io/pipx/) to use dedicated virtualenv:
     
     pipx install --user clima
     
-### Installing from source
+### Building/Installing from source
 
-Choose your favourite flavour of build system. Check their documentation if puzzled ([poetry](https://poetry.eustace.io), [flit](https://flit.readthedocs.io/en/latest), [pipx](https://pipxproject.github.io/pipx/), [pipx](https://pipxproject.github.io/pipx/), [pipenv](https://docs.pipenv.org/en/latest)..)
+This repo is based on [poetry](https://poetry.eustace.io).
 
-The tooling here has been exported with [DepHell](https://github.com/dephell/dephell) from the poetry declarations. In case your favourite build tool flavour files are not up to date, see the `publish.py` for its `convert` subcommand, which should convert to all the possible alternatives once dephell is installed.
+    git clone https://github.com/d3rp/clima.git 
+    cd clima
+    poetry install
 
 ## Usage
 

@@ -1,9 +1,0 @@
-bleach>=3.1.5
-hypothesis
-mock
-pytest
-pytest-watch==4.*,>=4.2.0
-python-levenshtein
-six
-tabulate==0.*,>=0.8.7
-twine

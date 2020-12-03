@@ -1,8 +1,13 @@
 #!/bin/bash
 set -x
+poetry run python ./examples/simplest_example.py hello
+
 poetry run python ./examples/script_example.py
 poetry run python ./examples/script_example.py print-age
 poetry run python ./examples/script_example.py print-name
+
+echo "The next example demonstrates the error output"
+poetry run python ./examples/traceback_example.py lumberjack
 
 poetry run python ./examples/script_with_required_param_example.py
 poetry run python ./examples/script_with_required_param_example.py print-age

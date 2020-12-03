@@ -1,8 +1,9 @@
 import traceback
 from contextlib import contextmanager
 import sys
-import re
 from tabulate import tabulate
+from pathlib import Path
+
 
 def filter_fields(d: dict, nt):
     """Excludes fields not found in the schema/namedtuple"""
@@ -41,67 +42,44 @@ def suppress_traceback():
 
     To something like:
 
-        core.py ::  __getattr__:114  - ...
+        core.py:114 ::  __getattr__ - ...
         Missing argument for "name"
     """
-
-    # yield
-    # return
-
-    # n_last_msgs = 3
-    def get_filepath(line):
-        m = re.match(r'([^"]+"(/?([^/"]+))+".*)', line)
-        if m is not None:
-            filename = list(m.groups())[-1]
-            return line.replace(m.group(0), f'{filename}')
-
-        else:
-            return line
-
-    def split_traceback(line, index=0):
-        splitline = line.strip(' ').split('\n')
-        res = splitline[index].strip(' ').split(',')
-
-        return res
-
-    def format_file_desc(line):
-        filedesc = split_traceback(line)
-        cpp_formatted = f'{filedesc[2]}:{filedesc[1][1:]}'
-        filename = f'{get_filepath(filedesc[0])}'
-        if len(filedesc) > 3:
-            filedesc = [cpp_formatted, *filedesc[2:]]
-        else:
-            filedesc = [cpp_formatted]
-        filedesc = [f'{desc}'.replace('in ', '').replace('line ', '') for desc in filedesc]
-
-        filename = f'{filename:35}'
-        return [filename, *filedesc]
-
-    def format_line(line):
-        return [*format_file_desc(line), *split_traceback(line, 1)[-1:]]
 
     try:
         yield
     except Exception:
-        from copy import deepcopy
         exc_type, exc_value, exc_traceback = sys.exc_info()
 
         traceback_file = 'exception_traceback.log'
         with open(traceback_file, 'w') as wf:
             traceback.print_exception(exc_type, exc_value, exc_traceback, file=wf)
 
-        print(f'full stacktrace in {traceback_file}')
-        print('\nTruncated traceback:')
+        print(f'Truncated error traceback (full trace in {traceback_file}):\n')
 
-        tb = traceback.extract_tb(exc_traceback, limit=-2)
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+
+        formatted_lines = traceback.format_exc().splitlines()
+        exception_desc = formatted_lines[-1]
+
         truncated_error_table = []
-        error_cell = []
-        for line in tb.format():
-            if line.strip(' ').startswith('File'):
-                truncated_error_table.append(deepcopy(error_cell))
-                error_cell = format_line(line)
-            else:
-                error_cell.append(line)
-        print(tabulate(truncated_error_table, tablefmt='plain'))
+        tbs = traceback.extract_tb(exc_traceback, limit=-3)
+        sep = ['::', ':', '=>']
+        for tb in tbs[:-1]:
+            if str(tb.name).startswith('_'):
+                continue
+            tb_filename = Path(tb.filename).name
+            truncated_error_table.append(
+                ['', f'{tb_filename}:{tb.lineno}', sep[0], f'{tb.name}()', sep[1], tb.line, sep[2]])
 
-        sys.exit(exc_value)
+        error_name = exception_desc.split(':')[0]
+        tb = tbs[-1]
+        tb_filename = Path(tb.filename).name
+        truncated_error_table.append(
+            ['', f'{tb_filename}:{tb.lineno}', sep[0], f'{tb.name}()', sep[1], tb.line, sep[2], f'{error_name}'])
+
+        print(tabulate(truncated_error_table, tablefmt='plain'))
+        print()
+        print(exception_desc)
+
+        sys.exit()
