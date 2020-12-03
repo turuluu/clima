@@ -29,6 +29,7 @@ secrets stored with [pass](https://www.passwordstore.org/).
          * [..in bash](#in-bash)
       * [Post init hook](#post-init-hook)
       * [Configuration file and environment variables](#configuration-file-and-environment-variables)
+      * [Configuration file in the home directory](#configuration-file-in-the-home-directory)
       * [Additional features via Fire](#additional-features-via-fire)
       * [Password unwrapping/decryption with pass](#password-unwrappingdecryption-with-pass)
       * [Truncated error printing](#truncated-error-printing)
@@ -266,9 +267,37 @@ Same applies for the env variables.
     # linux example
     X=2 tester subcommand-foo
     
+A configuration file defined this way can be located in the current working directory or its parent directory. Clima
+will try to use the first configuration file it finds, so that might produce some caveats.
     
+## Configuration file in the home directory
 
+You can also define the config file in the configuration class (one inheriting `Schema`) by defining the
+magic field `CFG`.
 
+For example, lets say the command `my_tool` (packaged etc) has a user configuration file at `~/.my_tool.cfg`. This
+can now be handled with just adding `CFG = Path.home() / '.my_tool.cfg` to the Schema:
+
+    from pathlib import Path
+    
+    class S(Schema):
+        bing = 'bang'
+        CFG = Path.home() / '.my_tool.cfg'
+    
+Then, for example, the configuration file would be written as:
+
+    #~/.my_tool.cfg
+    [Default]
+    bing = diudiu
+
+Running the command `my_tool` would produce the value in the configuration file, though the arguments can still be overriden. 
+
+    my_tool run 
+    # diudiu
+    
+    my_tool run --bing bam
+    # bam
+    
 ## Additional features via Fire
 
 See the [Python Fire's Flags](https://github.com/google/python-fire/blob/master/docs/using-cli.md#python-fires-flags)
