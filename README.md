@@ -62,7 +62,9 @@ This repo is based on [poetry](https://poetry.eustace.io).
 
     git clone https://github.com/d3rp/clima.git 
     cd clima
-    poetry install
+    poetry install --no-dev
+
+The `--no-dev` is for to install the running environment without development tooling.
 
 ## Usage
 
