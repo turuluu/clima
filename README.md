@@ -9,6 +9,8 @@
 
  # clima - command line interface with a schema 
 
+##### Table of contents
+
   * [Briefly](#briefly)
   * [Installing](#installing)
   * [Long description](#long-description)
