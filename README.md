@@ -1,69 +1,74 @@
-# clima - command line interface with a schema
+<img src="https://raw.githubusercontent.com/d3rp/clima/master/clima.png" align="left" /> Create a command line interface with minimal setup and less maintenance. 
 
-Create a command line interface with minimal setup and less maintenance. Clima handles loading and parsing command
-line arguments complimenting them with definitions found in optional configuration files, env files, env variables and
-secrets stored with [pass](https://www.passwordstore.org/).
 
 [![PyPI](https://img.shields.io/pypi/v/clima)](https://pypi.org/project/clima/)
 [![Python versions](https://img.shields.io/pypi/pyversions/clima)]()
-
+[![PyPI license](https://img.shields.io/pypi/l/clima)]() 
 [![Build status](https://travis-ci.com/d3rp/clima.svg?branch=master)](https://travis-ci.com/d3rp/clima)
 [![Dependencies](https://img.shields.io/librariesio/github/d3rp/clima)]() 
 
-[![PyPI license](https://img.shields.io/pypi/l/clima)]()
+ # clima - command line interface with a schema 
 
+  * [Briefly](#briefly)
+  * [Installing](#installing)
+  * [Long description](#long-description)
+  * [Usage](#usage)
+  * [Examples and platforms](#examples-and-platforms)
+     * [Testing the examples](#testing-the-examples)
+  * [Version printing](#version-printing)
+  * [Autocompletion](#autocompletion)
+     * [..in IDEs (wip)](#in-ides-wip)
+     * [..in bash](#in-bash)
+  * [Post init hook](#post-init-hook)
+     * [Cli.post_init()](#clipost_init)
+     * [Schema.post_init()](#schemapost_init)
+  * [Configuration file and environment variables](#configuration-file-and-environment-variables)
+  * [Configuration file in the home directory](#configuration-file-in-the-home-directory)
+  * [Additional features via Fire](#additional-features-via-fire)
+  * [Password unwrapping/decryption with pass](#password-unwrappingdecryption-with-pass)
+  * [Truncated error printing](#truncated-error-printing)
+  * [Type casting with configuration definition](#type-casting-with-configuration-definition)
+  * [Ways to run the script for the uninitiated](#ways-to-run-the-script-for-the-uninitiated)
+  * [Building/Installing from source](#buildinginstalling-from-source)
+  * [Why another cli framework?](#why-another-cli-framework)
+     * [Dependencies](#dependencies)        
+     
+## Briefly
 
-## Table of contents
+Clima handles loading and parsing command
+line arguments complimenting them with definitions found in optional configuration files, env files, env variables and
+secrets stored with [pass](https://www.passwordstore.org/).
 
-   * [clima - command line interface with a schema](#clima---command-line-interface-with-a-schema)
-      * [Table of contents](#table-of-contents)
-      * [Short examples](#short-examples)
-      * [Installing](#installing)
-      * [Long description](#long-description)
-      * [Usage](#usage)
-      * [Examples and platforms](#examples-and-platforms)
-         * [Testing the examples](#testing-the-examples)
-      * [Version printing](#version-printing)
-      * [Autocompletion](#autocompletion)
-         * [..in IDEs (wip)](#in-ides-wip)
-         * [..in bash](#in-bash)
-      * [Post init hook](#post-init-hook)
-      * [Configuration file and environment variables](#configuration-file-and-environment-variables)
-      * [Configuration file in the home directory](#configuration-file-in-the-home-directory)
-      * [Additional features via Fire](#additional-features-via-fire)
-      * [Password unwrapping/decryption with pass](#password-unwrappingdecryption-with-pass)
-      * [Truncated error printing](#truncated-error-printing)
-      * [Type casting with configuration definition](#type-casting-with-configuration-definition)
-      * [Building/Installing from source](#buildinginstalling-from-source)
-      * [Why another cli framework?](#why-another-cli-framework)
-         * [Dependencies](#dependencies)
-         
-## Short examples
+Example: to setup a configuration and a command line interface ready to go.
 
-Example: to setup a configuration and a command line interface ready to go:
+1. Import all necessary parts from the package:
+1. Define configuration i.e. Schema:
+1. Define the command line commands i.e. Cli-class:
+
 
     from clima import c, Schema
     
+    
     class C(Schema):
        a = 1
-     
+
+
     @c
     class Cli:
         def foo(self):
             # using configuration
             print(c.a)
- 
-Command line usage in a terminal would then be e.g.:
+            
+            
+The command line usage form could be as simple as:
+  
+     my_tool foo
+     my_tool foo --a 42
+  
+See the `examples` folder and other sections for more examples. For example the folder includes [something that resembles
+the example above](examples/readme_example.py).
 
-    ./script.py foo
-    ./script.py foo --a 42
-
-Or as packaged:
- 
-    my_tool foo
-    my_tool foo --a 42
-    
-See the `examples` folder and other sections for more examples.
+  
 
 ## Installing
 
@@ -187,6 +192,12 @@ Args:
 
 Usage:       __main__.py subcommand-foo [--X ...]
 ```
+
+All of the example scripts can be run by installing [poetry](https://python-poetry.org) and running the `run_examples.bash`
+script:
+
+    pip install --user poetry
+    ./run_examples.bash
    
 [toc](#table-of-contents)
 
@@ -228,7 +239,8 @@ TBD: zsh etc. completions
 
 ### Cli.post_init()
 
-Arguably the more useful of the two variations of post_inits.
+In some occasions it's useful to deduce specific defaults from the given parameters e.g. in a cross platform build allowing
+only minimal cli arguments. For those cases there's an `post_init` hook
 When defining the post_init() in the Cli class, i.e.
 
     @c
@@ -246,15 +258,17 @@ When defining the post_init() in the Cli class, i.e.
                
 The method will have access to the cli args, but can not introduce new variables to the schema.
 
+This is arguably the more useful of the two variations of post_inits.
+
 Note: The signature of the `post_init()` differs depending on which of the stages it is defined in. For the time being
 it is a `@staticmethod`
 
 ### Schema.post_init()
-In some occasions it's useful to deduce specific defaults from the given parameters e.g. in a cross platform build allowing
-only minimal cli arguments. For those cases there's an `post_init` hook in which the fields can be refered to as in a
-typical class, but that still allows validation and type casting etc.:
+This alternative is for to use post_init-like features positioning the steps so that command line arguments can still
+override things.
 
     class SoAdvanced(Schema):
+    
         platform: str = 'win'  # a description
         bin_path: pathlib.Path = ''  # x description
         
@@ -292,8 +306,16 @@ Same applies for the env variables.
     # linux example
     X=2 tester subcommand-foo
     
-A configuration file defined this way can be located in the current working directory or its parent directory. Clima
+A configuration file defined this way can be located in the current working directory or - if your `Schema` defines a
+ `cwd` field - there. Clima
 will try to use the first configuration file it finds, so that might produce some caveats.
+
+    class Conf(Schema):
+        cwd = ''
+
+    # Running ./script.py --cwd <folder> would automatically load the first *.cfg file in <folder>
+
+TBD: .env file loading.
     
 ## Configuration file in the home directory
 
@@ -379,6 +401,28 @@ The `Schema` definition can have type annotations, which are used to cast the gi
 
 Results in `c.p`'s type cast as `Path`.
 
+## Ways to run the script for the uninitiated
+
+Let's say those lines were written in a file named `script.py`. Command line usage in a terminal would then be e.g.:
+
+    python script.py foo
+    python script.py foo --a 42
+
+Adding this line in `script.py`
+
+    #!/usr/bin/env python
+    
+and changing its execution permissions (mac, linux):
+
+    chmod +x script.py
+   
+Allows for a shorter means of execution:
+
+    ./script.py foo
+
+For the "maximum user ergonomics", one could [package this as a runnable command](https://github.com/d3rp/my_tool) - publish in pip etc - and then 
+approach the convenience factor shown at first.
+ 
 ## Building/Installing from source
 
 This repo is based on [poetry](https://poetry.eustace.io).
@@ -413,3 +457,4 @@ Other options for full cli experience:
 
 
 [toc](#table-of-contents)
+
