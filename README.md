@@ -226,6 +226,30 @@ TBD: zsh etc. completions
 
 ## Post init hook
 
+### Cli.post_init()
+
+Arguably the more useful of the two variations of post_inits.
+When defining the post_init() in the Cli class, i.e.
+
+    @c
+    class Cli:
+    
+        @staticmethod
+        def post_init(s):
+            if s.platform = 'win':
+                self.bin_path = 'c:/Users/foo/bar'
+            else:
+                s.bin_path = '/Users/mac/sth'
+            
+        def subcommand(self):
+            pass
+               
+The method will have access to the cli args, but can not introduce new variables to the schema.
+
+Note: The signature of the `post_init()` differs depending on which of the stages it is defined in. For the time being
+it is a `@staticmethod`
+
+### Schema.post_init()
 In some occasions it's useful to deduce specific defaults from the given parameters e.g. in a cross platform build allowing
 only minimal cli arguments. For those cases there's an `post_init` hook in which the fields can be refered to as in a
 typical class, but that still allows validation and type casting etc.:
@@ -236,13 +260,14 @@ typical class, but that still allows validation and type casting etc.:
         
         def post_init(self, *args):
             if self.platform = 'win':
-                self.bin_path = 'c:/Users/foo/bar'
-            else:
-                self.bin_path = '/Users/mac/sth'
+                self.win_specific_field = 'All your files are locked by us..'
+            
                 
-Note: post_init() does not have access to the cli arguments. 
-Post init hook is run after schema initialization, but BEFORE the cli initialization. 
-               
+Note: This post_init() does not have access to the cli arguments, but the `Schema`'s post_init can introduce new
+attributes/properties/fields/arguments to the configuration, which the Cli-class post-init can't.
+Schema post init hook is run after schema initialization, but BEFORE the cli initialization. 
+
+
 [toc](#table-of-contents)
 
 ## Configuration file and environment variables

@@ -7,11 +7,13 @@ function run_py () {
     mid=${#fname}
     others="${@:2}"
     othersn=${#others}
-    half=$(( (mid+othersn) / 2 ))
-    side=$(( ((line_n - (2 * half))/2) - 4 ))
-    printf " %*s " "${side}" "" | tr " " -
+    wspace=${#@}
+    text_len=$(( mid+othersn ))
+    side=$(( line_n - text_len - wspace - 8 ))
+    echo
+    printf "[[[%*s "
     printf " $fname $others "
-    printf " %*s\n" "${side}" "" | tr " " -
+    printf " %*s\n" "${side}" "" | tr " " ] 
 
     python "$@"
 }

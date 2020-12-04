@@ -142,8 +142,8 @@ class TestSchema(TestCase, SysArgvRestore):
             def x(self):
                 pass
 
-        assert (c.test_int == 42)
-        assert (c.test_str == 'no moi')
+        assert c.test_int == 42, 'Schema should enable default value as int'
+        assert c.test_str == 'no moi', 'cli args not read'
 
     def test_positional(self):
         """Positional arguments should be parsed from Configuration(Schema) layout order"""
@@ -292,6 +292,10 @@ class TestTypeCastingWithArgs(TestCase, SysArgvRestore):
 
         @c
         class Cli:
+            @staticmethod
+            def post_init(s):
+                pass
+
             def x(self):
                 """docstring"""
                 pass
@@ -304,28 +308,29 @@ class TestTypeCastingWithArgs(TestCase, SysArgvRestore):
         assert (type(c.path) == PosixPath), f'Casting of cli args should follow schema {type(c.path)} != Path'
 
     # TODO: TBD
-    # def test_postinit_after_cli_args(self):
-    #     class TestTypes(Schema):
-    #         a: bool = True
-    #         path: PosixPath = ''
-    #
-    #         def post_init(self, *args):
-    #             assert type(self.a) == bool, 'post_init args should have been cast correctly'
-    #             assert not self.a, f'post_init should have access to cli args ({self.a} != False)'
-    #
-    #             assert type(
-    #                 self.path) == PosixPath, f'Casting of cli args should follow schema {type(self.path)} != Path'
-    #             assert self.path.name == 'foobar'
-    #
-    #             self.path = Path('baz')
-    #
-    #     @c
-    #     class Cli:
-    #         def x(self):
-    #             """docstring"""
-    #             pass
-    #
-    #     assert c.path.name == 'baz', 'post_init should override values'
+    def test_postinit_after_cli_args(self):
+        class TestTypes(Schema):
+            a: bool = True
+            path: PosixPath = ''
+
+        @c
+        class Cli:
+            @staticmethod
+            def post_init(s):
+                assert type(s.a) == bool, 'post_init args should have been cast correctly'
+                assert not s.a, f'post_init should have access to cli args ({s.a} != False)'
+
+                assert type(
+                    s.path) == PosixPath, f'Casting of cli args should follow schema {type(s.path)} != Path'
+                assert s.path.name == 'foobar'
+
+                s.path = Path('baz')
+
+            def x(self):
+                """docstring"""
+                pass
+
+        assert c.path.name == 'baz', 'post_init should override values'
 
 
 class TestConfigurable(TestCase, SysArgvRestore):

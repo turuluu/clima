@@ -41,8 +41,6 @@ class Configurable:
             )
         )
 
-        return self.__configured
-
     def _init(self, _schema: schema.MetaSchema):
         is_schema = isinstance(_schema, schema.MetaSchema)
         if not is_schema:
@@ -50,6 +48,7 @@ class Configurable:
 
         # Allows using Schema as a subclass only
         c.__configured = _schema
+
         # Allows deoorator usage with @c.init
         return schema_decorator(_schema)
 
@@ -110,19 +109,39 @@ def add_to_decorators(key, value):
     DECORATORS_STATE[key] = value
 
 
+def cast_as_annotated(s, attr, value):
+    result = value
+    if hasattr(type(s), '__annotations__'):
+        annotated = type(s).__annotations__.get(attr)
+        if annotated is not None:
+            result = annotated(value)
+
+    return result
+
+
 def cli(cls):
-    """Decorator that wraps the command line interface
-     specific class with fire
-    """
+    """Decorator that wraps the command line interface specific class with fire"""
     state = DECORATORS_STATE
+
+    CliClass = cls
 
     def init(self, **cli_args):
         """Generated init"""
         s = state['schema']
-        if hasattr(type(s), '__annotations__'):
-            for attr, cls in type(s).__annotations__.items():
-                if attr in cli_args:
-                    cli_args[attr] = cls(cli_args[attr])
+
+        # Cast everything according to schema before Cli.post_init
+        for attr, cli_arg_value in cli_args.items():
+            if hasattr(s, attr):
+                setattr(s, attr, cast_as_annotated(s, attr, cli_arg_value))
+            s: type(s) = s
+
+        if hasattr(CliClass, 'post_init'):
+            CliClass.post_init(s)
+
+        # TODO: consider if really necessary
+        for attr, annotated in cli_args.items():
+            if hasattr(s, attr):
+                cli_args[attr] = getattr(s, attr)
 
         # TODO: TBD - cli arguments available for post_init
         # s.post_init(s)
