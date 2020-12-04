@@ -39,12 +39,11 @@ Clima handles loading and parsing command
 line arguments complimenting them with definitions found in optional configuration files, env files, env variables and
 secrets stored with [pass](https://www.passwordstore.org/).
 
-Example: to setup a configuration and a command line interface ready to go.
-
 1. Import all necessary parts from the package:
 1. Define configuration i.e. Schema:
 1. Define the command line commands i.e. Cli-class:
 
+Example: to setup a configuration and a command line interface ready to go.
 
     from clima import c, Schema
     
