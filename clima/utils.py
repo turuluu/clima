@@ -1,8 +1,9 @@
 import traceback
 from contextlib import contextmanager
 import sys
-from tabulate import tabulate
 from pathlib import Path
+
+from tabulate import tabulate
 
 
 def filter_fields(d: dict, nt):

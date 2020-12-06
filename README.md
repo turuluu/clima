@@ -45,6 +45,8 @@ secrets stored with [pass](https://www.passwordstore.org/).
 1. Define configuration i.e. Schema:
 1. Define the command line commands i.e. Cli-class:
 
+![example ascii](https://raw.githubusercontent.com/d3rp/clima/master/example.svg)
+
 Example: to setup a configuration and a command line interface ready to go.
 
     from clima import c, Schema
