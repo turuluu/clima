@@ -72,6 +72,60 @@ class TestSchemaY(TestCase, SysArgvRestore):
         assert c.a == 1
         assert c.b == 2
 
+class TestSchemaArgs(TestCase, SysArgvRestore):
+    defaults = {
+        'str': 'foobar',
+        'bool': False,
+    }
+    changed = {
+        'str': 'changed',
+        'bool': True,
+    }
+
+    def setUp(self) -> None:
+        self.save_sysargv()
+
+        class C(Schema):
+            a: str = self.defaults['str']
+            b: bool = self.defaults['bool']
+
+
+    def test_defaults(self):
+        sys.argv = ['test', 'x']
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        assert c.a == self.defaults['str'], 'Schema definition should stick if not overridden'
+        assert c.b == self.defaults['bool'], 'Schema definition should stick if not overridden'
+
+    def test_schema_order_args(self):
+        sys.argv = ['test', 'x', '--a', self.changed['str'], '--b']
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        assert c.a == self.changed['str'], 'Args given in same order as schema def should override values'
+        assert c.b == self.changed['bool'], 'Args given in same order as schema def should override values'
+
+    def test_non_schema_order_args(self):
+        sys.argv = ['test', 'x', '--b', '--a', self.changed['str']]
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        print(sys.argv)
+        assert c.a == self.changed['str'], 'Args given in a different order as schema def should override values'
+        assert c.b == self.changed['bool'], 'Args given in a different order as schema def should override values'
+
 
 class TestSchemaNoType(TestCase, SysArgvRestore):
     default = 42

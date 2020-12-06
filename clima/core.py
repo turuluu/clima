@@ -236,8 +236,10 @@ def prepare_signatures(cls, schema):
             prm = params[i - 2]
 
             if isinstance(arg, str) and arg.startswith('--') and not arg.endswith('--'):
-                new_args += sys.argv[i:i + 2]
-                i += 2
+                # After the first explicit `--param` append the rest of args as is i.e.
+                # no need to parse for positional arguments after this point
+                new_args += sys.argv[i:]
+                break
             else:
                 new_args.append(f'--{prm.name}')
                 new_args.append(f'{arg}')
