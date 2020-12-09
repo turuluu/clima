@@ -1,16 +1,13 @@
-# Project Management System - as  a file..
+# Project Management System - as a file..
 
 So fresh and so lean, lean...
 
-## TODO:
+## TODO v1.0.0:
 
 * way to define required parameters in subcommand context for the subcommands help
   * probably some syntax for starters, that then is compared with and parsed for every method
-* generate man page in a reasonable fashion
-  * though fire v0.2.1 help looks like a man page
 * maybe a logging setup (--dryrun)
   * default debug logging wrapper that would log every function called
-* way to define schema within the cli class
 * clean the implementation
 - cwd argument is not respected (special parameter)
 - Validation of undefined parameters (should advice that they're not defined in the config)
@@ -18,13 +15,18 @@ So fresh and so lean, lean...
 - maybe also look into tox testing to verify actual cli running
 - fork python-fire 0.1.3 (-> forked, branch clima)
     * fire doesn't handle well strings as arguments, when there's spaces
-- better name - again
-- script named .conf preferation - multiple conf file selection logic
 
 ## Won't fix
 * fix doc string and args/parameter help for fire v0.2.1
     * 0.3.0 now. diverged a lot from what I wanted initially (0.1.3 type formatting)
+- better name - again
     
+## Backlog
+
+- script named .conf preferation - multiple conf file selection logic
+* way to define schema within the cli class
+* generate man page in a reasonable fashion
+  * though fire v0.2.1 help looks like a man page
 ## DONE:
 
 - better error reporting by dynamically handling error objects

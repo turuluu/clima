@@ -9,9 +9,10 @@ from pathlib import Path
 import configparser
 
 
-def asdict(cls):
+def asdict(obj):
     """Helper to create a dictionary out of the class attributes (fields/variables)"""
-    return {k: v for k, v in cls.__class__.__dict__.items()
+    obj_dict = obj.__class__.__dict__
+    return {k: getattr(obj, k) for k, v in obj_dict.items()
             if not k.startswith('_')
             and not inspect.isfunction(v)
             and not inspect.ismethod(v)}

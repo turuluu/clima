@@ -29,17 +29,17 @@ class Configurable:
     # TODO: idiomatic handling for use cases that apply to NamedTuple
     __configured = None
 
-    def _setup(self, params: dict, configuration_tuple):
+    def _chain_configurations(self, params: dict, configuration_tuple):
         """Chains all configuration options together"""
-        self.__configured = dict(
-            ChainMap(
-                params,
-                config_dict(configuration_tuple),
-                utils.filter_fields(os.environ, configuration_tuple),
-                get_secrets(configuration_tuple),
-                configuration_tuple._asdict()
-            )
+        cm = ChainMap(
+            params,
+            config_dict(configuration_tuple),
+            utils.filter_fields(os.environ, configuration_tuple),
+            get_secrets(configuration_tuple),
+            configuration_tuple._asdict()
         )
+
+        self.__configured = dict(cm)
 
     def _init(self, _schema: schema.MetaSchema):
         is_schema = isinstance(_schema, schema.MetaSchema)
@@ -119,6 +119,7 @@ def cast_as_annotated(s, attr, value):
     return result
 
 
+
 def cli(cls):
     """Decorator that wraps the command line interface specific class with fire"""
     state = DECORATORS_STATE
@@ -143,9 +144,9 @@ def cli(cls):
             if hasattr(s, attr):
                 cli_args[attr] = getattr(s, attr)
 
-        # TODO: TBD - cli arguments available for post_init
-        # s.post_init(s)
-        initialize_cli(cli_args, s)
+        global c
+        c._chain_configurations(cli_args, s)
+        # initialize_cli(cli_args, s)
 
     cls_attrs = dict(
         __init__=init,
@@ -174,9 +175,9 @@ def config_dict(configuration_tuple):
     return result
 
 
-def initialize_cli(a, b):
-    global c
-    c._setup(a, b)
+# def initialize_cli(a, b):
+#     global c
+#     c._setup(a, b)
 
 
 class Schema(object, metaclass=schema.MetaSchema):

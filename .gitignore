@@ -10,5 +10,6 @@ clima.egg-info/
 *.html
 .cache
 **/*.log
+**/*.cfg
 .hypothesis
 .DS_Store
