@@ -16,6 +16,13 @@ function run_py () {
     printf " %*s\n" "${side}" "" | tr " " ] 
 
     python "$@"
+    local err_code=$?
+    if [[ $err_code == 0 ]]; then
+      printf "exit code:  \033[32msuccess\033[0m"
+    else
+      printf "exit code:  \033[31mfail\033[0m"
+    fi
+    echo ""
 }
 
 run_py ./examples/simplest_example.py hello

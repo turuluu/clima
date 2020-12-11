@@ -109,15 +109,22 @@ def add_to_decorators(key, value):
     DECORATORS_STATE[key] = value
 
 
-def cast_as_annotated(s, attr, value):
+def cast_as_annotated(_schema, attr, value=None):
+    if value is None:
+        value = getattr(_schema, attr)
     result = value
-    if hasattr(type(s), '__annotations__'):
-        annotated = type(s).__annotations__.get(attr)
+
+    if hasattr(type(_schema), '__annotations__'):
+        annotated = type(_schema).__annotations__.get(attr)
         if annotated is not None:
-            result = annotated(value)
 
+            # TODO: Nested types. Here we'll wrap a string or uniterable into an iterable
+            # To prevent surprises such as 'VST' -> ('V', 'S', 'T') when expecting ('VST')
+            if schema.should_wrap_as_list(value, annotated):
+                result = annotated([value])
+            else:
+                result = annotated(value)
     return result
-
 
 
 def cli(cls):
@@ -142,7 +149,7 @@ def cli(cls):
         # TODO: consider if really necessary
         for attr, annotated in cli_args.items():
             if hasattr(s, attr):
-                cli_args[attr] = getattr(s, attr)
+                cli_args[attr] = cast_as_annotated(s, attr)
 
         global c
         c._chain_configurations(cli_args, s)

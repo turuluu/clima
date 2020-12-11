@@ -52,11 +52,11 @@ def suppress_traceback():
     except Exception:
         exc_type, exc_value, exc_traceback = sys.exc_info()
 
-        traceback_file = 'exception_traceback.log'
+        traceback_file = 'exception.log'
         with open(traceback_file, 'w') as wf:
             traceback.print_exception(exc_type, exc_value, exc_traceback, file=wf)
 
-        print(f'Truncated error traceback (full trace in {traceback_file}):\n')
+        print(f'Error (full trace in {traceback_file}):\n')
 
         exc_type, exc_value, exc_traceback = sys.exc_info()
 
@@ -71,16 +71,16 @@ def suppress_traceback():
                 continue
             tb_filename = Path(tb.filename).name
             truncated_error_table.append(
-                ['', f'{tb_filename}:{tb.lineno}', sep[0], f'{tb.name}()', sep[1], tb.line, sep[2]])
+                [f'{tb_filename}:{tb.lineno}', sep[0], f'{tb.name}()', sep[1], tb.line, sep[2]])
 
         error_name = exception_desc.split(':')[0]
         tb = tbs[-1]
         tb_filename = Path(tb.filename).name
         truncated_error_table.append(
-            ['', f'{tb_filename}:{tb.lineno}', sep[0], f'{tb.name}()', sep[1], tb.line, sep[2], f'{error_name}'])
+            [f'{tb_filename}:{tb.lineno}', sep[0], f'{tb.name}()', sep[1], tb.line, sep[2], f'{error_name}'])
 
         print(tabulate(truncated_error_table, tablefmt='plain'))
         print()
         print(exception_desc)
 
-        sys.exit()
+        sys.exit(1)

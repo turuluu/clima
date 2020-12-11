@@ -2,10 +2,14 @@
 from clima import c
 from pathlib import Path
 from subprocess import run as R
+from subprocess import check_call as check
 
 
 @c
 class Cli:
+    def test(self):
+        res = check(['poetry', 'run', 'pytest'])
+
     def bump(self):
         R(['poetry', 'version', 'patch'])
 
@@ -17,6 +21,7 @@ class Cli:
 
     def all(self):
         """foobar"""
+        self.test()
         self.bump()
         self.build()
         self.upload()

@@ -293,7 +293,7 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
         values = {
             'a': True,
             'f': 1.0,
-            'i': ['b', 'b', 'b'],
+            'i': ['bbb'],
             'm': '1',
         }
 
@@ -331,8 +331,10 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
             list,
             str,
         ]):
-            assert type(getattr(c, k)) is valid
-            assert getattr(c, k) == values[k]
+            field = getattr(c, k)
+            value = values[k]
+            assert type(getattr(c, k)) is valid, 'Fields not cast correctly after schema.post_init'
+            assert field == value, f'After casting and schema.post_init, values are incorrect ("{field}"!="{value}")'
 
 
 class TestTypeCastingWithArgs(TestCase, SysArgvRestore):
@@ -413,3 +415,60 @@ class TestConfigurable(TestCase, SysArgvRestore):
         class Cli:
             def x(self):
                 pass
+
+class TestIterables(TestCase, SysArgvRestore):
+    _int = 123
+    _str = 'abc'
+    def setUp(self) -> None:
+        self.save_sysargv()
+
+        class C(Schema):
+            a: tuple = self._int  # description
+            b: tuple = self._str  # description
+            c: list = self._int  # description
+            d: list = self._str  # description
+            e: set = self._int  # description
+            f: set = self._str  # description
+
+    def test_cli_with_args(self):
+        """Basic Cli definition with iterables and cli args parsing"""
+
+        sys.argv = ['test', 'x',
+                    '--a', '13',
+                    '--b', 'cd',
+                    '--c', '13',
+                    '--d', 'cd',
+                    '--e', '13',
+                    '--f', 'cd',
+                    ]
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        assert c.a == tuple([13]), 'Should wrap in iterable when parsing cli args'
+        assert c.b == tuple(['cd']), 'Should wrap in iterable when parsing cli args'
+        assert c.c == list([13]), 'Should wrap in iterable when parsing cli args'
+        assert c.d == list(['cd']), 'Should wrap in iterable when parsing cli args'
+        assert c.e == set([13]), 'Should wrap in iterable when parsing cli args'
+        assert c.f == set(['cd']), 'Should wrap in iterable when parsing cli args'
+
+    def test_cli(self):
+        """Basic Cli with iterables"""
+
+        sys.argv = ['test', 'x']
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        assert c.a == tuple([self._int]), 'Should wrap in iterable when configured in schema'
+        assert c.b == tuple([self._str]), 'Should wrap in iterable when configured in schema'
+        assert c.c == list([self._int]), 'Should wrap in iterable when configured in schema'
+        assert c.d == list([self._str]), 'Should wrap in iterable when configured in schema'
+        assert c.e == set([self._int]), 'Should wrap in iterable when configured in schema'
+        assert c.f == set([self._str]), 'Should wrap in iterable when configured in schema'
