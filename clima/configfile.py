@@ -1,6 +1,7 @@
 """Configuration file (sth.cfg) handling"""
 import configparser
 import inspect
+
 from pathlib import Path
 
 
@@ -38,10 +39,10 @@ def read_config(_filepath='test.cfg') -> dict:
         return {}
 
 
-def get_config_path(configuration_tuple):
-    client_file = Path(inspect.getfile(configuration_tuple.__class__))
-    if hasattr(configuration_tuple, 'cwd'):
-        p = Path(configuration_tuple._asdict()['cwd'])
+def get_config_path(_schema):
+    client_file = Path(inspect.getfile(_schema.__class__))
+    if hasattr(_schema, 'cwd'):
+        p = Path(_schema._asdict()['cwd'])
         if not p.absolute():
             p = client_file / p
     else:

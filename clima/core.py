@@ -3,13 +3,12 @@ import inspect
 import sys
 import os
 from functools import partial
+from typing import Dict
 
 from clima.fire import Fire
 
-from clima import schema, utils, password_store
+from clima import schema, utils, password_store, env
 from clima import docstring, configfile
-
-from typing import Dict
 
 
 class RequiredParameterException(Exception):
@@ -29,14 +28,15 @@ class Configurable:
     # TODO: idiomatic handling for use cases that apply to NamedTuple
     __configured = None
 
-    def _chain_configurations(self, params: dict, configuration_tuple):
+    def _chain_configurations(self, params: dict, _schema):
         """Chains all configuration options together"""
         cm = ChainMap(
             params,
-            config_dict(configuration_tuple),
-            utils.filter_fields(os.environ, configuration_tuple),
-            get_secrets(configuration_tuple),
-            configuration_tuple._asdict()
+            utils.filter_fields(os.environ, _schema),
+            env.get_env(_schema),
+            _schema._get_configfile_asdict(),
+            password_store.get_secrets(_schema),
+            _schema._asdict()
         )
 
         self.__configured = dict(cm)
@@ -86,23 +86,6 @@ class Configurable:
 
 
 c = Configurable()
-
-
-def get_secrets(configuration_tuple):
-    params = [t for t in configuration_tuple._asdict()]
-    secrets = {}
-    try:
-        for p in params:
-            secret = password_store.decrypt(p)
-            if len(secret) > 0:
-                secrets.update({p: secret})
-    except:
-        # TODO: Wanted to keep this lean, as one might not have gpg installed and what not..
-        # Need to provide for example a configuration key 'use gpg' that the user can use to
-        # enable this feature. This way it won't get in the way of other use cases.
-        pass
-
-    return secrets
 
 
 def add_to_decorators(key, value):
@@ -167,28 +150,21 @@ def cli(cls):
     return _Cli
 
 
-# TODO: config dict and parameter parsing have diverged type casting processes
-def config_dict(configuration_tuple):
-    result: Dict = {}
-
-    _config_file = configuration_tuple._asdict().get('CFG')
-    if _config_file is None:
-        _config_file = configfile.get_config_path(configuration_tuple)
-
-    if _config_file is not None:
-        result = utils.filter_fields(configfile.read_config(_config_file), configuration_tuple)
-        result = utils.type_correct_with(result, configuration_tuple)
-
-    return result
-
-
-# def initialize_cli(a, b):
-#     global c
-#     c._setup(a, b)
-
-
 class Schema(object, metaclass=schema.MetaSchema):
     """Base class for the user's configuration class"""
+
+    def _get_configfile_asdict(self):
+        result: Dict = {}
+
+        configfile_path = None
+        if 'CFG' in self._asdict():
+            configfile_path = configfile.get_config_path(self)
+
+        if configfile_path is not None:
+            result = utils.filter_fields(configfile.read_config(configfile_path), self)
+            result = utils.type_correct_with(result, self)
+
+        return result
 
     def _asdict(self):
         return schema.asdict(self)

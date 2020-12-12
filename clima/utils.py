@@ -1,6 +1,6 @@
 import traceback
-from contextlib import contextmanager
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 from tabulate import tabulate
@@ -84,3 +84,63 @@ def suppress_traceback():
         print(exception_desc)
 
         sys.exit(1)
+
+
+def chain_get(*args, fail=False):
+    """Chain multiple functions together, that return something or None.
+    The first function to return non-None will be used to return the output.
+
+    Order is from left to right i.e. chain_get(first, second, ..., last)
+
+    The arguments should be tuples of (function [, args])
+
+    Example:
+        def f(arg):
+            return 'sth' if arg else None
+
+        def g(one, two)
+            return 'sth' if one and two else None
+
+        value = chain_get(
+            (f, False),
+            (g, True, True),
+        )
+    """
+
+    if not all(type(t) is tuple for t in args):
+        print('incorrect params to chain_get')
+        for t in args:
+            if type(t) is not tuple:
+                print(f'{t} is not a tuple')
+        raise TypeError
+
+    def gen_fuple():
+        for f_tuple in args:
+            f = f_tuple[0]
+            f_args = f_tuple[1:]
+            yield f(*f_args)
+
+    @contextmanager
+    def passStopIteration():
+        try:
+            yield
+        except StopIteration:
+            pass
+
+    @contextmanager
+    def failStopIteration():
+        try:
+            yield
+        except StopIteration:
+            print('Failed. Only None values collected..')
+            raise ValueError
+
+    result = None
+    g = gen_fuple()
+    fail_mode = failStopIteration if fail else passStopIteration
+
+    with fail_mode():
+        while result is None:
+            result = next(g)
+
+    return result

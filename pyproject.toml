@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "clima"
-version = "0.6.6"
+version = "0.7.0"
 description = "Simple boilerplate for cli scripts"
 keywords = ["cli"]
 classifiers = [
@@ -26,6 +26,7 @@ cryptography = ">=3.2"
 bleach = ">=3.1.5"
 six = "*"
 tabulate = ">=0.8.7"
+python-dotenv = "^0.15.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
