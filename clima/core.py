@@ -156,10 +156,7 @@ class Schema(object, metaclass=schema.MetaSchema):
     def _get_configfile_asdict(self):
         result: Dict = {}
 
-        configfile_path = None
-        if 'CFG' in self._asdict():
-            configfile_path = configfile.get_config_path(self)
-
+        configfile_path = configfile.get_config_path(self)
         if configfile_path is not None:
             result = utils.filter_fields(configfile.read_config(configfile_path), self)
             result = utils.type_correct_with(result, self)

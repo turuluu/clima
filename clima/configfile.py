@@ -10,15 +10,15 @@ def is_in_module(f):
 
 
 def cfgs_gen(p):
-    yield from Path(p).parent.glob('*.cfg')
+    yield from Path(p).glob('*.cfg')
 
 
-def find_cfg(p):
+def find_cfg(p, level=2):
     p = Path(p)
     cfgs = list(cfgs_gen(p))
     if len(cfgs) == 0:
-        if is_in_module(p):
-            return find_cfg(p.parent)
+        if is_in_module(p) and level > 0:
+            return find_cfg(p.parent, level-1)
         else:
             return None
     else:
@@ -40,13 +40,31 @@ def read_config(_filepath='test.cfg') -> dict:
 
 
 def get_config_path(_schema):
-    client_file = Path(inspect.getfile(_schema.__class__))
-    if hasattr(_schema, 'cwd'):
-        p = Path(_schema._asdict()['cwd'])
-        if not p.absolute():
-            p = client_file / p
-    else:
-        p = client_file
-    config_file = find_cfg(p)
+    """
+    Resolve filepath for a config file, if one can be found.
 
-    return config_file
+    Args:
+        _schema:
+
+    Returns:
+        Path of config file or None
+
+    Examples of parsing patterns:
+        {}                                  -> glob for any .cfg file at pwd
+        {cwd: '../foo'}                     -> glob for any .cfg file using cwd
+        {cwd: '/root/foo'}                  -> glob for any .cfg file using cwd
+        {cwd: '../foo', CFG: 'my.cfg'}      -> select my.cfg at dir cwd
+        {cwd: '/root/foo', CFG: 'my.cfg'}   -> select my.cfg at dir cwd
+        {CFG: 'my.cfg'}                     -> select my.cfg at pwd
+        {CFG: '/root/foo/my.cfg'}           -> select cfg using absolute path
+
+    """
+    # if hasattr cfg and absolute, use cfg
+    cfg_filepath = Path(getattr(_schema, 'CFG', ''))
+    if not cfg_filepath.is_absolute():
+        # concate getattr cwd/'' getattr cfg/''
+        cfg_filepath = Path(getattr(_schema, 'cwd', '')) / cfg_filepath
+        if not cfg_filepath.is_file():
+            cfg_filepath = find_cfg(cfg_filepath)
+
+    return cfg_filepath

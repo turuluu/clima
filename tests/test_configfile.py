@@ -35,7 +35,7 @@ class TestConfigFromWorkingDir(TestCase, SysArgvRestore):
             def x(self):
                 pass
 
-        assert c.bar == 42
+        assert c.bar == 42, f'Failed loading config file - c.bar == {c.bar}'
 
 
 class TestConfigFromCwd(TestCase, SysArgvRestore):
@@ -49,6 +49,7 @@ class TestConfigFromCwd(TestCase, SysArgvRestore):
 
         class C(Schema):
             bar: int = 0
+            cwd: Path = ''
 
     def tearDown(self) -> None:
         self.test_cfg.unlink()
@@ -60,7 +61,7 @@ class TestConfigFromCwd(TestCase, SysArgvRestore):
             def x(self):
                 pass
 
-        assert c.bar == 42
+        assert c.bar == 42, f'Not loading from cfg file - c.bar == {c.bar}'
 
 
 class TestConfigFromCwdPath(TestCase, SysArgvRestore):
