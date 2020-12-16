@@ -9,19 +9,78 @@ from pathlib import PureWindowsPath as WindowsPath
 from pathlib import PurePosixPath as PosixPath
 from pathlib import Path
 
-from clima import c, Schema
+from clima import Schema
 
 from tests import SysArgvRestore
-
 
 # TODO: sane exception for this scenario
 # def test_schema_without_default():
 #     class C(Schema):
 #         a: int
 
+from functools import wraps
 
+
+def wrap_cc(func):
+    wraps(func)
+
+    from clima import c
+
+    def wrapped(*args, c=c, **kwargs):
+        result = func(*args, c=c, **kwargs)
+        c._clear()
+        return result
+
+    return wrapped
+
+
+def wrap_methods_with_c(cls):
+    orig = cls.__getattribute__
+
+    def new_getattr(self, name):
+        # print(f'wrapped with {c}')
+        if name.startswith('test_'):
+            method = getattr(cls, name)
+            new_method = wrap_cc(method)
+            setattr(cls, name, new_method)
+        return orig(self, name)
+
+    cls.__getattribute__ = new_getattr
+    return cls
+
+
+@wrap_methods_with_c
+class TestSchemaNoType(TestCase, SysArgvRestore):
+    default = 42
+
+    def setUp(self) -> None:
+        self.save_sysargv()
+
+        class C(Schema):
+            a = self.default
+
+    def test_default(self, c):
+        # c = self.c
+        sys.argv = ['test', 'x']
+        assert (c.a == self.default)
+
+    def test_override(self, c):
+        # c = self.c
+        sys.argv = ['test', 'x', '--a', '1']
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        assert (c.a == 1)
+
+
+@wrap_methods_with_c
 class TestSchemaX(TestCase, SysArgvRestore):
-    def test_schema_without_type(self):
+    def test_schema_without_type(self, c):
+        # c = self.c
         sys.argv = ['test', 'x']
 
         class C(Schema):
@@ -37,8 +96,10 @@ class TestSchemaX(TestCase, SysArgvRestore):
         assert c.a == 1
 
 
+@wrap_methods_with_c
 class TestSchemaY(TestCase, SysArgvRestore):
-    def test_schema_post_init(self):
+    def test_schema_post_init(self, c):
+        # c = self.c
         sys.argv = ['test', 'x']
 
         class C(Schema):
@@ -54,7 +115,8 @@ class TestSchemaY(TestCase, SysArgvRestore):
 
         assert c.a == 2
 
-    def test_schema_post_init_adding_attr(self):
+    def test_schema_post_init_adding_attr(self, c):
+        # c = self.c
         sys.argv = ['test', 'x']
 
         class C(Schema):
@@ -72,6 +134,8 @@ class TestSchemaY(TestCase, SysArgvRestore):
         assert c.a == 1
         assert c.b == 2
 
+
+@wrap_methods_with_c
 class TestSchemaArgs(TestCase, SysArgvRestore):
     defaults = {
         'str': 'foobar',
@@ -89,9 +153,10 @@ class TestSchemaArgs(TestCase, SysArgvRestore):
             a: str = self.defaults['str']
             b: bool = self.defaults['bool']
 
-
-    def test_defaults(self):
+    def test_defaults(self, c):
+        # c = self.c
         sys.argv = ['test', 'x']
+
         @c
         class Cli:
             def x(self):
@@ -101,7 +166,8 @@ class TestSchemaArgs(TestCase, SysArgvRestore):
         assert c.a == self.defaults['str'], 'Schema definition should stick if not overridden'
         assert c.b == self.defaults['bool'], 'Schema definition should stick if not overridden'
 
-    def test_schema_order_args(self):
+    def test_schema_order_args(self, c):
+        # c = self.c
         sys.argv = ['test', 'x', '--a', self.changed['str'], '--b']
 
         @c
@@ -113,7 +179,8 @@ class TestSchemaArgs(TestCase, SysArgvRestore):
         assert c.a == self.changed['str'], 'Args given in same order as schema def should override values'
         assert c.b == self.changed['bool'], 'Args given in same order as schema def should override values'
 
-    def test_non_schema_order_args(self):
+    def test_non_schema_order_args(self, c):
+        # c = self.c
         sys.argv = ['test', 'x', '--b', '--a', self.changed['str']]
 
         @c
@@ -127,31 +194,7 @@ class TestSchemaArgs(TestCase, SysArgvRestore):
         assert c.b == self.changed['bool'], 'Args given in a different order as schema def should override values'
 
 
-class TestSchemaNoType(TestCase, SysArgvRestore):
-    default = 42
-
-    def setUp(self) -> None:
-        self.save_sysargv()
-
-        class C(Schema):
-            a = self.default
-
-    def test_default(self):
-        sys.argv = ['test', 'x']
-        assert (c.a == self.default)
-
-    def test_override(self):
-        sys.argv = ['test', 'x', '--a', '1']
-
-        @c
-        class Cli:
-            def x(self):
-                """docstring"""
-                pass
-
-        assert (c.a == 1)
-
-
+@wrap_methods_with_c
 class TestSchema(TestCase, SysArgvRestore):
     defaults = {
         'test_int': [42, int],
@@ -170,12 +213,14 @@ class TestSchema(TestCase, SysArgvRestore):
             test_win_path: WindowsPath = self.defaults['test_win_path'][0]
 
     def test_default(self):
+        c = self.c
         sys.argv = ['test', 'x']
         for k, v in self.defaults.items():
             assert (getattr(c, k) == v[0])
             assert (type(getattr(c, k)) == v[1])
 
     def test_override(self):
+        c = self.c
         sys.argv = ['test', 'x', '--test_int', '1']
 
         @c
@@ -188,6 +233,7 @@ class TestSchema(TestCase, SysArgvRestore):
         assert (type(c.test_int) == int)
 
     def test_no_docstring(self):
+        c = self.c
         """Not defining a docstring in Configuration(Schema) should not crash the script"""
         sys.argv = ['test', 'x', '--test_str', 'no moi']
 
@@ -200,6 +246,7 @@ class TestSchema(TestCase, SysArgvRestore):
         assert c.test_str == 'no moi', 'cli args not read'
 
     def test_positional(self):
+        c = self.c
         """Positional arguments should be parsed from Configuration(Schema) layout order"""
         _int = 96
         _str = 'numberwang'
@@ -215,6 +262,7 @@ class TestSchema(TestCase, SysArgvRestore):
         assert (c.test_str == _str)
 
 
+@wrap_methods_with_c
 class TestTypeCasting(TestCase, SysArgvRestore):
     def setUp(self) -> None:
         sys.argv = ['test', 'x']
@@ -236,6 +284,8 @@ class TestTypeCasting(TestCase, SysArgvRestore):
             o: int = '1'
 
     def test_builtins(self):
+        c = self.c
+
         @c
         class Cli:
             def x(self):
@@ -261,11 +311,14 @@ class TestTypeCasting(TestCase, SysArgvRestore):
             assert type(getattr(c, k)) == valid
 
 
+@wrap_methods_with_c
 class TestTypeCastingWith(TestCase, SysArgvRestore):
     def setUp(self) -> None:
         sys.argv = ['test', 'x']
 
     def test_win_path(self):
+        c = self.c
+
         class TestTypes(Schema):
             p: WindowsPath = '.'
 
@@ -278,6 +331,8 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
         assert (type(c.p) == WindowsPath)
 
     def test_posix_path(self):
+        c = self.c
+
         class TestTypes(Schema):
             p: PosixPath = '.'
 
@@ -290,6 +345,7 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
         assert (type(c.p) == PosixPath)
 
     def test_builtins_post_init(self):
+        c = self.c
         values = {
             'a': True,
             'f': 1.0,
@@ -337,11 +393,14 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
             assert field == value, f'After casting and schema.post_init, values are incorrect ("{field}"!="{value}")'
 
 
+@wrap_methods_with_c
 class TestTypeCastingWithArgs(TestCase, SysArgvRestore):
     def setUp(self) -> None:
         sys.argv = ['test', 'x', '--a', '0', '--path', 'foobar']
 
     def test_casting_cli_args(self):
+        c = self.c
+
         class TestTypes(Schema):
             a: bool = True
             path: PosixPath = ''
@@ -365,6 +424,8 @@ class TestTypeCastingWithArgs(TestCase, SysArgvRestore):
 
     # TODO: TBD
     def test_postinit_after_cli_args(self):
+        c = self.c
+
         class TestTypes(Schema):
             a: bool = True
             path: PosixPath = ''
@@ -389,6 +450,7 @@ class TestTypeCastingWithArgs(TestCase, SysArgvRestore):
         assert c.path.name == 'baz', 'post_init should override values'
 
 
+@wrap_methods_with_c
 class TestConfigurable(TestCase, SysArgvRestore):
 
     def setUp(self) -> None:
@@ -398,6 +460,7 @@ class TestConfigurable(TestCase, SysArgvRestore):
             a: int = 1  # description
 
     def test_cli(self):
+        c = self.c
         """Basic Cli definition"""
 
         sys.argv = ['test', '--a', 13]
@@ -409,6 +472,7 @@ class TestConfigurable(TestCase, SysArgvRestore):
                 pass
 
     def test_cli_without_ds(self):
+        c = self.c
         """Cli definition without a docstring"""
 
         @partial(c, noprepare=True)
@@ -416,9 +480,12 @@ class TestConfigurable(TestCase, SysArgvRestore):
             def x(self):
                 pass
 
+
+@wrap_methods_with_c
 class TestIterables(TestCase, SysArgvRestore):
     _int = 123
     _str = 'abc'
+
     def setUp(self) -> None:
         self.save_sysargv()
 
@@ -431,6 +498,7 @@ class TestIterables(TestCase, SysArgvRestore):
             f: set = self._str  # description
 
     def test_cli_with_args(self):
+        c = self.c
         """Basic Cli definition with iterables and cli args parsing"""
 
         sys.argv = ['test', 'x',
@@ -456,6 +524,7 @@ class TestIterables(TestCase, SysArgvRestore):
         assert c.f == set(['cd']), 'Should wrap in iterable when parsing cli args'
 
     def test_cli(self):
+        c = self.c
         """Basic Cli with iterables"""
 
         sys.argv = ['test', 'x']

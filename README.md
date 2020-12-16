@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/d3rp/clima/master/clima.png" align="left" /> Create a command line interface with minimal setup and less maintenance. 
+<img src="https://raw.githubusercontent.com/d3rp/clima/master/clima.png" align="left" /> Create a command line interface with minimal setup.
 
 
 [![PyPI](https://img.shields.io/pypi/v/clima)](https://pypi.org/project/clima/)
@@ -38,39 +38,54 @@
 ## Briefly
 
 Clima handles loading and parsing command
-line arguments complimenting them with definitions found in optional configuration files, env files, env variables and
-secrets stored with [pass](https://www.passwordstore.org/).
+line arguments with some off-the-shelf features: definitions with configuration files, env files, env variables and
+secrets stored with [pass](https://www.passwordstore.org/) - also type handling, post_init hook and a global configuration
+object to access from anywhere in the script.
 
-1. Import all necessary parts from the package:
-1. Define configuration i.e. Schema:
+Creating a cli:
+
+1. Import all necessary parts from the package clima
+1. (optional) Define configuration i.e. Schema
 1. Define the command line commands i.e. Cli-class:
 
 ![example ascii](https://raw.githubusercontent.com/d3rp/clima/master/example.svg)
 
 Example: to setup a configuration and a command line interface ready to go.
 
-    from clima import c, Schema
+    from clima import c
     
-    
-    class C(Schema):
-       a = 1
-
-
     @c
     class Cli:
-        def foo(self):
-            # using configuration
-            print(c.a)
+        def say_hi(self):
+            print('oh hi - whatever this is..')
             
             
 The command line usage form could be as simple as:
   
-     my_tool foo
-     my_tool foo --a 42
+     my_tool say_hi
   
+### Configuration object in a spiffy
+
+    from clima import c
+    
+    # Defining the settings (configuration object)
+    class S(Schema):
+        place = 'world'
+        
+    @c
+    class Cli:
+        def say_hi(self):
+            # using configuration object 'c'
+            print(f'oh hi - {c.place}')
+            
+            
+The command line usage form could be as simple as:
+  
+     my_tool say_hi
+     my_tool say_hi --place 'other world'
+ 
 See the `examples` folder and other sections for more examples. For example the folder includes [something that resembles
 the example above](examples/readme_example.py).
-
   
 
 ## Installing
@@ -296,11 +311,11 @@ The `c` decorator/configuration chains multiple configuration options together i
 1. configuration file definitions
 1. defaults in the schema/template/namedtuple class
 
-The configuration file should be named with postfix `.cfg` e.g. `foo.cfg` and have an ini type formatting with
-a 'Default' section:
+The configuration file should be named with either the postfix `.conf` or `.cfg` e.g. `foo.conf` and have an ini type formatting with
+a 'Clima' section:
 
-    # foo.cfg
-    [Default]
+    # foo.conf
+    [Clima]
     x = 2
 
 The keys are the same as what you define in the schema. You can define all, some or none of the attributes.
@@ -316,7 +331,7 @@ will try to use the first configuration file it finds, so that might produce som
     class Conf(Schema):
         cwd = ''
 
-    # Running ./script.py --cwd <folder> would automatically load the first *.cfg file in <folder>
+    # Running ./script.py --cwd <folder> would automatically load the first *.conf file in <folder>
 
 TBD: .env file loading.
     
@@ -325,19 +340,19 @@ TBD: .env file loading.
 You can also define the config file in the configuration class (one inheriting `Schema`) by defining the
 magic field `CFG`.
 
-For example, lets say the command `my_tool` (packaged etc) has a user configuration file at `~/.my_tool.cfg`. This
-can now be handled with just adding `CFG = Path.home() / '.my_tool.cfg` to the Schema:
+For example, lets say the command `my_tool` (packaged etc) has a user configuration file at `~/.my_tool.conf`. This
+can now be handled with just adding `CFG = Path.home() / '.my_tool.conf` to the Schema:
 
     from pathlib import Path
     
     class S(Schema):
         bing = 'bang'
-        CFG = Path.home() / '.my_tool.cfg'
+        CFG = Path.home() / '.my_tool.conf'
     
 Then, for example, the configuration file would be written as:
 
-    #~/.my_tool.cfg
-    [Default]
+    #~/.my_tool.conf
+    [Clima]
     bing = diudiu
 
 Running the command `my_tool` would produce the value in the configuration file, though the arguments can still be overriden. 
@@ -362,6 +377,8 @@ documentation for nice additional features such as:
 
 Note: Currently this works only for gpg-keys without password. It's not ideal, but it's better than plain text `.env`
 files ;)
+
+Note 2: Leading and trailing whitespace (including `\n` linefeeds) are stripped, when decrypted.
 
 [pass](https://passwordstore.org) can be used to store passwords as gpg encrypted files under the home directory. Clima
 uses the default path of ~/.password-store and the files found within. It will then match the arguments with the 

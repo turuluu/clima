@@ -9,7 +9,7 @@ from clima.fire import Fire
 
 from clima import schema, utils, password_store, env
 from clima import docstring, configfile
-
+from pathlib import Path
 
 class RequiredParameterException(Exception):
     pass
@@ -28,6 +28,12 @@ class Configurable:
     # TODO: idiomatic handling for use cases that apply to NamedTuple
     __configured = None
 
+    def _get_configured(self):
+        return self.__configured
+
+    def _set_configured(self, dct: dict):
+        self.__configured = dct
+
     def _chain_configurations(self, params: dict, _schema):
         """Chains all configuration options together"""
         cm = ChainMap(
@@ -39,7 +45,8 @@ class Configurable:
             _schema._asdict()
         )
 
-        self.__configured = dict(cm)
+        # self.__configured = dict(cm)
+        return dict(cm)
 
     def _init(self, _schema: schema.MetaSchema):
         is_schema = isinstance(_schema, schema.MetaSchema)
@@ -84,6 +91,16 @@ class Configurable:
             print('none')
         return c_item
 
+    def _clear(self):
+        """Testing requires clearing global state"""
+
+        c.__configured = None
+
+        global DECORATORS_STATE
+        DECORATORS_STATE = {
+            'schema': None,
+            'generated': None,
+        }
 
 c = Configurable()
 
@@ -92,21 +109,28 @@ def add_to_decorators(key, value):
     DECORATORS_STATE[key] = value
 
 
-def cast_as_annotated(_schema, attr, value=None):
+def cast_as_annotated(_schema, attr, container=None, value=None):
+    """Schema is annotated with types. These types are used to
+    recast the value (value == container[attr] if not specified in kwargs)
+    in container (container == _schema if not specified in kwargs)
+    """
+    if container is None:
+        container = _schema
+
     if value is None:
-        value = getattr(_schema, attr)
+        value = getattr(container, attr)
     result = value
 
     if hasattr(type(_schema), '__annotations__'):
-        annotated = type(_schema).__annotations__.get(attr)
-        if annotated is not None:
+        annotated_type = type(_schema).__annotations__.get(attr)
+        if annotated_type is not None:
 
             # TODO: Nested types. Here we'll wrap a string or uniterable into an iterable
             # To prevent surprises such as 'VST' -> ('V', 'S', 'T') when expecting ('VST')
-            if schema.should_wrap_as_list(value, annotated):
-                result = annotated([value])
+            if schema.should_wrap_as_list(value, annotated_type):
+                result = annotated_type([value])
             else:
-                result = annotated(value)
+                result = annotated_type(value)
     return result
 
 
@@ -123,20 +147,44 @@ def cli(cls):
         # Cast everything according to schema before Cli.post_init
         for attr, cli_arg_value in cli_args.items():
             if hasattr(s, attr):
-                setattr(s, attr, cast_as_annotated(s, attr, cli_arg_value))
+                setattr(s, attr, cast_as_annotated(s, attr, value=cli_arg_value))
             s: type(s) = s
 
-        if hasattr(CliClass, 'post_init'):
-            CliClass.post_init(s)
+        if hasattr(s, 'cwd'):
+            p: Path = getattr(s, 'cwd')
+            if not p.is_absolute():
+                setattr(s, 'cwd', Path.cwd() / p)
 
-        # TODO: consider if really necessary
-        for attr, annotated in cli_args.items():
-            if hasattr(s, attr):
-                cli_args[attr] = cast_as_annotated(s, attr)
+        # if hasattr(CliClass, 'post_init'):
+        #     CliClass.post_init(s)
+
+        # # TODO: consider if really necessary
+        # for attr, annotated in cli_args.items():
+        #     if hasattr(s, attr):
+        #         cli_args[attr] = cast_as_annotated(s, attr)
 
         global c
-        c._chain_configurations(cli_args, s)
+        cm = c._chain_configurations(cli_args, s)
         # initialize_cli(cli_args, s)
+
+        tmp_c = Configurable()
+        tmp_c._set_configured(cm)
+        # TODO: consider if really necessary
+        for attr in s._asdict():
+            if attr in cm:
+                setattr(tmp_c, attr, cast_as_annotated(s, attr, container=tmp_c))
+
+        if hasattr(CliClass, 'post_init'):
+            CliClass.post_init(tmp_c)
+
+            # TODO: consider if really necessary
+            for attr in s._asdict():
+                if hasattr(tmp_c, attr):
+                    setattr(tmp_c, attr, cast_as_annotated(s, attr, container=tmp_c))
+
+        for attr in tmp_c._get_configured():
+            setattr(c, attr, getattr(tmp_c, attr))
+            # c._set_configured(tmp_c._get_configured())
 
     cls_attrs = dict(
         __init__=init,

@@ -10,6 +10,7 @@ def is_in_module(f):
 
 
 def cfgs_gen(p):
+    yield from Path(p).glob('*.conf')
     yield from Path(p).glob('*.cfg')
 
 
@@ -32,8 +33,8 @@ def read_config(_filepath='test.cfg') -> dict:
 
     file_config = configparser.ConfigParser()
     file_config.read(filepath)
-    if 'Default' in file_config:
-        return dict(file_config['Default'])
+    if 'Clima' in file_config:
+        return dict(file_config['Clima'])
     else:
         print('warning: config file found at {}, but it was missing section named [Default]'.format(str(filepath)))
         return {}

@@ -1,7 +1,15 @@
 import sys
 
+from clima.core import Configurable
+
 
 class SysArgvRestore:
+    # from clima import c
+
+    # def __init__(self):
+        # from clima import c
+        # self.c = c
+
     def setUp(self) -> None:
         self.save_sysargv()
 

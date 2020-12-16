@@ -51,7 +51,7 @@ def decrypt_file_with_id(gpg_file, gpg_id) -> str:
     except:
         pass
 
-    return result
+    return result.strip()
 
 
 def decrypt(keyname):
