@@ -440,9 +440,28 @@ Allows for a shorter means of execution:
 
     ./script.py foo
 
-For the "maximum user ergonomics", one could [package this as a runnable command](https://github.com/d3rp/my_tool) - publish in pip etc - and then 
-approach the convenience factor shown at first.
+Now this could be linked as an adhoc command for example:
+
+    ln -s $PWD/script.py ~/.local/bin/my_command
+
+### Packaging a Clima based tool
+
+For a pip-installable package, one could [package this as a runnable command](https://github.com/d3rp/my_tool) -
+publish in the public or one's private pypi etc - and then approach the convenience factor shown at first.
+
+    pip install my_tool
+    my_command foo -h
+
+To publish with poetry is quite straight forward. First create an account in pypi.org and then:
+
+    cd <project directory>
+    poetry build
+    poetry publish
  
+You can use `version` to bump up versions:
+    
+    poetry version patch
+
 ## Building/Installing from source
 
 This repo is based on [poetry](https://poetry.eustace.io).
