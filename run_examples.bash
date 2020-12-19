@@ -33,11 +33,10 @@ run_py ./examples/script_example.py print-name
 
 run_py ./examples/traceback_example.py lumberjack
 
-run_py ./examples/script_with_required_param_example.py
-run_py ./examples/script_with_required_param_example.py print-age
-run_py ./examples/script_with_required_param_example.py print-age
-run_py ./examples/script_with_required_param_example.py print-age --age 12
-run_py ./examples/script_with_required_param_example.py print-name
+run_py ./examples/script_with_required_param_example.py -h
+run_py ./examples/script_with_required_param_example.py version
+run_py ./examples/script_with_required_param_example.py print-age --name foo
+run_py ./examples/script_with_required_param_example.py print-age --name foo --age 12
 run_py ./examples/script_with_required_param_example.py print-name --name foo
 run_py ./examples/script_with_required_param_example.py print-name foo
 
