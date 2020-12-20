@@ -11,7 +11,7 @@ from pathlib import Path
 
 # from clima import Schema
 
-from tests import SysArgvRestore, TmpC
+from tests import SysArgvRestore
 
 # TODO: sane exception for this scenario
 # def test_schema_without_default():
@@ -49,7 +49,7 @@ def wrap_methods_with_c(cls):
     return cls
 
 
-class TestSchemaNoType(TestCase, SysArgvRestore, TmpC):
+class TestSchemaNoType(TestCase, SysArgvRestore):
     default = 42
 
     def setUp(self) -> None:
@@ -99,7 +99,6 @@ class TestSchemaX(TestCase, SysArgvRestore):
 
 class TestSchemaY(TestCase, SysArgvRestore):
     def test_schema_post_init(self):
-
         from clima import c, Schema
         self.c = c
         sys.argv = ['test', 'x']

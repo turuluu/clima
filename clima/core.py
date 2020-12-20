@@ -11,6 +11,7 @@ from clima import schema, utils, password_store, env
 from clima import docstring, configfile
 from pathlib import Path
 
+
 class RequiredParameterException(Exception):
     pass
 
@@ -101,6 +102,7 @@ class Configurable:
             'schema': None,
             'generated': None,
         }
+
 
 c = Configurable()
 
