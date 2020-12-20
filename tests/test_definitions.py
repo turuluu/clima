@@ -9,9 +9,9 @@ from pathlib import PureWindowsPath as WindowsPath
 from pathlib import PurePosixPath as PosixPath
 from pathlib import Path
 
-from clima import Schema
+# from clima import Schema
 
-from tests import SysArgvRestore
+from tests import SysArgvRestore, TmpC
 
 # TODO: sane exception for this scenario
 # def test_schema_without_default():
@@ -24,10 +24,10 @@ from functools import wraps
 def wrap_cc(func):
     wraps(func)
 
-    from clima import c
+    from clima import c, Schema
 
-    def wrapped(*args, c=c, **kwargs):
-        result = func(*args, c=c, **kwargs)
+    def wrapped(*args, c=c, Schema=Schema, **kwargs):
+        result = func(*args, c=c, Schema=Schema, **kwargs)
         c._clear()
         return result
 
@@ -49,23 +49,24 @@ def wrap_methods_with_c(cls):
     return cls
 
 
-@wrap_methods_with_c
-class TestSchemaNoType(TestCase, SysArgvRestore):
+class TestSchemaNoType(TestCase, SysArgvRestore, TmpC):
     default = 42
 
     def setUp(self) -> None:
+        from clima import c, Schema
+        self.c = c
         self.save_sysargv()
 
         class C(Schema):
             a = self.default
 
-    def test_default(self, c):
-        # c = self.c
+    def test_default(self):
+        c = self.c
         sys.argv = ['test', 'x']
         assert (c.a == self.default)
 
-    def test_override(self, c):
-        # c = self.c
+    def test_override(self):
+        c = self.c
         sys.argv = ['test', 'x', '--a', '1']
 
         @c
@@ -77,10 +78,10 @@ class TestSchemaNoType(TestCase, SysArgvRestore):
         assert (c.a == 1)
 
 
-@wrap_methods_with_c
 class TestSchemaX(TestCase, SysArgvRestore):
-    def test_schema_without_type(self, c):
-        # c = self.c
+    def test_schema_without_type(self):
+        from clima import c, Schema
+        self.c = c
         sys.argv = ['test', 'x']
 
         class C(Schema):
@@ -96,10 +97,11 @@ class TestSchemaX(TestCase, SysArgvRestore):
         assert c.a == 1
 
 
-@wrap_methods_with_c
 class TestSchemaY(TestCase, SysArgvRestore):
-    def test_schema_post_init(self, c):
-        # c = self.c
+    def test_schema_post_init(self):
+
+        from clima import c, Schema
+        self.c = c
         sys.argv = ['test', 'x']
 
         class C(Schema):
@@ -115,8 +117,9 @@ class TestSchemaY(TestCase, SysArgvRestore):
 
         assert c.a == 2
 
-    def test_schema_post_init_adding_attr(self, c):
-        # c = self.c
+    def test_schema_post_init_adding_attr(self):
+        from clima import c, Schema
+        self.c = c
         sys.argv = ['test', 'x']
 
         class C(Schema):
@@ -135,7 +138,6 @@ class TestSchemaY(TestCase, SysArgvRestore):
         assert c.b == 2
 
 
-@wrap_methods_with_c
 class TestSchemaArgs(TestCase, SysArgvRestore):
     defaults = {
         'str': 'foobar',
@@ -147,14 +149,16 @@ class TestSchemaArgs(TestCase, SysArgvRestore):
     }
 
     def setUp(self) -> None:
+        from clima import c, Schema
+        self.c = c
         self.save_sysargv()
 
         class C(Schema):
             a: str = self.defaults['str']
             b: bool = self.defaults['bool']
 
-    def test_defaults(self, c):
-        # c = self.c
+    def test_defaults(self):
+        c = self.c
         sys.argv = ['test', 'x']
 
         @c
@@ -166,8 +170,8 @@ class TestSchemaArgs(TestCase, SysArgvRestore):
         assert c.a == self.defaults['str'], 'Schema definition should stick if not overridden'
         assert c.b == self.defaults['bool'], 'Schema definition should stick if not overridden'
 
-    def test_schema_order_args(self, c):
-        # c = self.c
+    def test_schema_order_args(self):
+        c = self.c
         sys.argv = ['test', 'x', '--a', self.changed['str'], '--b']
 
         @c
@@ -179,8 +183,8 @@ class TestSchemaArgs(TestCase, SysArgvRestore):
         assert c.a == self.changed['str'], 'Args given in same order as schema def should override values'
         assert c.b == self.changed['bool'], 'Args given in same order as schema def should override values'
 
-    def test_non_schema_order_args(self, c):
-        # c = self.c
+    def test_non_schema_order_args(self):
+        c = self.c
         sys.argv = ['test', 'x', '--b', '--a', self.changed['str']]
 
         @c
@@ -194,7 +198,6 @@ class TestSchemaArgs(TestCase, SysArgvRestore):
         assert c.b == self.changed['bool'], 'Args given in a different order as schema def should override values'
 
 
-@wrap_methods_with_c
 class TestSchema(TestCase, SysArgvRestore):
     defaults = {
         'test_int': [42, int],
@@ -204,6 +207,8 @@ class TestSchema(TestCase, SysArgvRestore):
     }
 
     def setUp(self) -> None:
+        from clima import c, Schema
+        self.c = c
         super().save_sysargv()
 
         class C(Schema):
@@ -262,9 +267,10 @@ class TestSchema(TestCase, SysArgvRestore):
         assert (c.test_str == _str)
 
 
-@wrap_methods_with_c
 class TestTypeCasting(TestCase, SysArgvRestore):
     def setUp(self) -> None:
+        from clima import c, Schema
+        self.c = c
         sys.argv = ['test', 'x']
 
         class TypeGalore(Schema):
@@ -311,13 +317,12 @@ class TestTypeCasting(TestCase, SysArgvRestore):
             assert type(getattr(c, k)) == valid
 
 
-@wrap_methods_with_c
 class TestTypeCastingWith(TestCase, SysArgvRestore):
     def setUp(self) -> None:
         sys.argv = ['test', 'x']
 
     def test_win_path(self):
-        c = self.c
+        from clima import c, Schema
 
         class TestTypes(Schema):
             p: WindowsPath = '.'
@@ -331,7 +336,7 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
         assert (type(c.p) == WindowsPath)
 
     def test_posix_path(self):
-        c = self.c
+        from clima import c, Schema
 
         class TestTypes(Schema):
             p: PosixPath = '.'
@@ -345,7 +350,7 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
         assert (type(c.p) == PosixPath)
 
     def test_builtins_post_init(self):
-        c = self.c
+        from clima import c, Schema
         values = {
             'a': True,
             'f': 1.0,
@@ -393,13 +398,12 @@ class TestTypeCastingWith(TestCase, SysArgvRestore):
             assert field == value, f'After casting and schema.post_init, values are incorrect ("{field}"!="{value}")'
 
 
-@wrap_methods_with_c
 class TestTypeCastingWithArgs(TestCase, SysArgvRestore):
     def setUp(self) -> None:
         sys.argv = ['test', 'x', '--a', '0', '--path', 'foobar']
 
     def test_casting_cli_args(self):
-        c = self.c
+        from clima import c, Schema
 
         class TestTypes(Schema):
             a: bool = True
@@ -424,7 +428,7 @@ class TestTypeCastingWithArgs(TestCase, SysArgvRestore):
 
     # TODO: TBD
     def test_postinit_after_cli_args(self):
-        c = self.c
+        from clima import c, Schema
 
         class TestTypes(Schema):
             a: bool = True
@@ -450,10 +454,11 @@ class TestTypeCastingWithArgs(TestCase, SysArgvRestore):
         assert c.path.name == 'baz', 'post_init should override values'
 
 
-@wrap_methods_with_c
 class TestConfigurable(TestCase, SysArgvRestore):
 
     def setUp(self) -> None:
+        from clima import c, Schema
+        self.c = c
         self.save_sysargv()
 
         class C(Schema):
@@ -481,12 +486,13 @@ class TestConfigurable(TestCase, SysArgvRestore):
                 pass
 
 
-@wrap_methods_with_c
 class TestIterables(TestCase, SysArgvRestore):
     _int = 123
     _str = 'abc'
 
     def setUp(self) -> None:
+        from clima import c, Schema
+        self.c = c
         self.save_sysargv()
 
         class C(Schema):

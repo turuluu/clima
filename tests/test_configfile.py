@@ -8,8 +8,6 @@ import sys
 # subclass when validating (e.g. on windows Path('...') -> WindowsPath('...') )
 from pathlib import PureWindowsPath as WindowsPath
 
-from clima import c, Schema
-
 from tests import SysArgvRestore
 
 
@@ -17,9 +15,11 @@ class TestConfigFromWorkingDir(TestCase, SysArgvRestore):
     test_cfg = Path.cwd() / 'foo.cfg'
 
     def setUp(self) -> None:
+        from clima import c, Schema
+        self.c = c
         self.save_sysargv()
         with open(self.test_cfg, 'w', encoding='UTF-8') as wf:
-            wf.write('[Default]\nbar = 42')
+            wf.write('[Clima]\nbar = 42')
         sys.argv = ['test', 'x']
 
         class C(Schema):
@@ -30,21 +30,23 @@ class TestConfigFromWorkingDir(TestCase, SysArgvRestore):
         self.restore_sysargv()
 
     def test_configfile(self):
-        @c
+        @self.c
         class Cli:
             def x(self):
                 pass
 
-        assert c.bar == 42, f'Failed loading config file - c.bar == {c.bar}'
+        assert self.c.bar == 42, f'Failed loading config file - c.bar == {self.c.bar}'
 
 
 class TestConfigFromCwd(TestCase, SysArgvRestore):
     test_cfg = Path.cwd() / 'foo.cfg'
 
     def setUp(self) -> None:
+        from clima import c, Schema
+        self.c = c
         self.save_sysargv()
         with open(self.test_cfg, 'w', encoding='UTF-8') as wf:
-            wf.write('[Default]\nbar = 42')
+            wf.write('[Clima]\nbar = 42')
         sys.argv = ['test', 'x', '--cwd', os.fspath(self.test_cfg.parent)]
 
         class C(Schema):
@@ -56,21 +58,23 @@ class TestConfigFromCwd(TestCase, SysArgvRestore):
         self.restore_sysargv()
 
     def test_configfile(self):
-        @c
+        @self.c
         class Cli:
             def x(self):
                 pass
 
-        assert c.bar == 42, f'Not loading from cfg file - c.bar == {c.bar}'
+        assert self.c.bar == 42, f'Not loading from cfg file - c.bar == {self.c.bar}'
 
 
 class TestConfigFromCwdPath(TestCase, SysArgvRestore):
     test_cfg = Path.cwd() / 'foo.cfg'
 
     def setUp(self) -> None:
+        from clima import c, Schema
+        self.c = c
         self.save_sysargv()
         with open(self.test_cfg, 'w', encoding='UTF-8') as wf:
-            wf.write('[Default]\nbar = .')
+            wf.write('[Clima]\nbar = .')
         sys.argv = ['test', 'x', '--cwd', os.fspath(self.test_cfg.parent)]
 
         class C(Schema):
@@ -81,10 +85,10 @@ class TestConfigFromCwdPath(TestCase, SysArgvRestore):
         self.restore_sysargv()
 
     def test_configfile(self):
-        @c
+        @self.c
         class Cli:
             def x(self):
                 pass
 
-        assert str(c.bar) == '.'
-        assert type(c.bar) == WindowsPath
+        assert str(self.c.bar) == '.'
+        assert type(self.c.bar) == WindowsPath
