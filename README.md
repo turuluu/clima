@@ -12,8 +12,10 @@
 ##### Table of contents
 
   * [Briefly](#briefly)
+     * [Features](#features)
+     * [Cli definition](#cli-definition)
+     * [Configuration object in a spiffy](#configuration-object-in-a-spiffy)
   * [Installing](#installing)
-  * [Long description](#long-description)
   * [Usage](#usage)
   * [Examples and platforms](#examples-and-platforms)
      * [Testing the examples](#testing-the-examples)
@@ -24,23 +26,40 @@
   * [Post init hook](#post-init-hook)
      * [Cli.post_init()](#clipost_init)
      * [Schema.post_init()](#schemapost_init)
-  * [Configuration file and environment variables](#configuration-file-and-environment-variables)
-  * [Configuration file in the home directory](#configuration-file-in-the-home-directory)
+  * [Configuration options](#configuration-options)
+     * [Configuration file and environment variables](#configuration-file-and-environment-variables)
+     * [Type casting with configuration definition](#type-casting-with-configuration-definition)
+     * [Configuration file in the home directory](#configuration-file-in-the-home-directory)
+     * [.env file](#env-file)
+     * [Password unwrapping/decryption with pass](#password-unwrappingdecryption-with-pass)
   * [Additional features via Fire](#additional-features-via-fire)
-  * [Password unwrapping/decryption with pass](#password-unwrappingdecryption-with-pass)
   * [Truncated error printing](#truncated-error-printing)
-  * [Type casting with configuration definition](#type-casting-with-configuration-definition)
   * [Ways to run the script for the uninitiated](#ways-to-run-the-script-for-the-uninitiated)
+     * [Linking executable script to ~/.local/bin](#linking-executable-script-to-localbin)
+     * [Packaging a module (pip ready)](#packaging-a-module-pip-ready)
   * [Building/Installing from source](#buildinginstalling-from-source)
-  * [Why another cli framework?](#why-another-cli-framework)
-     * [Dependencies](#dependencies)        
-     
+  * [Long description and background](#long-description-and-background)
+     * [Why another cli framework?](#why-another-cli-framework)
+  * [Dependencies](#dependencies)
+   
 ## Briefly
 
+### Features
+
 Clima handles loading and parsing command
-line arguments with some off-the-shelf features: definitions with configuration files, env files, env variables and
-secrets stored with [pass](https://www.passwordstore.org/) - also type handling, post_init hook and a global configuration
-object to access from anywhere in the script.
+line arguments with some off-the-shelf features including:
+
+- a global configuration object
+    - quick definition of defaults
+    - defining defaults doubles as description for help on the command line
+    - type handling with annotations
+- definitions with configuration files
+- env variables
+    - loading .env files
+- secrets stored with [pass](https://www.passwordstore.org/)
+- post_init hook
+
+### Cli definition
 
 Creating a cli:
 
@@ -94,16 +113,7 @@ the example above](examples/readme_example.py).
 
 [toc](#table-of-contents)
 
-## Long description
-
-The subcommands are written as a class encapsulating the "business logic".
-You can define a simple schema of the configuration that maps to the command line arguments.
-
-In other words, you can use this to wrap your scripts as command line commands without resorting to bash or
-maintaining argument parsing in python. This removes the need of duplicating comments in order `--help` to remember what the arguments were and what they did. Sprinkling some decorator magic offers a typical use experience of a cli program (e.g. argument parsing and validation, --help, subcommands, ...).
-
-The implementation is focused on a premise that for a simple script there's usually a script wide global configuration which would be used through out the user code i.e. a context for the program that is refered to in different parts of the code. That configuration is populated with given arguments falling back on defaults in the code and some further complimentary options. Those are then made accessible via a global `c` variable that can be tossed around the code base with very little additional effort. With a small adjustment this can made to autocomplete in IDEs (as attributes). This helps when the schema of the configuration grows larger as the autocomplete kicks in after typing `c.` offering those fields in your "schema" as attributes.
-    
+   
 
 ## Usage
 
@@ -255,6 +265,8 @@ TBD: zsh etc. completions
 
 ## Post init hook
 
+There's two ways to define a post_init hook depending if it is done in the `Schema` subclass or the `Cli` definition.
+
 ### Cli.post_init()
 
 In some occasions it's useful to deduce specific defaults from the given parameters e.g. in a cross platform build allowing
@@ -282,6 +294,7 @@ Note: The signature of the `post_init()` differs depending on which of the stage
 it is a `@staticmethod`
 
 ### Schema.post_init()
+
 This alternative is for to use post_init-like features positioning the steps so that command line arguments can still
 override things.
 
@@ -302,14 +315,23 @@ Schema post init hook is run after schema initialization, but BEFORE the cli ini
 
 [toc](#table-of-contents)
 
-## Configuration file and environment variables
+## Configuration options
 
-The `c` decorator/configuration chains multiple configuration options together in order of priority (lower number overrides higher number):
+It's tedious to have to write a long list of parameters on the command line, when most of the use cases
+follow a similar pattern. To facilitate the use of configurations, there's several options to choose from.
+
+The `c` decorator/configuration chains multiple configuration options together in order of priority
+(lower number overrides higher number):
 
 1. command line arguments
 1. Environment variables
+1. .env file
 1. configuration file definitions
-1. defaults in the schema/template/namedtuple class
+1. decrypted passwords from `~/.password-store` if gnugpg is installed
+1. defaults in the subclass inheriting `Schema`
+
+### Configuration file and environment variables
+
 
 The configuration file should be named with either the postfix `.conf` or `.cfg` e.g. `foo.conf` and have an ini type formatting with
 a 'Clima' section:
@@ -333,9 +355,16 @@ will try to use the first configuration file it finds, so that might produce som
 
     # Running ./script.py --cwd <folder> would automatically load the first *.conf file in <folder>
 
-TBD: .env file loading.
-    
-## Configuration file in the home directory
+### Type casting with configuration definition
+ 
+The `Schema` definition can have type annotations, which are used to cast the given arguments. For example
+
+    class C(Schema):
+        p: Path = ''  # Path to something
+
+Results in `c.p`'s type cast as `Path`.   
+
+### Configuration file in the home directory
 
 You can also define the config file in the configuration class (one inheriting `Schema`) by defining the
 magic field `CFG`.
@@ -363,6 +392,47 @@ Running the command `my_tool` would produce the value in the configuration file,
     my_tool run --bing bam
     # bam
     
+### .env file
+ 
+ This is handled by [dotenv](https://github.com/theskumar/python-dotenv). In short, all the defaults defined in the
+ `Schema` subclass can be overridden either by:
+ 
+    <field> = <value>
+
+or
+
+    export <field> = <value>
+    
+### Password unwrapping/decryption with pass
+ 
+ Note: Currently this works only for gpg-keys without password. It's not ideal, but it's better than plain text `.env`
+ files ;)
+ 
+ Note 2: Leading and trailing whitespace (including `\n` linefeeds) are stripped, when decrypted.
+ 
+ [pass](https://passwordstore.org) can be used to store passwords as gpg encrypted files under the home directory. Clima
+ uses the default path of ~/.password-store and the files found within. It will then match the arguments with the 
+ stored passwords, for example:
+ 
+     tree -A ~/.password-store                                                                                                                                                                                                                                                                             ✔ | 41s | anaconda3 
+     /Users/me/.password-store
+     ├── work
+     │   ├── ci
+     │   │   ├── sign_id.gpg
+     │   │   ├── sign_pw.gpg
+     ... ... ...
+ 
+ And an according `Schema` definition:
+ 
+     class Conf(Schema):
+         sign_id: str = ''  # signing id for the CI
+         sign_pw: str = ''  # signing pw for the CI
+ 
+ Would accept those arguments as cli arguments, or if omitted, would traverse through the `.password-store` and decrypt the
+ found `sign_id.gpg` and `sign_pw.gpg` placing the values found in the configuration object `c`.
+     
+ [toc](#table-of-contents)      
+ 
 ## Additional features via Fire
 
 See the [Python Fire's Flags](https://github.com/google/python-fire/blob/master/docs/using-cli.md#python-fires-flags)
@@ -373,35 +443,6 @@ documentation for nice additional features such as:
     tester.py -- --interactive
     tester.py -- --completion
     
-## Password unwrapping/decryption with pass
-
-Note: Currently this works only for gpg-keys without password. It's not ideal, but it's better than plain text `.env`
-files ;)
-
-Note 2: Leading and trailing whitespace (including `\n` linefeeds) are stripped, when decrypted.
-
-[pass](https://passwordstore.org) can be used to store passwords as gpg encrypted files under the home directory. Clima
-uses the default path of ~/.password-store and the files found within. It will then match the arguments with the 
-stored passwords, for example:
-
-    tree -A ~/.password-store                                                                                                                                                                                                                                                                             ✔ | 41s | anaconda3 
-    /Users/me/.password-store
-    ├── work
-    │   ├── ci
-    │   │   ├── sign_id.gpg
-    │   │   ├── sign_pw.gpg
-    ... ... ...
-
-And an according `Schema` definition:
-
-    class Conf(Schema):
-        sign_id: str = ''  # signing id for the CI
-        sign_pw: str = ''  # signing pw for the CI
-
-Would accept those arguments as cli arguments, or if omitted, would traverse through the `.password-store` and decrypt the
-found `sign_id.gpg` and `sign_pw.gpg` placing the values found in the configuration object `c`.
-    
-[toc](#table-of-contents)
 
 ## Truncated error printing
 
@@ -412,16 +453,12 @@ enough.
 
 Note: When running the examples, the `exception_traceback.log` file will be written inside the `examples` directory
 
-## Type casting with configuration definition
-
-The `Schema` definition can have type annotations, which are used to cast the given arguments. For example
-
-    class C(Schema):
-        p: Path = ''  # Path to something
-
-Results in `c.p`'s type cast as `Path`.
 
 ## Ways to run the script for the uninitiated
+
+Here's a section to suggest ideas how to wrap scripts using clima.
+
+### Linking executable script to ~/.local/bin
 
 Let's say those lines were written in a file named `script.py`. Command line usage in a terminal would then be e.g.:
 
@@ -444,7 +481,7 @@ Now this could be linked as an adhoc command for example:
 
     ln -s $PWD/script.py ~/.local/bin/my_command
 
-### Packaging a Clima based tool
+### Packaging a module (pip ready)
 
 For a pip-installable package, one could [package this as a runnable command](https://github.com/d3rp/my_tool) -
 publish in the public or one's private pypi etc - and then approach the convenience factor shown at first.
@@ -474,13 +511,22 @@ The `--no-dev` is for to install the running environment without development too
 
 [toc](#table-of-contents)
 
-## Why another cli framework?
+## Long description and background
 
-This is just a tool to slap together a cli program in python instead that grew out of the need of having a build automation system and an entrypoint script to build various flavours of C++ projects. The intention is to get something reasonably configurable and generic up and running as fast as possible while still having the "power" of python. I can't bother to memorize argparses syntax, even though it's a very good package. Also click works nice for more elaborate things though fire is my personal favourite for the time being. Often times when I kick off a bash script for this it ends up too elaborate very quick and then I miss python.
+The subcommands are written as a class encapsulating the "business logic".
+You can define a simple schema of the configuration that maps to the command line arguments.
 
-Also docopt looks very nice, but it doesn't provide autocompletion and all the configuration chaining magic I was after.
+In other words, you can use this to wrap your scripts as command line commands without resorting to bash or
+maintaining argument parsing in python. This removes the need of duplicating comments in order `--help` to remember what the arguments were and what they did. Sprinkling some decorator magic offers a typical use experience of a cli program (e.g. argument parsing and validation, --help, subcommands, ...).
 
-Other options for full cli experience:
+The implementation is focused on a premise that for a simple script there's usually a script wide global configuration which would be used through out the user code i.e. a context for the program that is refered to in different parts of the code. That configuration is populated with given arguments falling back on defaults in the code and some further complimentary options. Those are then made accessible via a global `c` variable that can be tossed around the code base with very little additional effort. With a small adjustment this can made to autocomplete in IDEs (as attributes). This helps when the schema of the configuration grows larger as the autocomplete kicks in after typing `c.` offering those fields in your "schema" as attributes.
+ 
+### Why another cli framework?
+
+Clima is not intended to cater all needs of a feature complete cli framework like the ones enlisted below.
+This is a package to help with boilerplate to get quick, but reusable tools for your workflow.
+
+Other options for full featured cli experience:
 
 * [docopt](https://docopt.org)
 * [fire](https://github.com/google/python-fire)
@@ -489,11 +535,13 @@ Other options for full cli experience:
 * [typer](https://github.com/tiangolo/typer)
 
 
-### Dependencies
+## Dependencies
 
-* fire - [python-fire](https://github.com/google/python-fire) from google does the cli wrapping / forked into the repo
-    - I wanted to have the version 0.1.x formatting and help output with few hacks of my own
+* [dotenv](https://github.com/theskumar/python-dotenv)
+* gnugpg - this is pass through though. If it's not installed, the feature is not in use.
+
+* fire - [python-fire](https://github.com/google/python-fire) from google does the cli wrapping / forked and included 
+into the repo - I wanted to have the version 0.1.x formatting and help output with few hacks of my own
 
 
 [toc](#table-of-contents)
-
