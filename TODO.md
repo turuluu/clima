@@ -15,6 +15,7 @@ So fresh and so lean, lean...
 - maybe also look into tox testing to verify actual cli running
 - fork python-fire 0.1.3 (-> forked, branch clima)
     * fire doesn't handle well strings as arguments, when there's spaces
+- include (and fix) hypothesis tests
 
 ## Won't fix
 * fix doc string and args/parameter help for fire v0.2.1
