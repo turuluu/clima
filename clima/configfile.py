@@ -28,17 +28,21 @@ def find_cfg(p, level=2):
 
 def read_config(_filepath='test.cfg') -> dict:
     filepath = Path(_filepath)
+    parsed_conf = {}
     if not filepath.exists():
-        return {}
+        return parsed_conf
 
-    file_config = configparser.ConfigParser()
-    file_config.read(filepath)
-    if 'Clima' in file_config:
-        return dict(file_config['Clima'])
-    else:
-        print('warning: config file found at {}, but it was missing section named [Default]'.format(str(filepath)))
-        return {}
+    try:
+        file_config = configparser.ConfigParser()
+        file_config.read(filepath)
+        if 'Clima' in file_config:
+            parsed_conf = dict(file_config['Clima'])
+        else:
+            print('warning: config file found at {}, but it was missing section named [Clima]'.format(str(filepath)))
+    except:
+        print(f'warning: clima deducted {_filepath} to be a valid config file, but could not read it.')
 
+    return parsed_conf
 
 def get_config_path(_schema):
     """

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "clima"
-version = "0.7.7"
+version = "0.7.9"
 description = "Simple boilerplate for cli scripts"
 keywords = ["cli"]
 classifiers = [
