@@ -7,6 +7,7 @@ import inspect
 # Version printing part 0
 from pathlib import Path
 import configparser
+from importlib import metadata
 
 
 def asdict(obj):
@@ -24,13 +25,41 @@ def schema_decorator(decorators_state, cls):
     return cls
 
 
-def get_pkg_version():
-    # Version printing part 1
-    # Enables version printing out of the box
-    # Idea is, that when poetry is used, this will look up the version
-    # in its configuration.
-    version = '0.0.1'
+def get_importing_frame():
+    piece = inspect.stack()[0]
+    for frame in inspect.getouterframes(piece.frame):
+        code_context = frame.code_context
+        if isinstance(code_context, list):
+            code = code_context[0]
+            if 'clima' in code and 'import' in code and 'core' not in code:
+                return frame
+
+
+def deduce_importer_version():
+    """experimental way of deducing the version from the package that
+    imports clima
+    """
+    from importlib import util
+    version = None
+    try:
+        frame = get_importing_frame()
+        p = Path(frame.filename)
+        parent = str(p.parent.name)
+        importer_package = None
+        while importer_package is None:
+            spec = util.find_spec(parent)
+            if hasattr(spec, 'name'):
+                importer_package = spec.name
+        version = metadata.version(importer_package)
+    except:
+        pass
+
+    return version
+
+
+def parse_version_from_pyproject_toml():
     toml = Path('pyproject.toml')
+    version = None
     if toml.exists():
         parser = configparser.ConfigParser()
         parser.read(toml)
@@ -39,23 +68,29 @@ def get_pkg_version():
         if 'version' in tool_section:
             quoted = tool_section['version']
             version = quoted.replace('"', '')
+    return version
+
+
+def get_pkg_version():
+    # Version printing part 1
+    # Enables version printing out of the box
+    # Idea is, that when poetry is used, this will look up the version
+    # in its configuration.
+
+    if (version := deduce_importer_version()) is not None:
+        pass
+    elif (version := parse_version_from_pyproject_toml()) is not None:
+        pass
+    else:
+        version = '0.0.1'
 
     return version
 
 
 def is_iterable(value):
-    # v_is_iterable = False
     iterables = [tuple, list, set]
-    # try:
-    #     if type(value) is type:
-    #         v_is_iterable = iter(value()) is not None
-    #     else:
-    #         v_is_iterable = iter(value) is not None
-    # except TypeError:
-    #     pass
 
     return (type(value) in iterables or value in iterables)
-    # return v_is_iterable
 
 
 def should_wrap_as_list(value, target_type):
@@ -67,6 +102,7 @@ def should_wrap_as_list(value, target_type):
         res = True
 
     return res
+
 
 class MetaSchema(type):
     """

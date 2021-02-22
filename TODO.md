@@ -4,17 +4,19 @@ So fresh and so lean, lean...
 
 ## TODO v1.0.0:
 
-* way to define required parameters in subcommand context for the subcommands help
-  * probably some syntax for starters, that then is compared with and parsed for every method
-* maybe a logging setup (--dryrun)
-  * default debug logging wrapper that would log every function called
-* clean the implementation
+- version printing
+- handling # in Schema
+- way to define required parameters in subcommand context for the subcommands help
+  - probably some syntax for starters, that then is compared with and parsed for every method
+- maybe a logging setup (--dryrun)
+  - default debug logging wrapper that would log every function called
+- clean the implementation
 - cwd argument is not respected (special parameter)
 - Validation of undefined parameters (should advice that they're not defined in the config)
 - configfile helper to advice fixes in parameters etc.
 - maybe also look into tox testing to verify actual cli running
 - fork python-fire 0.1.3 (-> forked, branch clima)
-    * fire doesn't handle well strings as arguments, when there's spaces
+    - fire doesn't handle well strings as arguments, when there's spaces
 - include (and fix) hypothesis tests
 
 ## Won't fix

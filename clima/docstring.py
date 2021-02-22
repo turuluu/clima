@@ -5,7 +5,7 @@ import inspect
 
 def wrap_method_docstring(cls: object, nt):
     """
-    In place mutation of 'nt'
+    In place mutation of 'nt' (NamedTuple)
 
     Uses the implicit Schema's fields as the
     classes methods' signatures i.e. helps fire to show up the
@@ -27,7 +27,6 @@ def replace_docstring(func, args):
     # TODO: subcommand level args replacement with something (see TODO)
     docstring = func.__doc__
     docstring = (docstring if docstring is not None else '') + '\nArgs:\n' + args
-    # print(f'{func.__name__} docstring {docstring}')
     func.__doc__ = docstring
 
 
@@ -77,6 +76,7 @@ def parse_source_for_params(params):
         if src_line.startswith(' ')
     }
     return OrderedDict(split_parameters)
+
 
 
 def argument_help(attr_name, attr):
