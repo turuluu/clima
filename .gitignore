@@ -14,3 +14,4 @@ clima.egg-info/
 **/*.conf
 .hypothesis
 .DS_Store
+poetry.lock

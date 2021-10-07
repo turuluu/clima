@@ -21,11 +21,13 @@ authors = ["Joni Turunen <rojun.itu@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.6"
-cryptography = ">=3.2"
-bleach = ">=3.1.5"
+python = "^3.6.2"
+setuptools = "^50.3.0"
+wheel = "*"
+cryptography = "^3.2"
+bleach = "^3.1.5"
 six = "*"
-tabulate = ">=0.8.7"
+tabulate = "^0.8.7"
 python-dotenv = "^0.15.0"
 
 [tool.poetry.dev-dependencies]
