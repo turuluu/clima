@@ -1,6 +1,5 @@
 """Configuration file (sth.cfg) handling"""
 import configparser
-import inspect
 
 from pathlib import Path
 
@@ -19,7 +18,7 @@ def find_cfg(p, level=2):
     cfgs = list(cfgs_gen(p))
     if len(cfgs) == 0:
         if is_in_module(p) and level > 0:
-            return find_cfg(p.parent, level-1)
+            return find_cfg(p.parent, level - 1)
         else:
             return None
     else:
@@ -43,6 +42,7 @@ def read_config(_filepath='test.cfg') -> dict:
         print(f'warning: clima deducted {_filepath} to be a valid config file, but could not read it.')
 
     return parsed_conf
+
 
 def get_config_path(_schema):
     """

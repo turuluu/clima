@@ -1,6 +1,6 @@
 """Doc string handling"""
-from collections import OrderedDict
 import inspect
+from collections import OrderedDict
 
 
 def wrap_method_docstring(cls: object, nt):
@@ -76,7 +76,6 @@ def parse_source_for_params(params):
         if src_line.startswith(' ')
     }
     return OrderedDict(split_parameters)
-
 
 
 def argument_help(attr_name, attr):

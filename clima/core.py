@@ -1,15 +1,14 @@
-from collections import ChainMap
 import inspect
-import sys
 import os
+import sys
+from collections import ChainMap
 from functools import partial
+from pathlib import Path
 from typing import Dict
 
-from clima.fire import Fire
-
-from clima import schema, utils, password_store, env
 from clima import docstring, configfile
-from pathlib import Path
+from clima import schema, utils, password_store, env
+from clima.fire import Fire
 
 
 class RequiredParameterException(Exception):

@@ -2,7 +2,6 @@ import glob
 
 from pathlib import Path
 from subprocess import check_output
-from functools import partial
 
 PW_STORE_PATH = str(Path.home() / ".password-store")
 

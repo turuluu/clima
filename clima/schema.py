@@ -1,13 +1,12 @@
-import sys
+import configparser
 import inspect
-
+import sys
+from importlib import metadata
 # Until poetry fixes this https://github.com/python-poetry/poetry/issues/144
 # This hack is necessary to report correct __version__
 # inside the project
 # Version printing part 0
 from pathlib import Path
-import configparser
-from importlib import metadata
 
 
 def asdict(obj):
