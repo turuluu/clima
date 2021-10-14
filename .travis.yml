@@ -2,52 +2,53 @@
 # https://travis-ci.org/
 # https://github.com/dephell/dephell
 
+os: linux
 language: python
 dist: bionic
 
 python:
-  - "3.6"      # current default Python on Travis CI
-  - "3.7"
+  # - "3.6"      # current default Python on Travis CI
+  # - "3.7"
   - "3.8"
   - "3.9"
-  - "3.9-dev"   # 3.9 development branch
+  allow_failures:
+    - "3.10-dev"
 # command to install dependencies
-before_install:
+install:
   - pip install --upgrade pip wheel setuptools
   - pip install poetry
-install:
   - poetry install
 # command to run tests
 script:
   - pytest
 
-matrix:
-  include:
-    - python: "3.6"
-      env: ENV=pytest
-    - python: "3.7"
-      env: ENV=pytest
-    - python: "3.8"
-      env: ENV=pytest
-
-    - name: "Mac Build"
-      os: osx
-      language: generic
-      env: ENV=pytest
-      before_install:
-        - pip install --upgrade pip wheel setuptools
-        - pip install poetry
-      install:
-        - poetry install
-      script:
-        - poetry run pytest
-
-    - name: "Python 3.9 on Windows"
-      os: windows           # Windows 10.0.17134 N/A Build 17134
-      language: shell       # 'language: python' is an error on Travis CI Windows
-      before_install:
-        - choco install python
-        - python -m pip install --upgrade pip
-        - python -m pip install poetry
-      env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
-      script: poetry run pytest
+#jobs:
+#  include:
+#    # - python: "3.6"
+#    #   env: ENV=pytest
+#    # - python: "3.7"
+#    #   env: ENV=pytest
+#    # - python: "3.8"
+#    #  env: ENV=pytest
+#
+#    - name: "Mac Build"
+#      os: osx
+#      language: generic
+#      env: ENV=pytest
+#      addons:
+#        homebrew:
+#          packages:
+#            - python3
+#      script:
+#        - poetry run pytest
+#
+#    - name: "Python 3.10 on Windows"
+#      os: windows           # Windows 10.0.17134 N/A Build 17134
+#      language: shell       # 'language: python' is an error on Travis CI Windows
+#      before_install:
+#        - choco install python
+#      install:
+#        - pip install --upgrade --user pip wheel setuptools poetry
+#        - poetry install
+#      env: PATH=/c/Users/travis/AppData/Roaming/Python/Python310/Scripts:/c/Python310:/c/Python310/Scripts:$PATH
+#      script: poetry run pytest

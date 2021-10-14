@@ -6,9 +6,8 @@ keywords = ["cli"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries",
     "Topic :: Utilities",
@@ -21,7 +20,7 @@ authors = ["Joni Turunen <rojun.itu@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = "^3.8.0"
 setuptools = "^50.3.0"
 wheel = "*"
 cryptography = "^3.2"
