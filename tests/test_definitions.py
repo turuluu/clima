@@ -202,18 +202,27 @@ class TestWeirdSchema(TestCase, SysArgvRestore):
     }
 
     def setUp(self) -> None:
-        from clima import c, Schema
-        self.c = c
+        from clima import Schema
         super().save_sysargv()
 
         class C(Schema):
             test_int: int = self.defaults['test_int'][0]  # comment for the int
-            # this_here: str = self.defaults['test_int'][0]  # <0.7.14 would break the schema
+            # thishere
+            # foo: asdf
+            # foo: asdf = 0
+            # foo: asdf = 0  # sth
             test_str: str = self.defaults['test_str'][0]  # comment for the str
 
     def test_default(self):
-        c = self.c
+        from clima import c
         sys.argv = ['test', 'x']
+
+        @c
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
         for k, v in self.defaults.items():
             assert (getattr(c, k) == v[0])
             assert (type(getattr(c, k)) == v[1])

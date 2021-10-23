@@ -75,7 +75,13 @@ def parse_source_for_params(params):
         for src_line in params
         if src_line.startswith(' ')
     }
-    return OrderedDict(split_parameters)
+    try:
+        params_dict = OrderedDict(split_parameters)
+    except ValueError as ex:
+        params_dict = None
+
+    return params_dict
+
 
 
 def argument_help(attr_name, attr):
@@ -109,7 +115,8 @@ def prepare_docstring_help(N):
         for attr_name, cls in N.__annotations__.items():
 
             filtered = filter_params(N)
-            parsed = parse_source_for_params(filtered)
+            if parsed := parse_source_for_params(filtered) is None:
+                continue
             attr = attr_map(parsed).get(attr_name)
             if attr is None:
                 continue

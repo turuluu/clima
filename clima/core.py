@@ -1,3 +1,4 @@
+import fileinput
 import inspect
 import os
 import sys
@@ -255,11 +256,20 @@ def prepare_signatures(cls, schema):
     # pop the post_init from the end of parameters
     params = [prm for prm in params_with_post_init if prm.name != 'post_init']
 
+    # Check for piped input (stdin)
+    if len(sys.argv) >= 2 and not sys.stdin.isatty():
+        stdin_str = []
+        for line in fileinput.input(files=False, openhook=fileinput.hook_encoded(encoding='utf-8')):
+            stdin_str = line.strip()
+            break
+        sys.argv += stdin_str.split()
+
     # Hacking sys.argv to include positional keywords with assumed keyword names
     # as I couldn't find another workaround to tell python-fire how to parse these
     # The alternative had been to integrate python-fire with tighter coupling into this
     if len(sys.argv) > 2 and not any(['-h' in sys.argv, '--help' in sys.argv]):
         new_args = sys.argv[0:2]
+
         i = 2
         while i < len(sys.argv):
             arg = sys.argv[i]
