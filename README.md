@@ -399,13 +399,15 @@ or
     export <field> = <value>
     
 ### Password unwrapping/decryption with pass
+
+ If gnugpg(2) is installed, clima can leverage it to decrypt secrets on-the-fly.
  
- Note: Currently this works only for gpg-keys without password. It's not ideal, but it's better than plain text `.env`
- files ;)
+ Note: Currently this works most conveniently with gpg-keys without a password. Gpg handles the password prompts which might
+ fail on some platforms or configurations.
  
  Note 2: Leading and trailing whitespace (including `\n` linefeeds) are stripped, when decrypted.
  
- [pass](https://passwordstore.org) can be used to store passwords as gpg encrypted files under the home directory. Clima
+ [pass](https://passwordstore.org) (not required) can be used to store passwords as gpg encrypted files under the home directory. Clima
  uses the default path of ~/.password-store and the files found within. It will then match the arguments with the 
  stored passwords, for example:
  
@@ -445,6 +447,12 @@ This feature rose as an opinionated option, and I admit, it should be something 
 
 Note: When running the examples, the `exception_traceback.log` file will be written inside the `examples` directory
 
+    Error (full trace in exception.log):
+
+    traceback_example.py:7   ::  lumberjack()            :  self.bright_side_of_death()  =>
+    traceback_example.py:12  ::  bright_side_of_death()  :  return tuple()[0]            =>  IndexError
+
+    IndexError: tuple index out of range
 
 ## Ways to run the script for the uninitiated
 

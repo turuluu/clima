@@ -1,24 +1,22 @@
-from unittest import TestCase
-from functools import partial
 import sys
-
+from functools import partial
+from functools import wraps
+from pathlib import Path
+from pathlib import PurePosixPath as PosixPath
 # Using Pure versions of paths allows testing cross platform code
 # Can't use just Path, because that will get rendered to a platform specific
 # subclass when validating (e.g. on windows Path('...') -> WindowsPath('...') )
 from pathlib import PureWindowsPath as WindowsPath
-from pathlib import PurePosixPath as PosixPath
-from pathlib import Path
-
-# from clima import Schema
+from unittest import TestCase
 
 from tests import SysArgvRestore
 
+
+# from clima import Schema
 # TODO: sane exception for this scenario
 # def test_schema_without_default():
 #     class C(Schema):
 #         a: int
-
-from functools import wraps
 
 
 def wrap_cc(func):
@@ -195,6 +193,30 @@ class TestSchemaArgs(TestCase, SysArgvRestore):
         print(sys.argv)
         assert c.a == self.changed['str'], 'Args given in a different order as schema def should override values'
         assert c.b == self.changed['bool'], 'Args given in a different order as schema def should override values'
+
+
+class TestWeirdSchema(TestCase, SysArgvRestore):
+    defaults = {
+        'test_int': [84, int],
+        'test_str': ['oh hi', str],
+    }
+
+    def setUp(self) -> None:
+        from clima import c, Schema
+        self.c = c
+        super().save_sysargv()
+
+        class C(Schema):
+            test_int: int = self.defaults['test_int'][0]  # comment for the int
+            # this_here: str = self.defaults['test_int'][0]  # <0.7.14 would break the schema
+            test_str: str = self.defaults['test_str'][0]  # comment for the str
+
+    def test_default(self):
+        c = self.c
+        sys.argv = ['test', 'x']
+        for k, v in self.defaults.items():
+            assert (getattr(c, k) == v[0])
+            assert (type(getattr(c, k)) == v[1])
 
 
 class TestSchema(TestCase, SysArgvRestore):
