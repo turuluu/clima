@@ -75,7 +75,13 @@ def parse_source_for_params(params):
         for src_line in params
         if src_line.startswith(' ')
     }
-    return OrderedDict(split_parameters)
+    try:
+        params_dict = OrderedDict(split_parameters)
+    except ValueError as ex:
+        params_dict = {}
+
+    return params_dict
+
 
 
 def argument_help(attr_name, attr):

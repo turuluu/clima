@@ -8,7 +8,7 @@ from tests import SysArgvRestore
 
 class TestSimple(TestCase, SysArgvRestore):
     def test_version_print(self):
-        sys.argv = ['--version']
+        sys.argv = ['version']
 
         class C(Schema):
             pass

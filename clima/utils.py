@@ -31,8 +31,12 @@ def type_correct_with(cdict, cfg_tuple):
 def suppress_traceback():
     """Better exception printout
 
-    This is just awful formatting - after years of trying to read this, I still squint
-    my eyes to find the real issue. Let's reformat the traceback
+    Usage:
+        with utils.suppress_traceback():
+            ...code...  <-- tracebacks will be handled anew
+
+    For context, compared to the awful formatting below. After years of trying to read this traceback format, I still squint
+    my eyes to find the real issue. Let's reformat the traceback:
 
           ...
           File "/Users/.../src/py/python-fire/fire/core.py", line 127, in Fire

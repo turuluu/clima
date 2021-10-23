@@ -1,3 +1,4 @@
+import fileinput
 import inspect
 import os
 import sys
@@ -254,6 +255,12 @@ def prepare_signatures(cls, schema):
 
     # pop the post_init from the end of parameters
     params = [prm for prm in params_with_post_init if prm.name != 'post_init']
+
+    # Check for piped input (stdin)
+    if len(sys.argv) >= 2 and not sys.stdin.isatty():
+        with fileinput.input(files=False) as stdin:
+            stdin_str = next(stdin).strip()
+        sys.argv += stdin_str.split()
 
     # Hacking sys.argv to include positional keywords with assumed keyword names
     # as I couldn't find another workaround to tell python-fire how to parse these

@@ -195,39 +195,49 @@ class TestSchemaArgs(TestCase, SysArgvRestore):
         assert c.b == self.changed['bool'], 'Args given in a different order as schema def should override values'
 
 
-class TestWeirdSchema(TestCase, SysArgvRestore):
-    defaults = {
-        'test_int': [84, int],
-        'test_str': ['oh hi', str],
-    }
-
-    def setUp(self) -> None:
-        from clima import c, Schema
-        self.c = c
-        super().save_sysargv()
-
-        class C(Schema):
-            test_int: int = self.defaults['test_int'][0]  # comment for the int
-            # this_here: str = self.defaults['test_int'][0]  # <0.7.14 would break the schema
-            test_str: str = self.defaults['test_str'][0]  # comment for the str
-
-    def test_default(self):
-        c = self.c
-        sys.argv = ['test', 'x']
-        for k, v in self.defaults.items():
-            assert (getattr(c, k) == v[0])
-            assert (type(getattr(c, k)) == v[1])
+# class TestWeirdSchema(TestCase, SysArgvRestore):
+#     def setUp(self) -> None:
+#         self.defaults = {
+#             'test_int': [84, int],
+#             'test_str': ['oh hi', str],
+#         }
+#
+#         from clima import Schema
+#         super().save_sysargv()
+#
+#         class C(Schema):
+#             test_int: int = self.defaults['test_int'][0]  # comment for the int
+#             # thishere
+#             # foo: asdf
+#             # foo: asdf = 0
+#             # foo: asdf = 0  # sth
+#             test_str: str = self.defaults['test_str'][0]  # comment for the str
+#
+#     def test_commented_default(self):
+#         from clima import c
+#         sys.argv = ['test', 'x']
+#
+#         @c
+#         class Cli:
+#             def x(self):
+#                 """docstring"""
+#                 pass
+#
+#         for k, v in self.defaults.items():
+#             assert (getattr(c, k) == v[0])
+#             assert (type(getattr(c, k)) == v[1])
 
 
 class TestSchema(TestCase, SysArgvRestore):
-    defaults = {
-        'test_int': [42, int],
-        'test_str': ['oh hi', str],
-        'test_posix_path': [PosixPath('/tmp'), PosixPath],
-        'test_win_path': [WindowsPath('/tmp'), WindowsPath],
-    }
 
     def setUp(self) -> None:
+        self.defaults = {
+            'test_int': [42, int],
+            'test_str': ['oh hi', str],
+            'test_posix_path': [PosixPath('/tmp'), PosixPath],
+            'test_win_path': [WindowsPath('/tmp'), WindowsPath],
+        }
+
         from clima import c, Schema
         self.c = c
         super().save_sysargv()
