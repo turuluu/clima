@@ -20,7 +20,7 @@ install:
   - poetry install
 # command to run tests
 script:
-  - pytest
+  - pytest -s
 
 #jobs:
 #  include:

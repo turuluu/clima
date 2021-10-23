@@ -78,7 +78,7 @@ def parse_source_for_params(params):
     try:
         params_dict = OrderedDict(split_parameters)
     except ValueError as ex:
-        params_dict = None
+        params_dict = {}
 
     return params_dict
 
@@ -115,8 +115,7 @@ def prepare_docstring_help(N):
         for attr_name, cls in N.__annotations__.items():
 
             filtered = filter_params(N)
-            if parsed := parse_source_for_params(filtered) is None:
-                continue
+            parsed = parse_source_for_params(filtered)
             attr = attr_map(parsed).get(attr_name)
             if attr is None:
                 continue

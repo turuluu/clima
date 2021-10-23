@@ -258,10 +258,8 @@ def prepare_signatures(cls, schema):
 
     # Check for piped input (stdin)
     if len(sys.argv) >= 2 and not sys.stdin.isatty():
-        stdin_str = []
-        for line in fileinput.input(files=False, openhook=fileinput.hook_encoded(encoding='utf-8')):
-            stdin_str = line.strip()
-            break
+        with fileinput.input(files=False) as stdin:
+            stdin_str = next(stdin).strip()
         sys.argv += stdin_str.split()
 
     # Hacking sys.argv to include positional keywords with assumed keyword names
@@ -269,7 +267,6 @@ def prepare_signatures(cls, schema):
     # The alternative had been to integrate python-fire with tighter coupling into this
     if len(sys.argv) > 2 and not any(['-h' in sys.argv, '--help' in sys.argv]):
         new_args = sys.argv[0:2]
-
         i = 2
         while i < len(sys.argv):
             arg = sys.argv[i]
