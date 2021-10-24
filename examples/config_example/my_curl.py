@@ -9,6 +9,7 @@ class C(Schema):
     url: str = 'https://pypi.org'  # This will be overriden by foo.cfg
 
 
+# Hack to enable autocompletion in IDEs
 c: C = c
 
 
@@ -21,6 +22,7 @@ class MyCurl:
     def headers(self):
         """GET query to the url and print out the headers of the response"""
         self._configure()
+        print(f'requesting from {c.url}..')
         res = requests.get(c.url)
         print(res.headers)
 

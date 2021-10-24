@@ -15,6 +15,10 @@ So fresh and so lean, lean...
 - [ ] .conf file checks
     - [ ] Skip .conf files that don't include [Clima] section
     - [ ] Where the .conf files are loaded (recursive levels etc)?
+- [ ] usage and help page improvements
+    - [ ] Fix argument print out (instead of printing just [ARGS])
+    - [ ] Remove redundant - from <cmd> - <subcmd>
+    - [ ] Parse top level docstring for general help (when not using subcommands)
 
 ### v1.0.0
 
