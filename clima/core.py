@@ -258,9 +258,12 @@ def prepare_signatures(cls, schema):
 
     # Check for piped input (stdin)
     if len(sys.argv) >= 2 and not sys.stdin.isatty():
-        with fileinput.input(files=False) as stdin:
-            stdin_str = next(stdin).strip()
-        sys.argv += stdin_str.split()
+        try:
+            with fileinput.input(files=False) as stdin:
+                stdin_str = next(stdin).strip()
+            sys.argv += stdin_str.split()
+        except StopIteration as ex:
+            pass
 
     # Hacking sys.argv to include positional keywords with assumed keyword names
     # as I couldn't find another workaround to tell python-fire how to parse these
