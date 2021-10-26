@@ -4,7 +4,6 @@ on: [push, pull_request]
 
 jobs:
   Tests:
-    needs: Linting
     name: ${{ matrix.os }} / ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
