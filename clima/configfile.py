@@ -1,5 +1,6 @@
 """Configuration file (sth.cfg) handling"""
 import configparser
+import sys
 
 from pathlib import Path
 
@@ -39,7 +40,7 @@ def read_config(_filepath='test.cfg') -> dict:
         else:
             print('warning: config file found at {}, but it was missing section named [Clima]'.format(str(filepath)))
     except:
-        print(f'warning: clima deducted {_filepath} to be a valid config file, but could not read it.')
+        print(f'warning: clima deducted {_filepath} to be a valid config file, but could not read it.', file=sys.stderr)
 
     return parsed_conf
 
