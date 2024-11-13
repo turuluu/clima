@@ -35,6 +35,8 @@ def read_config(_filepath='test.cfg') -> dict:
     try:
         file_config = configparser.ConfigParser()
         file_config.read(filepath)
+        # TODO: When fixing version printing with reflection, use this to alternatively use
+        # package name for the config section
         if 'Clima' in file_config:
             parsed_conf = dict(file_config['Clima'])
         else:

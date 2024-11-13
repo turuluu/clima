@@ -557,8 +557,8 @@ class TestIterables(TestCase, SysArgvRestore):
         assert c.b == tuple(['cd']), 'Should wrap in iterable when parsing cli args'
         assert c.c == list([13]), 'Should wrap in iterable when parsing cli args'
         assert c.d == list(['cd']), 'Should wrap in iterable when parsing cli args'
-        assert c.e == set([13]), 'Should wrap in iterable when parsing cli args'
-        assert c.f == set(['cd']), 'Should wrap in iterable when parsing cli args'
+        assert c.e == {13}, 'Should wrap in iterable when parsing cli args'
+        assert c.f == {'cd'}, 'Should wrap in iterable when parsing cli args'
 
     def test_cli(self):
         c = self.c
@@ -576,5 +576,5 @@ class TestIterables(TestCase, SysArgvRestore):
         assert c.b == tuple([self._str]), 'Should wrap in iterable when configured in schema'
         assert c.c == list([self._int]), 'Should wrap in iterable when configured in schema'
         assert c.d == list([self._str]), 'Should wrap in iterable when configured in schema'
-        assert c.e == set([self._int]), 'Should wrap in iterable when configured in schema'
-        assert c.f == set([self._str]), 'Should wrap in iterable when configured in schema'
+        assert c.e == {self._int}, 'Should wrap in iterable when configured in schema'
+        assert c.f == {self._str}, 'Should wrap in iterable when configured in schema'

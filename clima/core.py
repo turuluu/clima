@@ -186,6 +186,7 @@ def cli(cls):
 
         for attr in tmp_c._get_configured():
             setattr(c, attr, getattr(tmp_c, attr))
+            # setattr(c, attr, cast_as_annotated(s, attr, container=tmp_c))
             # c._set_configured(tmp_c._get_configured())
 
     cls_attrs = dict(
@@ -255,6 +256,7 @@ def prepare_signatures(cls, schema):
 
     # pop the post_init from the end of parameters
     params = [prm for prm in params_with_post_init if prm.name != 'post_init']
+    print(params)
 
     # Check for piped input (stdin)
     if len(sys.argv) >= 2 and not sys.stdin.isatty():
@@ -295,7 +297,9 @@ def prepare_signatures(cls, schema):
 
 
 def prepare(cls, schema: Schema):
-    """Beef: prepares signatures, docstrings and initiates fire for the cli-magic"""
+    """Beef: prepares signatures, docstrings and initiates fire for the cli-magic
+    Also: error handling printout customisation
+    """
     prepare_signatures(cls, schema)
     docstring.wrap_method_docstring(cls, schema)
 
@@ -304,6 +308,11 @@ def prepare(cls, schema: Schema):
         if len(sys.argv) > 1 and sys.argv[-1] == 'version':
             # Version printing part 2
             print(schema.version)
+
+            # TODO: fix version printing maybe with the latest:
+            # import importlib.metadata
+            # package = ... # reflection
+            # print(importlib.metadata.version(package))
 
         else:
             Fire(cls)
