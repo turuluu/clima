@@ -1,12 +1,13 @@
 import configparser
 import inspect
 import sys
-from importlib import metadata
 # Until poetry fixes this https://github.com/python-poetry/poetry/issues/144
 # This hack is necessary to report correct __version__
 # inside the project
 # Version printing part 0
 from pathlib import Path
+
+from clima import utils
 
 
 def asdict(obj):
@@ -23,37 +24,42 @@ def schema_decorator(decorators_state, cls):
     decorators_state['schema'] = cls()
     return cls
 
-
-def get_importing_frame():
-    piece = inspect.stack()[0]
-    for frame in inspect.getouterframes(piece.frame):
-        code_context = frame.code_context
-        if isinstance(code_context, list):
-            code = code_context[0]
-            if 'clima' in code and 'import' in code and 'core' not in code:
-                return frame
+# def deduce_importer_version():
+#     """Experimental way of deducing the version from the package that
+#     imports clima
+#     """
+#     package = deduce_package()
+#     return get_package_version(package)
 
 
-def deduce_importer_version():
-    """experimental way of deducing the version from the package that
-    imports clima
-    """
-    from importlib import util
-    version = None
-    try:
-        frame = get_importing_frame()
-        p = Path(frame.filename)
-        parent = str(p.parent.name)
-        importer_package = None
-        while importer_package is None:
-            spec = util.find_spec(parent)
-            if hasattr(spec, 'name'):
-                importer_package = spec.name
-        version = metadata.version(importer_package)
-    except:
-        pass
+# def deduce_importer_version():
+#     """experimental way of deducing the version from the package that
+#     imports clima
+#     """
+#     from importlib import util
+#     version = None
+#     try:
+#         frame = get_importing_frame()
+#         p = Path(frame.filename)
+#         parent = str(p.parent.name)
+#         importer_package = None
+#         while importer_package is None:
+#             spec = util.find_spec(parent)
+#             if hasattr(spec, 'name'):
+#                 importer_package = spec.name
+#                 break;
+#             if str(p.parent) == str(p.parent.parent):
+#                 break
+#             p = p.parent
+#             parent = str(p.name)
+#             if importer_package:
+#                 version = metadata.version(importer_package)
+#         version = metadata.version(importer_package)
+#     except:
+#         pass
 
-    return version
+#     return version
+
 
 
 def parse_version_from_pyproject_toml():
@@ -76,7 +82,7 @@ def get_pkg_version():
     # Idea is, that when poetry is used, this will look up the version
     # in its configuration.
 
-    if (version := deduce_importer_version()) is not None:
+    if (version := utils.get_package_version(utils.deduce_package()) ) is not None:
         pass
     elif (version := parse_version_from_pyproject_toml()) is not None:
         pass

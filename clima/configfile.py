@@ -4,6 +4,8 @@ import sys
 
 from pathlib import Path
 
+from clima import utils
+
 
 def is_in_module(f):
     return len(list(Path(f).parent.glob('__init__.py')))
@@ -26,7 +28,18 @@ def find_cfg(p, level=2):
         return cfgs[0]
 
 
-def read_config(_filepath='test.cfg') -> dict:
+
+def read_config(_filepath='test.cfg', package_name=None) -> dict:
+    """Read and parse a config file.
+    
+    Args:
+        _filepath: Path to the config file
+        package_name: Package name to look for in config sections. Only used in tests,
+                     normally deduced automatically.
+
+    Returns:
+        Dictionary containing the parsed config values
+    """
     filepath = Path(_filepath)
     parsed_conf = {}
     if not filepath.exists():
@@ -37,15 +50,19 @@ def read_config(_filepath='test.cfg') -> dict:
         file_config.read(filepath)
         # TODO: When fixing version printing with reflection, use this to alternatively use
         # package name for the config section
-        if 'Clima' in file_config:
+        if package_name is None:
+            package_name = utils.deduce_package()
+
+        if package_name is not None and package_name in file_config:
+            parsed_conf = dict(file_config[package_name])
+        elif 'Clima' in file_config:
             parsed_conf = dict(file_config['Clima'])
-        else:
-            print('warning: config file found at {}, but it was missing section named [Clima]'.format(str(filepath)))
+        # else:
+        #     print('warning: config file found at {}, but it was missing section named [Clima]'.format(str(filepath)))
     except:
-        print(f'warning: clima deducted {_filepath} to be a valid config file, but could not read it.', file=sys.stderr)
+        print(f'warning: inferred {_filepath} to be a valid config file, but could not read it.', file=sys.stderr)
 
     return parsed_conf
-
 
 def get_config_path(_schema):
     """

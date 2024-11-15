@@ -3,6 +3,6 @@ import importlib.metadata
 __version__= importlib.metadata.version('clima')
 
 from clima import fire
-from clima.core import c, Schema
+from clima.core import c, Schema, Configurable
 from clima.helputils import print_help, HelpString
 from clima.utils import suppress_traceback

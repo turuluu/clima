@@ -95,7 +95,8 @@ class Configurable:
     def _clear(self):
         """Testing requires clearing global state"""
 
-        c.__configured = None
+        self.__configured = None
+        Schema._package_name = None
 
         global DECORATORS_STATE
         DECORATORS_STATE = {
@@ -204,12 +205,13 @@ def cli(cls):
 class Schema(object, metaclass=schema.MetaSchema):
     """Base class for the user's configuration class"""
 
+    _package_name = None
     def _get_configfile_asdict(self):
         result: Dict = {}
 
         configfile_path = configfile.get_config_path(self)
         if configfile_path is not None:
-            result = utils.filter_fields(configfile.read_config(configfile_path), self)
+            result = utils.filter_fields(configfile.read_config(configfile_path, self._package_name), self)
             result = utils.type_correct_with(result, self)
 
         return result

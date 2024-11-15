@@ -1,9 +1,67 @@
 import sys
 import traceback
+import inspect
+
 from contextlib import contextmanager
 from pathlib import Path
+from importlib import metadata
 
 from tabulate import tabulate
+
+
+def get_importing_frame():
+    piece = inspect.stack()[0]
+    for frame in inspect.getouterframes(piece.frame):
+        code_context = frame.code_context
+        if isinstance(code_context, list):
+            code = code_context[0]
+            if 'clima' in code and 'import' in code and 'core' not in code:
+                return frame
+
+def get_package_name(path: Path, parent_name: str):
+    """Helper function to get package name from path and parent name
+    
+    Args:
+        path: Path object representing file location
+        parent_name: Name of parent directory
+        
+    Returns:
+        Package name if found, None otherwise
+    """
+    from importlib import util
+    importer_package = None
+    
+    while importer_package is None:
+        spec = util.find_spec(parent_name)
+        if hasattr(spec, 'name'):
+            importer_package = spec.name
+            break
+        if str(path.parent) == str(path.parent.parent):
+            break
+        path = path.parent
+        parent_name = str(path.name)
+        
+    return importer_package
+
+def deduce_package():
+    """Deduce the package name that imports clima"""
+    frame = get_importing_frame()
+    if not frame:
+        return None
+        
+    p = Path(frame.filename)
+    parent = str(p.parent.name)
+    return get_package_name(p, parent)
+
+def get_package_version(package_name):
+    """Get version from package using importlib metadata"""
+    if not package_name:
+        return None
+        
+    try:
+        return metadata.version(package_name)
+    except:
+        return None
 
 
 def filter_fields(d: dict, nt):
