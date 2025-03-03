@@ -1,3 +1,5 @@
+.venv/
+
 #### visualstudiocode ####
 .vscode
 .vscode/*
