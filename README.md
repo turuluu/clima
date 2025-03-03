@@ -1,11 +1,11 @@
-<img src="https://raw.githubusercontent.com/d3rp/clima/master/clima.png" align="left" /> Create a command line interface with minimal setup.
+<img src="https://raw.githubusercontent.com/turuluu/clima/master/clima.png" align="left" /> Create a command line interface with minimal setup.
 
 
 [![PyPI](https://img.shields.io/pypi/v/clima)](https://pypi.org/project/clima/)
 [![Python versions](https://img.shields.io/pypi/pyversions/clima)]()
 [![PyPI license](https://img.shields.io/pypi/l/clima)]() 
-[![Build status](https://app.travis-ci.com/d3rp/clima.svg?branch=master)](https://app.travis-ci.com/github/d3rp/clima)
-[![Dependencies](https://badges.hiptest.com/librariesio/release/github/d3rp/clima)](https://libraries.io/pypi/clima) 
+[![Build status](https://app.travis-ci.com/turuluu/clima.svg?branch=master)](https://app.travis-ci.com/github/turuluu/clima)
+[![Dependencies](https://badges.hiptest.com/librariesio/release/github/turuluu/clima)](https://libraries.io/pypi/clima) 
 
  # clima - command line interface with a schema 
 
@@ -46,30 +46,23 @@
 
 ### Features
 
-Clima handles loading and parsing command
-line arguments with some off-the-shelf features, including:
+Clima handles loading and parsing command line arguments similarily to argparse, but without the boilerplate. 
 
-- a global configuration object
-    - a quick definition of defaults
-    - defining defaults doubles as a description for help on the command line
-    - type handling with annotations
-- definitions with configuration files
-- env variables
-    - loading .env files
-- secrets stored with [pass](https://www.passwordstore.org/)
-- post_init hook
+Main features:
+
+- A global configuration object mapping as command line arguments defined as a single dataclass
+    - Default values
+    - Type casting
+    - Docstring doubles as `--help` description for the command line
+- Alternatives to command line arguments
+    - Declaring defaults in a config file
+    - Env variables
+    - .env files
+- Handling secrets using gnugpg (and [pass](https://www.passwordstore.org/) directory structure)
 
 ### Cli definition
 
-Creating a command-line interface for your program:
-
-1. Import all necessary parts from the package clima
-1. (optional) Define configuration i.e., Schema
-1. Define the command line commands i.e., CLI-class:
-
-![example ascii](https://raw.githubusercontent.com/d3rp/clima/master/example.svg)
-
-Example: to set up a configuration and a command-line interface ready to go.
+Create a command-line interface:
 
     from clima import c
     
@@ -77,54 +70,49 @@ Example: to set up a configuration and a command-line interface ready to go.
     class Cli:
         def say_hi(self):
             print('oh hi - whatever this is..')
-            
-            
-The command line usage form could be as simple as:
-  
-     my_tool say_hi
-  
-### Configuration object in a spiffy
+
+![example ascii](https://raw.githubusercontent.com/turuluu/clima/master/example.svg)
+
+### Configuration 
 
     from clima import c
     
     # Defining the settings (configuration object)
     class S(Schema):
-        place = 'world'
+        place = 'Finland'
         
     @c
     class Cli:
         def say_hi(self):
-            # using configuration object 'c'
-            print(f'oh hi - {c.place}')
+            print(f'Hi from {c.place}')
             
             
-Again, the command line usage form could be as simple as:
+Usage example:
   
-     my_tool say_hi
-     my_tool say_hi --place 'other world'
+     cli.py say_hi
+     > Hi from Finland
+     cli.py say_hi --place 'Sweden'
+     > Hi from Sweden
  
 See the `examples` folder and other sections for more examples. For example, the folder includes [something that resembles
 the example above](examples/readme_example.py).
   
-
 ## Installing
 
     pip install --user clima
 
 [toc](#table-of-contents)
 
-   
-
 ## Usage
 
 See the example file in [`examples/script_example.py`](examples/script_example.py). Here's a rundown of the individual
-parts in such a script (adapted from another example at [module example](examples/module_example)).
+parts (adapted from another example at [module example](examples/module_example)).
 
-First, import the required components:
+Import clima
 
     from clima import c, Schema
     
-In your code, define the `Schema` subclass:
+Define the `Schema` subclass:
 
     class Configuration(Schema):
         a: str = 'A'  # a description
@@ -133,14 +121,17 @@ In your code, define the `Schema` subclass:
 Here "Configuration" is an arbitrary name, no magic there. The inherited `Schema` class
 defines the attributes (i.e. `a` and `x` in this example). 
 
-Note the specific formatting of the `Schema` subclass:
+Note the specific formatting of the `Schema` subclass follows the format:
 
         # attribute[: type] = default value  [# Description for the --help]
+
+The values in square brackets `[]` are optional.
+
+For example:
+
         a: str = 'A'  # a description
        
-`a` is the attribute that can be called in the code later with `c.a`. In this example, it has a type of 'str' and a default
-value of 'A'. The values in square brackets `[]` are
-optional.
+`a` is the attribute that can be called in the code later with `c.a`. In this example, it has a type of 'str' and a default value of 'A'.
 
 Clima parses the comment after the definition for the command-line help printout. In other words, Clima parses all of these parts to be displayed when the program is called using the argument '--help'. For example like this:
 
@@ -186,17 +177,15 @@ As a decorator, `@c` defines the class to be parsed as the subcommands. As an ob
 
 ## Examples and platforms
 
-Tried and used on Linux, macOS, and windows. However, packaging and dependency management in python is sometimes hairy and
-your mileage may vary.
+Tried and used on Linux, macOS, and windows. However, packaging and dependency management in python is sometimes hairy and your mileage may vary.
 
 More examples in the [examples directory](examples) with printouts of the defined subcommands and helps.
 
-
 ### Testing the examples
 
-The [examples](examples) can be tried out by cloning the repo and running from repo directory root (on linux and the like):
+Try the [examples](examples) by running from repo directory root (on linux and the like):
 
-    git clone https://github.com/d3rp/clima.git 
+    git clone https://github.com/turuluu/clima.git 
     cd clima
     PYTHONPATH=$PWD python ./examples/readme_example.py foo -h
 
@@ -207,7 +196,7 @@ Running the examples that wrap a module:
     PYTHONPATH=$PWD python ./examples/module_example/__main__.py subcommand-bar
     ...
 
-The output should resemble this (fire v0.1.3 prints out Args, fire v0.2.1 does not (though it looks much nicer))
+The examples should printout:
 
 ```
 $ tester subcommand-foo -- -h
@@ -224,8 +213,7 @@ Args:
 Usage:       __main__.py subcommand-foo [--X ...]
 ```
 
-All of the example scripts can be run by installing [poetry](https://python-poetry.org) and running the `run_examples.bash`
-script:
+All of the example scripts can also be run by installing [poetry](https://python-poetry.org) and running the `run_examples.bash` script:
 
     pip install --user poetry
     ./run_examples.bash
@@ -239,6 +227,8 @@ Version printing works via the `version` subcommand and provides a version check
     my_tool version
    
 Clima parses the `version` attribute into the `c` object, so if you want control over it, you can overwrite it with the `post_init` or by handling the `c.version` otherwise.
+
+Note: `my_tool` is an executable script either as a symbolic link found in the path. It's one way of creating CLI programs quickly.
 
 ## Autocompletion
  
@@ -443,14 +433,14 @@ documentation for nice additional features such as:
 
 ## Truncated error printing
 
-This feature rose as an opinionated option, and I admit, it should be something the user could bypass. Even though I have used python for a few years professionally, I am still not satisfied with its error printing. When raising exceptions, Clima truncates the error lists and tries to provide a more readable version of the "first" point of failure. The whole traceback is written into a logfile `exception_traceback.log` to examine if the truncated output provides insufficient information.
+This feature rose as an opinionated option and should be something the user could bypass (wip). When raising exceptions, Clima truncates the error lists and tries to provide a more readable version of the "first" point of failure. The whole traceback is written into a logfile `exception.log` to examine if the truncated output provides insufficient information.
 
 Note: When running the examples, the `exception_traceback.log` file will be written inside the `examples` directory
 
     Error (full trace in exception.log):
 
     traceback_example.py:7   ::  lumberjack()            :  self.bright_side_of_death()  =>
-    traceback_example.py:12  ::  bright_side_of_death()  :  return tuple()[0]            =>  IndexError
+    traceback_example.py:12  ::  bright_side_of_life()   :  return tuple()[0]            =>  IndexError
 
     IndexError: tuple index out of range
 
@@ -483,7 +473,7 @@ Now this could be linked as an adhoc command for example:
 
 ### Packaging a module (pip ready)
 
-For a pip-installable package, one could [package this as a runnable command](https://github.com/d3rp/my_tool) -
+For a pip-installable package, one could [package this as a runnable command](https://github.com/turuluu/my_tool) -
 publish in the public or one's private pypi etc - and then approach the convenience factor shown at first.
 
     pip install my_tool
@@ -503,7 +493,7 @@ You can use `version` to bump up versions:
 
 This repo is based on [poetry](https://poetry.eustace.io).
 
-    git clone https://github.com/d3rp/clima.git 
+    git clone https://github.com/turuluu/clima.git 
     cd clima
     poetry install --no-dev
 
@@ -537,9 +527,5 @@ Other options for a full-featured CLI experience:
 
 * [dotenv](https://github.com/theskumar/python-dotenv)
 * gnugpg - this is pass through though. If it's not installed, the feature is not in use.
-
-* fire - [python-fire](https://github.com/google/python-fire) from google does the cli wrapping / forked and included 
-into the repo - I wanted to have the version 0.1.x formatting and help output with few hacks of my own
-
 
 [toc](#table-of-contents)

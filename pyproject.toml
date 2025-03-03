@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "clima"
-version = "0.8.2"
+version = "0.9.0"
 description = "Command line interface (cli) boilerplate using a schema"
 keywords = ["cli", "schema", "boilerplate", "cli-boilerplate", "cli-schema", "cli-tool", "cli-tools", "cli-interface", "cli-interfaces", "cli-application", "cli-applications"]
 classifiers = [
@@ -10,13 +10,15 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Build Tools",
     "Topic :: Software Development :: Libraries",
     "Topic :: Utilities",
     "Operating System :: POSIX :: Linux",
     "Operating System :: Microsoft :: Windows :: Windows 10",
     "Operating System :: MacOS :: MacOS X", ]
-homepage = "https://github.com/d3rp/clima.git"
+homepage = "https://github.com/turuluu/clima.git"
 authors = ["Joni Turunen <rojun.itu@gmail.com>"]
 readme = "README.md"
 

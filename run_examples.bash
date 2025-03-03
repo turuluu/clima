@@ -1,4 +1,5 @@
 #!/bin/bash
+poetry install
 poetry run bash -c '
 
 function run_py () {
