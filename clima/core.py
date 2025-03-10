@@ -46,7 +46,6 @@ class Configurable:
             _schema._asdict()
         )
 
-        # self.__configured = dict(cm)
         return dict(cm)
 
     def _init(self, _schema: schema.MetaSchema):
