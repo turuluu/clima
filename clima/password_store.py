@@ -86,6 +86,3 @@ def get_secrets(configuration_tuple):
 def test_decrypt():
     keyname = 'pace_eden_lookup_signid'
     print(decrypt(keyname))
-
-# test_keymapping()
-# test_decrypt()
