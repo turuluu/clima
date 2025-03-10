@@ -6,7 +6,6 @@ keywords = ["cli", "schema", "boilerplate", "cli-boilerplate", "cli-schema", "cl
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -23,10 +22,10 @@ authors = ["Joni Turunen <rojun.itu@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8.0"
-setuptools = "^58.2.0"
+python = ">3.9.1"
+setuptools = "70.0.0"
 wheel = "*"
-cryptography = "^35.0.0"
+cryptography = "44.0.1"
 bleach = "^4.1.0"
 six = "*"
 tabulate = "^0.8.7"
