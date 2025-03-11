@@ -24,12 +24,11 @@ jobs:
         shell: bash
         run: |
           echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
-    
       - name: Install Poetry
-        shell: bash
-        run: |
-          curl -fsS -o install-poetry.py https://raw.githubusercontent.com/sdispater/poetry/master/install-poetry.py
-          python install-poetry.py --preview -y
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+
       - name: Update PATH
         if: ${{ matrix.os != 'Windows' }}
         shell: bash
@@ -40,10 +39,6 @@ jobs:
         shell: bash
         run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
 
-      - name: Setup Poetry
-        shell: bash
-        run: |
-          poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v4
         id: cache
