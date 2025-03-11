@@ -9,10 +9,10 @@ jobs:
     strategy:
       matrix:
         os: [Ubuntu, MacOS, Windows]
-        python-version: [3.8, 3.9]
+        python-version: [3.9, 3.10, 3.11, 3.12]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
@@ -45,7 +45,7 @@ jobs:
         run: |
           poetry config virtualenvs.in-project true
       - name: Set up cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: cache
         with:
           path: .venv
