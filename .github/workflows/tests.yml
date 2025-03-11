@@ -3,16 +3,16 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  python-version-tests:
+  Tests:
     name: ${{ matrix.os }} / ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
         os: [Ubuntu, MacOS, Windows]
-        python-version: [3.8, 3.9, 3.10, 3.11]
+        python-version: [3.9, 3.10, 3.11, 3.12]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
@@ -24,12 +24,11 @@ jobs:
         shell: bash
         run: |
           echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
-    
       - name: Install Poetry
-        shell: bash
-        run: |
-          curl -fsS -o install-poetry.py https://raw.githubusercontent.com/sdispater/poetry/master/install-poetry.py
-          python install-poetry.py --preview -y
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+
       - name: Update PATH
         if: ${{ matrix.os != 'Windows' }}
         shell: bash
@@ -40,12 +39,8 @@ jobs:
         shell: bash
         run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
 
-      - name: Setup Poetry
-        shell: bash
-        run: |
-          poetry config virtualenvs.in-project true
       - name: Set up cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: cache
         with:
           path: .venv
@@ -65,22 +60,4 @@ jobs:
         shell: bash
         run: |
           poetry run pytest -s
-
-  toxic-tests:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install tox tox-gh-actions
-      - name: Test with tox
-        run: tox
+          poetry install
