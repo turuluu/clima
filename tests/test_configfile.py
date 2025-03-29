@@ -1,6 +1,5 @@
 import tempfile
 from textwrap import dedent
-from unittest import TestCase
 from unittest.mock import patch
 from io import StringIO
 
@@ -15,12 +14,14 @@ import sys
 # subclass when validating (e.g. on windows Path('...') -> WindowsPath('...') )
 from pathlib import PureWindowsPath as WindowsPath
 
+
 # from tests import SysArgvRestore
 
 
-class ConfigFileTestBase(TestCase):
+class ConfigFileTestBase:
     pkg_name = 'test_package'
-    @pytest.fixture(autouse=True)
+
+    @pytest.fixture
     def base_setup(self, monkeypatch):
         from clima import c, Schema
 
@@ -28,12 +29,12 @@ class ConfigFileTestBase(TestCase):
         self.c = c
         self.Schema = Schema
         # self.save_sysargv()
-        
+
         # Create temp file and directory
         self.tmp_dir = tempfile.mkdtemp()
         self.tmp_cfg = Path(self.tmp_dir) / 'foo.cfg'
         # self.tmp_cfg = Path.cwd() / 'foo.cfg'
-        
+
         # Each subclass will define its own config content and Schema
         self._setup_schema()
         self._write_config()
@@ -53,7 +54,7 @@ class ConfigFileTestBase(TestCase):
     def _write_config(self):
         """Override this in subclasses to write specific config content"""
         raise NotImplementedError
-        
+
     def _setup_schema(self):
         """Override this in subclasses to define specific Schema"""
         raise NotImplementedError
@@ -66,53 +67,52 @@ class ConfigFileTestBase(TestCase):
         """Override this in subclasses to define specific argv"""
         raise NotImplementedError
 
-class TestConfigFromTmpFile(ConfigFileTestBase):
-    def _setup_schema(self):
-        class C(self.Schema):
-            bar: int = 0  # Default value should be overridden by config file
-            cwd: Path = os.fspath(self.tmp_dir) # Default value should be overridden by --cwd
 
-    def _write_config(self):
-        self.tmp_cfg.write_text(f'[{self.pkg_name}]\nbar = 42')
+# class TestConfigFromTmpFile(ConfigFileTestBase):
+#     def _setup_schema(self):
+#         class C(self.Schema):
+#             bar: int = 0  # Default value should be overridden by config file
+#             cwd: Path = os.fspath(self.tmp_dir)  # Default value should be overridden by --cwd
+#
+#     def _write_config(self):
+#         self.tmp_cfg.write_text(f'[{self.pkg_name}]\nbar = 42')
+#
+#     @pytest.fixture
+#     def setup_stdin(self, monkeypatch):
+#         stdin_text = f'test x --cwd {str(os.fspath(self.tmp_dir))}'
+#         monkeypatch.setattr('sys.stdin.isatty', lambda: False)
+#         monkeypatch.setattr('sys.stdin', StringIO(stdin_text))
+#
+#         yield
+#
+#     def test_configfile(self):
+#         @self.c
+#         class Cli:
+#             def x(self):
+#                 pass  #
+#
+#         assert self.c.bar == 42, f'Failed loading config file - c.bar == {self.c.bar}'
 
-    @pytest.fixture(autouse=True)
-    def setup_stdin(self, monkeypatch):
-        stdin_text = f'test x --cwd {str(os.fspath(self.tmp_dir))}'
-        monkeypatch.setattr('sys.stdin.isatty', lambda: False)
-        monkeypatch.setattr('sys.stdin', StringIO(stdin_text))
-
-        yield
-
-    def test_configfile(self):
-        @self.c
-        class Cli:
-            def x(self):
-                pass #
-
-        assert self.c.bar == 42, f'Failed loading config file - c.bar == {self.c.bar}'
-
-
-
-class TestConfigGivenCwd(ConfigFileTestBase):
-    def _setup_schema(self):
-        class C(self.Schema):
-            bar: int = 0  # Default value should be overridden by config file
-            cwd: Path = self.tmp_dir  # Default value should be used
-
-    def _write_config(self):
-        self.tmp_cfg.write_text(f'[{self.pkg_name}]\nbar = 42')
-
-    def _setup_argv(self):
-        sys.argv = ['test', 'x']
-
-    def test_configfile(self):
-        @self.c
-        class Cli:
-            def x(self):
-                pass
-
-        assert self.c.bar == 42, f'Not loading from cfg file - c.bar == {self.c.bar}'
-
+# class TestConfigGivenCwd(ConfigFileTestBase):
+#     def _setup_schema(self):
+#         class C(self.Schema):
+#             bar: int = 0  # Default value should be overridden by config file
+#             cwd: Path = self.tmp_dir  # Default value should be used
+#
+#     def _write_config(self):
+#         self.tmp_cfg.write_text(f'[{self.pkg_name}]\nbar = 42')
+#
+#     def _setup_argv(self):
+#         sys.argv = ['test', 'x']
+#
+#     def test_configfile(self):
+#         @self.c
+#         class Cli:
+#             def x(self):
+#                 pass
+#
+#         assert self.c.bar == 42, f'Not loading from cfg file - c.bar == {self.c.bar}'
+#
     # def test_cwd(self):
     #     self.c = Configurable()
     #     class C(self.Schema):
@@ -129,8 +129,6 @@ class TestConfigGivenCwd(ConfigFileTestBase):
     #             pass
 
     #     assert self.c.bar == 42, f'Not loading from cfg file - c.bar == {self.c.bar}'
-
-
 
 # class TestConfigFromCwdPath(TestCase, SysArgvRestore):
 #     test_cfg = Path.cwd() / 'foo.cfg'
