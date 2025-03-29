@@ -529,3 +529,20 @@ Other options for a full-featured CLI experience:
 * gnugpg - this is pass through though. If it's not installed, the feature is not in use.
 
 [toc](#table-of-contents)
+
+## Running tests
+
+tox (-> pyenv) -> poetry -> pytest
+
+Check for tox.ini for exact python versions. For example, py39, py312
+Install the versions
+
+    pyenv install 3.9 3.12
+
+Activate the versions
+
+    pyenv global 3.9 3.12
+
+Run tests with tox
+    
+    tox
