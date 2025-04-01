@@ -7,7 +7,7 @@
 [![Build status](https://app.travis-ci.com/turuluu/clima.svg?branch=master)](https://app.travis-ci.com/github/turuluu/clima)
 [![Dependencies](https://badges.hiptest.com/librariesio/release/github/turuluu/clima)](https://libraries.io/pypi/clima) 
 
- # clima - command line interface with a schema 
+# clima - command line interface with a schema 
   
 ## Briefly
 

@@ -6,9 +6,10 @@ So fresh and so lean, lean...
 
 ### v0.9.0
 
+- [▣] maybe also look into tox testing to verify actual cli running
+- [▣] Split readme into readme and docs
 - [ ] cwd argument is not respected (special parameter)
 - [ ] Validation of undefined parameters (should advice that they're not defined in the config)
-- [ ] maybe also look into tox testing to verify actual cli running
 - [ ] fix string handling corner cases (fire doesn't handle well strings as arguments, when there's spaces)
 - [ ] include (and fix) hypothesis tests
 - [ ] Fix help when given an undefined parameter
@@ -44,7 +45,6 @@ So fresh and so lean, lean...
 - [ ] way to define schema within the cli class
 - [ ] generate man page in a reasonable fashion
   - [ ] though fire v0.2.1 help looks like a man page
-- [ ] Split readme into readme and wiki
  
 ## Won't fix
 
