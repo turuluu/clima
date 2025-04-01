@@ -8,57 +8,22 @@
 [![Dependencies](https://badges.hiptest.com/librariesio/release/github/turuluu/clima)](https://libraries.io/pypi/clima) 
 
  # clima - command line interface with a schema 
-
-##### Table of contents
-
-  * [Briefly](#briefly)
-     * [Features](#features)
-     * [Cli definition](#cli-definition)
-     * [Configuration object in a spiffy](#configuration-object-in-a-spiffy)
-  * [Installing](#installing)
-  * [Usage](#usage)
-  * [Examples and platforms](#examples-and-platforms)
-     * [Testing the examples](#testing-the-examples)
-  * [Version printing](#version-printing)
-  * [Autocompletion](#autocompletion)
-     * [..in IDEs (wip)](#in-ides-wip)
-     * [..in bash](#in-bash)
-  * [Post init hook](#post-init-hook)
-     * [Cli.post_init()](#clipost_init)
-     * [Schema.post_init()](#schemapost_init)
-  * [Configuration options](#configuration-options)
-     * [Configuration file and environment variables](#configuration-file-and-environment-variables)
-     * [Type casting with configuration definition](#type-casting-with-configuration-definition)
-     * [Configuration file in the home directory](#configuration-file-in-the-home-directory)
-     * [.env file](#env-file)
-     * [Password unwrapping/decryption with pass](#password-unwrappingdecryption-with-pass)
-  * [Additional features via Fire](#additional-features-via-fire)
-  * [Truncated error printing](#truncated-error-printing)
-  * [Ways to run the script for the uninitiated](#ways-to-run-the-script-for-the-uninitiated)
-     * [Linking executable script to ~/.local/bin](#linking-executable-script-to-localbin)
-     * [Packaging a module (pip ready)](#packaging-a-module-pip-ready)
-  * [Building/Installing from source](#buildinginstalling-from-source)
-  * [Long description and background](#long-description-and-background)
-     * [Why another cli framework?](#why-another-cli-framework)
-  * [Dependencies](#dependencies)
-   
+  
 ## Briefly
 
 ### Features
 
 Clima handles loading and parsing command line arguments similarily to argparse, but without the boilerplate. 
 
-Main features:
-
 - A global configuration object mapping as command line arguments defined as a single dataclass
     - Default values
     - Type casting
-    - Docstring doubles as `--help` description for the command line
-- Alternatives to command line arguments
+    - Funciton docstrings double as `--help` description on the command line
+- Configuration for arguments
     - Declaring defaults in a config file
-    - Env variables
-    - .env files
-- Handling secrets using gnugpg (and [pass](https://www.passwordstore.org/) directory structure)
+    - Parsing env variables
+    - Parsing .env files
+    - Decrypting secrets using gnugpg (if installed)
 
 ### Cli definition
 
