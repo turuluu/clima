@@ -8,27 +8,47 @@ So fresh and so lean, lean...
 
 - [▣] maybe also look into tox testing to verify actual cli running
 - [▣] Split readme into readme and docs
+- [ ] Fix tests and verify state is at least on par with last release
+- [ ] Fix boolean values loaded from config
+- [ ] Fix version subcommand
+
+### v0.9.1
+
+- [ ] .conf file checks
+    - [ ] Skip .conf files that don't include [<package>] section
+    - [ ] Where the .conf files are loaded (recursive levels etc)?
+
+### v0.9.2
+
 - [ ] cwd argument is not respected (special parameter)
-- [ ] Validation of undefined parameters (should advice that they're not defined in the config)
 - [ ] fix string handling corner cases (fire doesn't handle well strings as arguments, when there's spaces)
 - [ ] include (and fix) hypothesis tests
+
+### v0.9.3
+
+- [ ] Validation of undefined parameters (should advice that they're not defined in the config)
 - [ ] Fix help when given an undefined parameter
-- [ ] .conf file checks
-    - [ ] Skip .conf files that don't include [Clima] section
-    - [ ] Where the .conf files are loaded (recursive levels etc)?
-- [ ] usage and help page improvements
-    - [ ] Fix argument print out (instead of printing just [ARGS])
-    - [ ] Remove redundant - from <cmd> - <subcmd>
-    - [ ] Parse top level docstring for general help (when not using subcommands)
+
+### v0.9.4
+
+- [ ] opt-in to overriden tracebacks
+- [ ] Replace deprecated pipes-usage
 
 ### v1.0.0
 
 - [ ] clean the implementation
+- [ ] Rewrite docs
+  - Getting started
+  - Basic defaults
+  - Reference
+  - background for logo
+  - favicon for good measure
 - [ ] Some perf/sanity considerations
     - [ ] docstring parsing takes a second or two, because it's run so inefficiently (viztracer)
 
-## TODO v1.0.1
+## Backlog
 
+- [ ] improve exception.log -> e.g. sudo runs can create a non-overwritable log file that breaks the next run
 - [ ] piping v2.0
     - [ ] consider: use -- to explicitly map to an argument and mixing with common parameters (cmd | tool --arg --)
 - [ ] completions
@@ -38,13 +58,15 @@ So fresh and so lean, lean...
 - [ ] maybe a logging setup (--dryrun)
   - [ ] default debug logging wrapper that would log every function called
 - [ ] configfile helper to advice fixes in parameters etc.
-
-## Backlog
-
+- [ ] usage and help page improvements
+    - [ ] Fix argument print out (instead of printing just [ARGS])
+    - [ ] Remove redundant - from <cmd> - <subcmd>
+    - [ ] Parse top level docstring for general help (when not using subcommands)
 - [ ] script named .conf preferation - multiple conf file selection logic
 - [ ] way to define schema within the cli class
 - [ ] generate man page in a reasonable fashion
   - [ ] though fire v0.2.1 help looks like a man page
+- [ ] rewrite the fire part
  
 ## Won't fix
 
