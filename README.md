@@ -17,7 +17,7 @@ Main features:
 - A global configuration object mapping as command line arguments defined as a single dataclass
     - Default values
     - Type casting
-    - Funciton docstrings double as `--help` description on the command line
+    - Function docstrings double as `--help` description on the command line
 - Configuration for arguments
     - Declaring defaults in a config file
     - Parsing env variables
