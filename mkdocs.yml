@@ -5,3 +5,4 @@ nav:
   - 'index.md'
 theme:
    name: material
+   logo: docs/assets/clima.png

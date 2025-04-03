@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/turuluu/clima/master/clima.png" align="left" /> Create a command line interface with minimal setup.
+<img src="https://raw.githubusercontent.com/turuluu/clima/master/docs/assets/clima.png" align="left" /> Create a command line interface with minimal setup.
 
 [![PyPI](https://img.shields.io/pypi/v/clima)](https://pypi.org/project/clima/)
 [![Python versions](https://img.shields.io/pypi/pyversions/clima)]()
