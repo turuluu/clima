@@ -6,11 +6,14 @@ So fresh and so lean, lean...
 
 ### v0.9.0
 
-- [▣] maybe also look into tox testing to verify actual cli running
 - [▣] Split readme into readme and docs
-- [ ] Fix tests and verify state is at least on par with last release
+- [▣] .conf file checks
+    - [▣] Skip .conf files that don't include [Clima] section
+- [◤] running linux, macos and windows tests on github/travis
+- [◤] maybe also look into tox testing to verify actual cli running
+- [ ] Fix tests and verify state is at least on par with last release (0.8.x)
 - [ ] Fix boolean values loaded from config
-- [ ] Fix version subcommand
+- [ ] some refactoring (naming, dead code, seams for better tests, etc)
 
 ### v0.9.1
 
@@ -20,6 +23,7 @@ So fresh and so lean, lean...
 
 ### v0.9.2
 
+- [ ] Fix version subcommand
 - [ ] cwd argument is not respected (special parameter)
 - [ ] fix string handling corner cases (fire doesn't handle well strings as arguments, when there's spaces)
 - [ ] include (and fix) hypothesis tests
@@ -27,24 +31,45 @@ So fresh and so lean, lean...
 ### v0.9.3
 
 - [ ] Validation of undefined parameters (should advice that they're not defined in the config)
-- [ ] Fix help when given an undefined parameter
+- [ ] usage and help page improvements
+    - [ ] Fix help when given an undefined parameter
+    - [ ] Fix argument print out (instead of printing just [ARGS])
+    - [ ] Remove redundant - from <cmd> - <subcmd>
+    - [ ] Parse top level docstring for general help (when not using subcommands)
+    - [ ] Use fire without @c
+    - [ ] rtd documentation
 
 ### v0.9.4
 
 - [ ] opt-in to overriden tracebacks
 - [ ] Replace deprecated pipes-usage
+- [ ] consider providing a preconfigured logging setup, with info on stdout and debug in file
 
 ### v1.0.0
 
+- [ ] include (and fix) hypothesis tests
+- [ ] fix the clima.core issues with tests
 - [ ] clean the implementation
-- [ ] Rewrite docs
-  - Getting started
-  - Basic defaults
-  - Reference
-  - background for logo
-  - favicon for good measure
 - [ ] Some perf/sanity considerations
     - [ ] docstring parsing takes a second or two, because it's run so inefficiently (viztracer)
+- [ ] Rewrite docs
+    - [ ] Getting started
+    - [ ] Basic defaults
+    - [ ] Reference
+    - [ ] background for logo
+    - [ ] favicon for good measure
+    
+## TODO v1.x.x
+
+- [ ] piping v2.0
+    - [ ] consider: use -- to explicitly map to an argument and mixing with common parameters (cmd | tool --arg --)
+- [ ] completions
+- [ ] way to define required parameters in subcommand context for the subcommands help
+  - [ ] probably some syntax for starters, that then is compared with and parsed for every method
+    - [ ] nested schema classes
+- [ ] maybe a logging setup (--dryrun)
+  - [ ] default debug logging wrapper that would log every function called
+- [ ] configfile helper to advice fixes in parameters etc.
 
 ## Backlog
 
@@ -73,10 +98,31 @@ So fresh and so lean, lean...
 * fix doc string and args/parameter help for fire v0.2.1
     * 0.3.0 now. diverged a lot from what I wanted initially (0.1.3 type formatting)
 - better name - again
- 
+
+## In Review
+
+* [ ] post schema init stuff 
+  * [ ] validation (fields are what they're supposed to be, optional helper msg what it was and what it should be)
+  * [ ] post init hook for reassigning variables (...)
+  * [ ] type assurance as in if the attribute is of type Path, then c.attr is Path when using it
+  * [ ] optional configurations e.g. mac/win in build scripts 
+- [◤] rewriting tests to match current state
+    - [◤] type casting from config files doesn't work for lists (at leasts)
+- [ ] Validation of undefined parameters (should advice that they're not defined in the config) (kinda done)
+
 ## DONE:
 
+### v0.8.0
+
+- [■] version printing (infer package version with `<cmd> version`)
+- [■] config loading doesn't look into current dir or --cwd
+- [■] piping
+    - [■] consider: piping implicitly to the first argument
+- [■] handling # in Schema
+    - [■] Commenting a field in the middle of the definition breaks clima
+
 ### v0.7.0
+
 - [■] fork python-fire 0.1.3 (-> forked, branch clima)
     - [■] include to code
     - [■] add license details
@@ -118,24 +164,4 @@ So fresh and so lean, lean...
 * [■] some sane tests
 * [■] clean code from `__init__`
 * [■] fix args parsing for help description. Something broke it in v0.2.1
-
-## In Review
-
-* [ ] post schema init stuff 
-  * [ ] validation (fields are what they're supposed to be, optional helper msg what it was and what it should be)
-  * [ ] post init hook for reassigning variables (...)
-  * [ ] type assurance as in if the attribute is of type Path, then c.attr is Path when using it
-  * [ ] optional configurations e.g. mac/win in build scripts 
-- [◤] rewriting tests to match current state
-    - [◤] type casting from config files doesn't work for lists (at leasts)
-
-### v0.8.0
-
-- [■] version printing (infer package version with `<cmd> version`)
-- [■] config loading doesn't look into current dir or --cwd
-- [■] piping
-    - [■] consider: piping implicitly to the first argument
-- [■] handling # in Schema
-    - [■] Commenting a field in the middle of the definition breaks clima
-
 
