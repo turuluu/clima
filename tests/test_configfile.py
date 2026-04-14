@@ -9,6 +9,48 @@ from pathlib import Path
 import os
 import sys
 
+from clima.configfile import find_cfg
+
+
+class TestFindCfgSectionFilter:
+    """find_cfg should skip .cfg/.conf files that don't contain the package's section."""
+
+    def test_skips_files_without_relevant_section(self, tmp_path):
+        # alphabetically first .cfg has no relevant section
+        (tmp_path / 'a_unrelated.cfg').write_text('[OtherTool]\nfoo = bar\n')
+        # second .cfg has the package section
+        (tmp_path / 'b_app.cfg').write_text('[mypkg]\nfoo = bar\n')
+
+        result = find_cfg(tmp_path, package_name='mypkg')
+
+        assert result is not None
+        assert result.name == 'b_app.cfg'
+
+    def test_clima_section_also_accepted(self, tmp_path):
+        (tmp_path / 'a_unrelated.cfg').write_text('[OtherTool]\nfoo = bar\n')
+        (tmp_path / 'b_clima.cfg').write_text('[Clima]\nfoo = bar\n')
+
+        result = find_cfg(tmp_path, package_name='mypkg')
+
+        assert result is not None
+        assert result.name == 'b_clima.cfg'
+
+    def test_returns_none_when_no_relevant_file(self, tmp_path):
+        (tmp_path / 'unrelated.cfg').write_text('[OtherTool]\nfoo = bar\n')
+
+        result = find_cfg(tmp_path, package_name='mypkg')
+
+        assert result is None
+
+    def test_backwards_compatible_without_package_name(self, tmp_path):
+        # When called without package_name (legacy callers), do not filter
+        (tmp_path / 'a.cfg').write_text('[OtherTool]\nfoo = bar\n')
+
+        result = find_cfg(tmp_path)
+
+        assert result is not None
+        assert result.name == 'a.cfg'
+
 # Using Pure versions of platform explicit paths allows testing cross platform code
 # Can't use just Path, because that will get rendered to a platform specific
 # subclass when validating (e.g. on windows Path('...') -> WindowsPath('...') )

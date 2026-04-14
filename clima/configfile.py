@@ -16,12 +16,27 @@ def cfgs_gen(p):
     yield from Path(p).glob('*.cfg')
 
 
-def find_cfg(p, level=2):
+def _has_relevant_section(path, package_name):
+    """Return True if `path` parses as a config file containing either
+    [<package_name>] or [Clima]."""
+    try:
+        parser = configparser.ConfigParser()
+        parser.read(path)
+    except configparser.Error:
+        return False
+    if package_name is not None and package_name in parser:
+        return True
+    return 'Clima' in parser
+
+
+def find_cfg(p, level=2, package_name=None):
     p = Path(p)
     cfgs = list(cfgs_gen(p))
+    if package_name is not None:
+        cfgs = [c for c in cfgs if _has_relevant_section(c, package_name)]
     if len(cfgs) == 0:
         if is_in_module(p) and level > 0:
-            return find_cfg(p.parent, level - 1)
+            return find_cfg(p.parent, level - 1, package_name=package_name)
         else:
             return None
     else:
@@ -90,6 +105,7 @@ def get_config_path(_schema):
         # concate getattr cwd/'' getattr cfg/''
         cfg_filepath = Path(getattr(_schema, 'cwd', '')) / cfg_filepath
         if not cfg_filepath.is_file():
-            cfg_filepath = find_cfg(cfg_filepath)
+            package_name = utils.deduce_package()
+            cfg_filepath = find_cfg(cfg_filepath, package_name=package_name)
 
     return cfg_filepath
