@@ -578,3 +578,70 @@ class TestIterables(TestCase, SysArgvRestore):
         assert c.d == list([self._str]), 'Should wrap in iterable when configured in schema'
         assert c.e == {self._int}, 'Should wrap in iterable when configured in schema'
         assert c.f == {self._str}, 'Should wrap in iterable when configured in schema'
+
+
+class TestBooleanCasting(TestCase, SysArgvRestore):
+    """Test boolean casting from string values (e.g., from config files)"""
+
+    def setUp(self) -> None:
+        from clima import c, Schema
+        self.c = c
+        super().save_sysargv()
+
+        class C(Schema):
+            flag_true: bool = False
+            flag_false: bool = True
+
+    def test_boolean_cli_args(self):
+        """Test boolean casting from CLI arguments"""
+        c = self.c
+        sys.argv = ['test', 'x', '--flag_true', 'true', '--flag_false', 'false']
+
+        @c
+        class Cli:
+            def x(self):
+                pass
+
+        assert c.flag_true is True, 'Should parse "true" string as True'
+        assert c.flag_false is False, 'Should parse "false" string as False'
+        assert type(c.flag_true) is bool
+        assert type(c.flag_false) is bool
+
+    def test_boolean_alt_values(self):
+        """Test boolean casting with alternative string values"""
+        c = self.c
+        sys.argv = ['test', 'x', '--flag_true', '1', '--flag_false', '0']
+
+        @c
+        class Cli:
+            def x(self):
+                pass
+
+        assert c.flag_true is True, 'Should parse "1" as True'
+        assert c.flag_false is False, 'Should parse "0" as False'
+
+    def test_boolean_yes_no(self):
+        """Test boolean casting with yes/no values"""
+        c = self.c
+        sys.argv = ['test', 'x', '--flag_true', 'yes', '--flag_false', 'no']
+
+        @c
+        class Cli:
+            def x(self):
+                pass
+
+        assert c.flag_true is True, 'Should parse "yes" as True'
+        assert c.flag_false is False, 'Should parse "no" as False'
+
+    def test_boolean_case_insensitive(self):
+        """Test boolean casting is case-insensitive"""
+        c = self.c
+        sys.argv = ['test', 'x', '--flag_true', 'TRUE', '--flag_false', 'FALSE']
+
+        @c
+        class Cli:
+            def x(self):
+                pass
+
+        assert c.flag_true is True
+        assert c.flag_false is False

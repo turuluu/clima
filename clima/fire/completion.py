@@ -23,7 +23,6 @@ from copy import copy
 import inspect
 
 from clima.fire import inspectutils
-import six
 
 
 def Script(name, component, default_options=None):
@@ -100,7 +99,7 @@ complete -F _complete-{identifier} {command}
 def _IncludeMember(name, verbose):
   if verbose:
     return True
-  if isinstance(name, six.string_types):
+  if isinstance(name, str):
     return name and name[0] != '_'
   return True  # Default to including the member
 
@@ -186,7 +185,7 @@ def _FormatForCommand(token):
   Returns:
     The transformed token.
   """
-  if not isinstance(token, six.string_types):
+  if not isinstance(token, str):
     token = str(token)
 
   if token.startswith('_'):

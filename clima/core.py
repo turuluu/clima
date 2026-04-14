@@ -131,6 +131,9 @@ def cast_as_annotated(_schema, attr, container=None, value=None):
             # To prevent surprises such as 'VST' -> ('V', 'S', 'T') when expecting ('VST')
             if schema.should_wrap_as_list(value, annotated_type):
                 result = annotated_type([value])
+            elif annotated_type is bool and isinstance(value, str):
+                # Special handling for boolean strings from config files
+                result = value.lower() in ('true', '1', 'yes', 'on')
             else:
                 result = annotated_type(value)
     return result

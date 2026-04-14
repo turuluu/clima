@@ -19,6 +19,6 @@ def get_env(_schema) -> Dict:
     )
 
     env_file = Path(cwd) / '.env'
-    env_dict = dotenv_values(stream=env_file)
+    env_dict = dotenv_values(dotenv_path=env_file) if env_file.exists() else {}
 
     return utils.filter_fields(env_dict, _schema)

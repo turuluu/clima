@@ -26,8 +26,8 @@ import unittest
 from clima.fire import core
 from clima.fire import trace
 
+import io
 import mock
-import six
 
 
 class BaseTestCase(unittest.TestCase):
@@ -47,8 +47,8 @@ class BaseTestCase(unittest.TestCase):
     Yields:
       Yields to the wrapped context.
     """
-    stdout_fp = six.StringIO()
-    stderr_fp = six.StringIO()
+    stdout_fp = io.StringIO()
+    stderr_fp = io.StringIO()
     try:
       with mock.patch.object(sys, 'stdout', stdout_fp):
         with mock.patch.object(sys, 'stderr', stderr_fp):

@@ -20,8 +20,6 @@ from __future__ import print_function
 
 import inspect
 
-import six
-
 
 class FullArgSpec(object):
   """The arguments of a function, as in Python 3's inspect.FullArgSpec."""
@@ -71,8 +69,6 @@ def _GetArgSpecInfo(fn):
   if inspect.isclass(fn):
     # If the function is a class, we try to use it's init method.
     skip_arg = True
-    if six.PY2 and hasattr(fn, '__init__'):
-      fn = fn.__init__
   else:
     # If the function is a bound method, we skip the `self` argument.
     is_method = inspect.ismethod(fn)
@@ -87,13 +83,8 @@ def GetFullArgSpec(fn):
   fn, skip_arg = _GetArgSpecInfo(fn)
 
   try:
-    if six.PY2:
-      args, varargs, varkw, defaults = inspect.getargspec(fn)  # pylint: disable=deprecated-method
-      kwonlyargs = kwonlydefaults = None
-      annotations = getattr(fn, '__annotations__', None)
-    else:
-      (args, varargs, varkw, defaults,
-       kwonlyargs, kwonlydefaults, annotations) = inspect.getfullargspec(fn)  # pylint: disable=deprecated-method,no-member
+    (args, varargs, varkw, defaults,
+     kwonlyargs, kwonlydefaults, annotations) = inspect.getfullargspec(fn)  # pylint: disable=deprecated-method,no-member
 
   except TypeError:
     # If we can't get the argspec, how do we know if the fn should take args?

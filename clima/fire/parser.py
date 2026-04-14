@@ -133,4 +133,4 @@ def _Replacement(node):
   # These are the only builtin constants supported by literal_eval.
   if value in ('True', 'False', 'None'):
     return node
-  return ast.Str(value)
+  return ast.Constant(value)
