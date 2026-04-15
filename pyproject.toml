@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "clima"
-version = "0.9.6"
+version = "0.9.7"
 description = "Command line interface (cli) boilerplate using a schema"
 keywords = ["cli", "schema", "boilerplate", "cli-boilerplate", "cli-schema", "cli-tool", "cli-tools", "cli-interface", "cli-interfaces", "cli-application", "cli-applications"]
 classifiers = [
@@ -32,7 +32,7 @@ python-dotenv = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
-# hypothesis = "*"
+hypothesis = "*"
 mock = "*"
 requests = ">=2.25.0"
 
