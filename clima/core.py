@@ -149,15 +149,27 @@ def cli(cls):
         """Generated init"""
         s = state['schema']
 
+        # Extract and set cwd FIRST if provided via CLI, before config file discovery.
+        # This ensures _chain_configurations uses the correct directory for config lookup.
+        if hasattr(s, 'cwd') and 'cwd' in cli_args:
+            cwd_value = cli_args.pop('cwd')  # Remove from cli_args to prevent override
+            cwd_path = cast_as_annotated(s, 'cwd', value=cwd_value)
+            if isinstance(cwd_path, str):
+                cwd_path = Path(cwd_path)
+            if not cwd_path.is_absolute():
+                cwd_path = Path.cwd() / cwd_path
+            setattr(s, 'cwd', cwd_path)
+
         # Cast everything according to schema before Cli.post_init
         for attr, cli_arg_value in cli_args.items():
-            if hasattr(s, attr):
+            if hasattr(s, attr) and attr != 'cwd':  # Skip cwd, already handled above
                 setattr(s, attr, cast_as_annotated(s, attr, value=cli_arg_value))
             s: type(s) = s
 
+        # Handle cwd if not already set from CLI (apply relative path logic)
         if hasattr(s, 'cwd'):
             p: Path = getattr(s, 'cwd')
-            if not p.is_absolute():
+            if p and not p.is_absolute():
                 setattr(s, 'cwd', Path.cwd() / p)
 
         # if hasattr(CliClass, 'post_init'):
