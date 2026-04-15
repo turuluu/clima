@@ -62,18 +62,36 @@ def schema_decorator(decorators_state, cls):
 
 
 
-def parse_version_from_pyproject_toml():
-    toml = Path('pyproject.toml')
-    version = None
-    if toml.exists():
-        parser = configparser.ConfigParser()
-        parser.read(toml)
+def parse_version_from_pyproject_toml(start: Path = None):
+    """Walk up from `start` (default: cwd) looking for a `pyproject.toml`
+    with a `[tool.poetry]` section and return its `version`, or None.
 
-        tool_section = parser['tool.poetry']
-        if 'version' in tool_section:
-            quoted = tool_section['version']
-            version = quoted.replace('"', '')
-    return version
+    Walking up ensures an installed script invoked as `myscript version`
+    from an unrelated cwd can still locate its own `pyproject.toml` sitting
+    alongside the importing script.
+    """
+    if start is None:
+        start = Path.cwd()
+    start = Path(start)
+    if start.is_file():
+        start = start.parent
+
+    for directory in [start, *start.parents]:
+        toml = directory / 'pyproject.toml'
+        if toml.exists():
+            parser = configparser.ConfigParser()
+            parser.read(toml)
+            if 'tool.poetry' in parser and 'version' in parser['tool.poetry']:
+                return parser['tool.poetry']['version'].replace('"', '')
+            return None
+    return None
+
+
+def _importer_dir():
+    frame = utils.get_importing_frame()
+    if frame is None:
+        return None
+    return Path(frame.filename).parent
 
 
 def get_pkg_version():
@@ -84,7 +102,7 @@ def get_pkg_version():
 
     if (version := utils.get_package_version(utils.deduce_package()) ) is not None:
         pass
-    elif (version := parse_version_from_pyproject_toml()) is not None:
+    elif (version := parse_version_from_pyproject_toml(start=_importer_dir())) is not None:
         pass
     else:
         version = '0.0.1'
