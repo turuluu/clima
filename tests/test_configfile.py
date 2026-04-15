@@ -51,6 +51,53 @@ class TestFindCfgSectionFilter:
         assert result is not None
         assert result.name == 'a.cfg'
 
+
+class TestFindCfgRecursion:
+    """find_cfg should walk up parents, but only while inside a Python module,
+    and at most `level` hops."""
+
+    def test_walks_up_when_start_dir_is_module(self, tmp_path):
+        # parent has the config. `is_in_module(child)` checks whether
+        # child.parent (== tmp_path) has __init__.py — so the package root
+        # must also look like a module for the hop to happen.
+        (tmp_path / '__init__.py').write_text('')
+        (tmp_path / 'app.cfg').write_text('[Clima]\nfoo = bar\n')
+        child = tmp_path / 'pkg'
+        child.mkdir()
+        (child / '__init__.py').write_text('')
+
+        result = find_cfg(child)
+
+        assert result is not None
+        assert result.name == 'app.cfg'
+
+    def test_does_not_walk_up_when_start_dir_not_module(self, tmp_path):
+        # parent has config, child is NOT a module (no __init__.py)
+        (tmp_path / 'app.cfg').write_text('[Clima]\nfoo = bar\n')
+        child = tmp_path / 'plain'
+        child.mkdir()
+
+        result = find_cfg(child)
+
+        assert result is None
+
+    def test_respects_level_limit(self, tmp_path):
+        # Grandparent has the config; every ancestor is itself a module so
+        # the `is_in_module` gate keeps letting us hop.
+        (tmp_path / '__init__.py').write_text('')
+        (tmp_path / 'app.cfg').write_text('[Clima]\nfoo = bar\n')
+        mid = tmp_path / 'mid'
+        mid.mkdir()
+        (mid / '__init__.py').write_text('')
+        leaf = mid / 'leaf'
+        leaf.mkdir()
+        (leaf / '__init__.py').write_text('')
+
+        # level=1: leaf -> mid (no config there) -> level now 0, stop.
+        assert find_cfg(leaf, level=1) is None
+        # level=2 (default): leaf -> mid -> tmp_path. Found.
+        assert find_cfg(leaf).name == 'app.cfg'
+
 # Using Pure versions of platform explicit paths allows testing cross platform code
 # Can't use just Path, because that will get rendered to a platform specific
 # subclass when validating (e.g. on windows Path('...') -> WindowsPath('...') )

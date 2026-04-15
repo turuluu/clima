@@ -30,6 +30,24 @@ def _has_relevant_section(path, package_name):
 
 
 def find_cfg(p, level=2, package_name=None):
+    """Find a `.conf`/`.cfg` file starting at `p`, optionally walking up.
+
+    Discovery rules:
+    - Glob `p` for `*.conf` then `*.cfg`; returns the first match (first
+      `.conf` preferred, then `.cfg`). Ordering within each extension is
+      whatever `Path.glob` yields (typically filesystem order).
+    - If `package_name` is provided, candidates are filtered to files that
+      parse as INI and contain either a `[<package_name>]` or `[Clima]`
+      section. Files that cannot be parsed as INI are skipped.
+    - If no candidate is found at `p`, recursion walks up to `level` parent
+      directories, but only while `is_in_module(p)` holds — which, note,
+      checks whether **`p`'s parent** (not `p` itself) contains an
+      `__init__.py`. In practice this means the hop happens when the next
+      directory up still looks like part of a Python package tree, so
+      unrelated configs outside the user's package are not picked up.
+    - Default `level` is 2, so at most two parent hops are attempted.
+    - Returns the matching `Path`, or `None` if nothing is found.
+    """
     p = Path(p)
     cfgs = list(cfgs_gen(p))
     if package_name is not None:
