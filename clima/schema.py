@@ -1,6 +1,6 @@
-import configparser
 import inspect
 import sys
+import tomllib
 # Until poetry fixes this https://github.com/python-poetry/poetry/issues/144
 # This hack is necessary to report correct __version__
 # inside the project
@@ -79,10 +79,18 @@ def parse_version_from_pyproject_toml(start: Path = None):
     for directory in [start, *start.parents]:
         toml = directory / 'pyproject.toml'
         if toml.exists():
-            parser = configparser.ConfigParser()
-            parser.read(toml)
-            if 'tool.poetry' in parser and 'version' in parser['tool.poetry']:
-                return parser['tool.poetry']['version'].replace('"', '')
+            try:
+                with toml.open('rb') as f:
+                    data = tomllib.load(f)
+            except (tomllib.TOMLDecodeError, OSError):
+                # Unparsable or unreadable pyproject.toml — skip and keep
+                # walking upward. This is different from a successfully read
+                # file that simply has no [tool.poetry] section.
+                continue
+            poetry = data.get('tool', {}).get('poetry', {})
+            version = poetry.get('version')
+            if version is not None:
+                return version
             return None
     return None
 
