@@ -305,6 +305,16 @@ will try to use the first configuration file it finds, so that might produce som
 
     # Running ./script.py --cwd <folder> would automatically load the first *.conf file in <folder>
 
+#### Discovery rules
+
+When no explicit `CFG` is set, Clima looks up a config file using these rules (see `clima/configfile.py:find_cfg`):
+
+- The search starts at `cwd` (if the `Schema` defines it) or the current working directory.
+- That directory is globbed for `*.conf` first, then `*.cfg`. The first match wins, so `.conf` is preferred over `.cfg`, and ordering within each extension follows whatever `Path.glob` yields (typically filesystem order).
+- Candidates are filtered to files that parse as INI and contain a `[<package_name>]` section (deduced from the caller) or a `[Clima]` section. Files without a relevant section are ignored, so unrelated `.conf`/`.cfg` files in the same directory don't accidentally get picked up.
+- If nothing matches, Clima walks **up to 2 parent directories** looking for a match — but only while the next directory up still contains an `__init__.py`. In practice this means the walk only climbs within a Python package tree and stops as soon as it leaves one.
+- Setting `CFG` on the `Schema` (absolute path or relative to `cwd`) bypasses discovery entirely and loads that file directly.
+
 ### Type casting with configuration definition
  
 The `Schema` definition can have type annotations, which are used to cast the given arguments. For example
