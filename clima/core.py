@@ -312,12 +312,42 @@ def prepare_signatures(cls, schema):
         method.__signature__ = sig.replace(parameters=new_parameters)
 
 
+def unknown_cli_flags(argv, schema_fields):
+    """Return sorted flag names present in argv but missing from schema_fields.
+
+    Accepts both `--foo` and `--foo=bar` forms. Stops scanning at a bare `--`
+    sentinel (Fire's end-of-options marker). Ignores `-h` / `--help` and any
+    short-form flags.
+    """
+    known = set(schema_fields)
+    unknown = set()
+    for token in argv:
+        if token == '--':
+            break
+        if not isinstance(token, str) or not token.startswith('--'):
+            continue
+        name = token[2:].split('=', 1)[0]
+        if not name or name == 'help':
+            continue
+        if name not in known:
+            unknown.add(name)
+    return sorted(unknown)
+
+
 def prepare(cls, schema: Schema):
     """Beef: prepares signatures, docstrings and initiates fire for the cli-magic
     Also: error handling printout customisation
     """
     prepare_signatures(cls, schema)
     docstring.wrap_method_docstring(cls, schema)
+
+    unknown = unknown_cli_flags(sys.argv[2:], schema._fields)
+    if unknown:
+        print(
+            f'clima: warning: unknown parameter(s) not defined in Schema: '
+            f'{", ".join(unknown)}',
+            file=sys.stderr,
+        )
 
     with utils.suppress_traceback():
 
