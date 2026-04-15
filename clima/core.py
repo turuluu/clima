@@ -334,6 +334,48 @@ def unknown_cli_flags(argv, schema_fields):
     return sorted(unknown)
 
 
+def filter_argv_of_unknown_flags(argv, unknown_flags):
+    """Remove unknown flags and their values from argv.
+
+    Handles both `--flag value` and `--flag=value` forms.
+    Stops processing at a bare `--` sentinel (Fire's end-of-options marker).
+    """
+    if not unknown_flags:
+        return argv
+
+    unknown_set = set(unknown_flags)
+    result = []
+    skip_next = False
+
+    for i, token in enumerate(argv):
+        if skip_next:
+            skip_next = False
+            continue
+
+        if token == '--':
+            result.append(token)
+            result.extend(argv[i + 1:])
+            break
+
+        if isinstance(token, str) and token.startswith('--') and not token.endswith('--'):
+            # Extract flag name from both forms: --foo and --foo=bar
+            if '=' in token:
+                flag_name = token[2:].split('=', 1)[0]
+                if flag_name in unknown_set:
+                    continue  # Skip this flag entirely (it includes the value)
+                result.append(token)
+            else:
+                flag_name = token[2:]
+                if flag_name in unknown_set:
+                    skip_next = True  # Skip this flag and its value
+                    continue
+                result.append(token)
+        else:
+            result.append(token)
+
+    return result
+
+
 def prepare(cls, schema: Schema):
     """Beef: prepares signatures, docstrings and initiates fire for the cli-magic
     Also: error handling printout customisation
@@ -348,6 +390,9 @@ def prepare(cls, schema: Schema):
             f'{", ".join(unknown)}',
             file=sys.stderr,
         )
+        # Remove unknown flags from sys.argv to prevent them from appearing
+        # in help output or being passed to Fire
+        sys.argv = filter_argv_of_unknown_flags(sys.argv, unknown)
 
     with utils.suppress_traceback():
 

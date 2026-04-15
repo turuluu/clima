@@ -102,3 +102,36 @@ class TestPrepareWarnsOnUnknown(TestCase, SysArgvRestore):
             sys.stderr = real_stderr
 
         self.assertEqual(buf.getvalue(), '')
+
+    def test_help_excludes_unknown_parameters(self):
+        from io import StringIO
+        from clima.fire.core import FireExit
+
+        stdout_buf = StringIO()
+        stderr_buf = StringIO()
+        real_stdout = sys.stdout
+        real_stderr = sys.stderr
+        sys.stdout = stdout_buf
+        sys.stderr = stderr_buf
+        try:
+            sys.argv = ['prog', 'foo', '--undefined-param', 'test', '--help']
+
+            class S(Schema):
+                a: str = 'default'
+
+            @c
+            class Cli:
+                def foo(self):
+                    pass
+        except FireExit:
+            pass  # Expected when --help is used
+        finally:
+            sys.stdout = real_stdout
+            sys.stderr = real_stderr
+
+        help_output = stderr_buf.getvalue()
+        # The usage line should NOT contain the undefined parameter
+        usage_line = help_output.split('\n')[0]
+        self.assertNotIn('--undefined-param', usage_line)
+        # The warning should still be present
+        self.assertIn('unknown parameter', stderr_buf.getvalue())
