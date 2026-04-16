@@ -80,8 +80,6 @@ def filter_fields(d: dict, nt):
 
 def type_correct_with(cdict, cfg_tuple):
     """Use type hints of the cfg tuple to cast parameters i.e. attributes into their intended types"""
-    # TODO: This would be cleaner, if the config would use Schema or derivative in the
-    # first place and use its validation process
     res = {}
     for k, v in cdict.items():
         typename = getattr(cfg_tuple, k)
@@ -178,11 +176,7 @@ def chain_get(*args, fail=False):
     """
 
     if not all(type(t) is tuple for t in args):
-        print('incorrect params to chain_get')
-        for t in args:
-            if type(t) is not tuple:
-                print(f'{t} is not a tuple')
-        raise TypeError
+        raise TypeError('all arguments to chain_get must be tuples')
 
     def gen_fuple():
         for f_tuple in args:
@@ -202,8 +196,7 @@ def chain_get(*args, fail=False):
         try:
             yield
         except StopIteration:
-            print('Failed. Only None values collected..')
-            raise ValueError
+            raise ValueError('all callables returned None')
 
     result = None
     g = gen_fuple()

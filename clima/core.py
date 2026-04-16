@@ -26,7 +26,6 @@ schema_decorator = partial(schema.schema_decorator, DECORATORS_STATE)
 
 class Configurable:
     """Configuration management"""
-    # TODO: idiomatic handling for use cases that apply to NamedTuple
     __configured = None
 
     def _get_configured(self):
@@ -87,8 +86,6 @@ class Configurable:
 
     def __getitem__(self, item):
         c_item = self.__configured[item]
-        if c_item is None:
-            print('none')
         return c_item
 
     def _clear(self):
@@ -124,8 +121,6 @@ def cast_as_annotated(_schema, attr, container=None, value=None):
         annotated_type = type(_schema).__annotations__.get(attr)
         if annotated_type is not None:
 
-            # TODO: Nested types. Here we'll wrap a string or uniterable into an iterable
-            # To prevent surprises such as 'VST' -> ('V', 'S', 'T') when expecting ('VST')
             if schema.should_wrap_as_list(value, annotated_type):
                 result = annotated_type([value])
             elif annotated_type is bool and isinstance(value, str):
@@ -181,21 +176,11 @@ def cli(cls):
             if p and not p.is_absolute():
                 setattr(s, 'cwd', Path.cwd() / p)
 
-        # if hasattr(CliClass, 'post_init'):
-        #     CliClass.post_init(s)
-
-        # # TODO: consider if really necessary
-        # for attr, annotated in cli_args.items():
-        #     if hasattr(s, attr):
-        #         cli_args[attr] = cast_as_annotated(s, attr)
-
         global c
         cm = c._chain_configurations(cli_args, s)
-        # initialize_cli(cli_args, s)
 
         tmp_c = Configurable()
         tmp_c._set_configured(cm)
-        # TODO: consider if really necessary
         for attr in s._asdict():
             if attr in cm:
                 setattr(tmp_c, attr, cast_as_annotated(s, attr, container=tmp_c))
@@ -203,7 +188,6 @@ def cli(cls):
         if hasattr(CliClass, 'post_init'):
             CliClass.post_init(tmp_c)
 
-            # TODO: consider if really necessary
             for attr in s._asdict():
                 if hasattr(tmp_c, attr):
                     setattr(tmp_c, attr, cast_as_annotated(s, attr, container=tmp_c))
@@ -244,7 +228,6 @@ class Schema(object, metaclass=schema.MetaSchema):
         return schema.asdict(self)
 
     def _wrap(self):
-        # TODO: Figure this out so Schema could live inside schema.py file
         c._init(self)
 
     @staticmethod
@@ -282,7 +265,6 @@ def prepare_signatures(cls, schema):
 
     # pop the post_init from the end of parameters
     params = [prm for prm in params_with_post_init if prm.name != 'post_init']
-    print(params)
 
     # Check for piped input (stdin)
     if len(sys.argv) >= 2 and not sys.stdin.isatty():
@@ -407,13 +389,6 @@ def prepare(cls, schema: Schema):
     with utils.suppress_traceback():
 
         if len(sys.argv) > 1 and sys.argv[-1] == 'version':
-            # Version printing part 2
             print(schema.version)
-
-            # TODO: fix version printing maybe with the latest:
-            # import importlib.metadata
-            # package = ... # reflection
-            # print(importlib.metadata.version(package))
-
         else:
             Fire(cls)
