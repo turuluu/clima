@@ -8,7 +8,6 @@ import os
 import pytest
 
 from clima import c, Schema
-import clima.core
 
 
 def setup_test_dirs():
@@ -68,11 +67,7 @@ class TestCwdArgumentRespected:
         finally:
             os.chdir(old_cwd)
             cleanup_test_dirs(wrong_dir, correct_dir)
-            # Properly reset global state
-            c._Configurable__configured = None
-            Schema._package_name = None
-            clima.core.DECORATORS_STATE['schema'] = None
-            clima.core.DECORATORS_STATE['generated'] = None
+            c._clear()
 
     def test_cwd_with_relative_path(self, monkeypatch):
         """Test that relative --cwd paths are resolved correctly."""
@@ -110,8 +105,4 @@ class TestCwdArgumentRespected:
         finally:
             os.chdir(old_cwd)
             cleanup_test_dirs(wrong_dir, correct_dir)
-            # Properly reset global state
-            c._Configurable__configured = None
-            Schema._package_name = None
-            clima.core.DECORATORS_STATE['schema'] = None
-            clima.core.DECORATORS_STATE['generated'] = None
+            c._clear()

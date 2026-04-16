@@ -97,11 +97,8 @@ class Configurable:
         self.__configured = None
         Schema._package_name = None
 
-        global DECORATORS_STATE
-        DECORATORS_STATE = {
-            'schema': None,
-            'generated': None,
-        }
+        DECORATORS_STATE['schema'] = None
+        DECORATORS_STATE['generated'] = None
 
 
 c = Configurable()

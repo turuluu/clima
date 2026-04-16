@@ -36,12 +36,7 @@ class TestStringWithSpaces:
         assert c.msg == 'hello', f"Expected msg='hello', got '{c.msg}'"
         assert c.other == 'world', f"Expected other='world', got '{c.other}'"
 
-        # Cleanup
-        import clima.core
-        c._Configurable__configured = None
-        Schema._package_name = None
-        clima.core.DECORATORS_STATE['schema'] = None
-        clima.core.DECORATORS_STATE['generated'] = None
+        c._clear()
 
     def test_multiple_string_arguments_with_spaces(self, monkeypatch):
         """Test multiple string arguments with spaces."""
@@ -65,9 +60,4 @@ class TestStringWithSpaces:
         assert c.arg1 == 'hello world', f"Expected 'hello world', got '{c.arg1}'"
         assert c.arg2 == 'foo bar', f"Expected 'foo bar', got '{c.arg2}'"
 
-        # Cleanup
-        import clima.core
-        c._Configurable__configured = None
-        Schema._package_name = None
-        clima.core.DECORATORS_STATE['schema'] = None
-        clima.core.DECORATORS_STATE['generated'] = None
+        c._clear()

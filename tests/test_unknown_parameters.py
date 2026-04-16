@@ -6,7 +6,6 @@ through `prepare()`.
 import sys
 from unittest import TestCase
 
-import clima.core
 from clima import c, Schema
 from clima.core import unknown_cli_flags
 
@@ -57,10 +56,7 @@ class TestPrepareWarnsOnUnknown(TestCase, SysArgvRestore):
 
     def tearDown(self):
         self.restore_sysargv()
-        # Workaround for known _clear() bug: mutate DECORATORS_STATE in place
-        # rather than rebinding (see todo.md Backlog note).
-        clima.core.DECORATORS_STATE['schema'] = None
-        clima.core.DECORATORS_STATE['generated'] = None
+        c._clear()
 
     def test_warns_when_unknown_flag_present(self):
         from io import StringIO

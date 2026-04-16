@@ -3,7 +3,6 @@ import sys
 from io import StringIO
 from unittest import TestCase
 
-import clima.core
 from clima import c, Schema
 from clima.fire.core import FireExit
 
@@ -16,8 +15,7 @@ class TestUsageWithSubcommands(TestCase, SysArgvRestore):
 
     def tearDown(self):
         self.restore_sysargv()
-        clima.core.DECORATORS_STATE['schema'] = None
-        clima.core.DECORATORS_STATE['generated'] = None
+        c._clear()
 
     def _capture_help(self, argv):
         """Run @c decoration with given argv and return captured stderr."""
