@@ -62,6 +62,8 @@ Usage example:
      cli.py say_hi --place 'Sweden'
      > Hi from Sweden
  
-[Read the docs](https://python-clima.readthedocs.io/)
+## Documentation
 
-See and run the `examples`...
+Full documentation at [python-clima.readthedocs.io](https://python-clima.readthedocs.io/).
+
+See and run the `examples/` directory for more usage patterns.
