@@ -181,9 +181,23 @@ def _UsageStringFromFullArgSpec(command, spec):
   return '\n'.join(commands) + '\n'
 
 
+def _HasSubcommands(component):
+  """Check if a class has multiple public methods (subcommands)."""
+  if not inspect.isclass(component):
+    return False
+  methods = [
+      name for name, val in vars(component).items()
+      if not name.startswith('_') and inspect.isfunction(val)
+  ]
+  return len(methods) > 1
+
+
 def UsageString(component, trace=None, verbose=False):
   """Returns a string showing how to use the component as a Fire command."""
   command = trace.GetCommand() + ' ' if trace else ''
+
+  if inspect.isclass(component) and _HasSubcommands(component):
+    return command + '<subcommand>\n'
 
   if inspect.isroutine(component) or inspect.isclass(component):
     spec = inspectutils.GetFullArgSpec(component)
