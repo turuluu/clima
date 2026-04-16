@@ -32,3 +32,4 @@ clima.egg-info/
 .hypothesis
 .DS_Store
 poetry.lock
+site/
