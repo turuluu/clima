@@ -6,7 +6,11 @@ from contextlib import contextmanager
 from pathlib import Path
 from importlib import metadata
 
-from tabulate import tabulate
+try:
+    from tabulate import tabulate
+    _HAS_TABULATE = True
+except ImportError:
+    _HAS_TABULATE = False
 
 
 def get_importing_frame():
@@ -141,7 +145,11 @@ def suppress_traceback():
         truncated_error_table.append(
             [f'{tb_filename}:{tb.lineno}', sep[0], f'{tb.name}()', sep[1], tb.line, sep[2], f'{error_name}'])
 
-        print(tabulate(truncated_error_table, tablefmt='plain'))
+        if _HAS_TABULATE:
+            print(tabulate(truncated_error_table, tablefmt='plain'))
+        else:
+            for row in truncated_error_table:
+                print('  '.join(str(col) for col in row))
         print()
         print(exception_desc)
 
