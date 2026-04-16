@@ -35,7 +35,7 @@ Create a command-line interface:
 
 Create a cli program with arguments:
 
-    from clima import c
+    from clima import c, Schema
     
     # Defining the settings (configuration object)
     class S(Schema):
