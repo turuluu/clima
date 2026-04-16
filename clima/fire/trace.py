@@ -199,11 +199,6 @@ class FireTrace(object):
         continue
       if element.args:
         args.extend(element.args)
-      if element.HasSeparator():
-        args.append(self.separator)
-
-    if self.NeedsSeparator():
-      args.append(self.separator)
 
     return ' '.join(self._Quote(arg) for arg in args)
 

@@ -67,3 +67,12 @@ class TestUsageWithSubcommands(TestCase, SysArgvRestore):
         )
         self.assertNotIn('<subcommand>', usage_line)
         self.assertIn('foo', usage_line)
+
+    def test_error_usage_has_no_dash_separator(self):
+        output = self._capture_help(['prog', 'badcmd'])
+        usage_lines = [
+            l for l in output.split('\n')
+            if 'Usage:' in l or 'prog' in l
+        ]
+        for line in usage_lines:
+            self.assertNotRegex(line, r'\bprog\b\s+-\s')
