@@ -4,7 +4,15 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/clima)]()
 [![PyPI license](https://img.shields.io/pypi/l/clima)]() 
 
-# clima - command line interface with a schema 
+# clima - command line interface with a schema
+
+## Installation
+
+```
+pip install clima
+```
+
+Requires Python 3.9+.
 
 ### Features
 
