@@ -18,21 +18,17 @@ Requires Python 3.9+.
 
 clima eliminates CLI boilerplate: define a `Schema` dataclass and a `Cli` class — that's it. Unlike click, typer, or argparse, clima gives you a built-in config cascade (CLI args → env vars → `.env` file → config file → defaults) with zero extra code. Schema fields double as CLI flags, environment variables, and config file keys automatically.
 
-### Features
+## Features
 
-Clima handles loading and parsing command line arguments without the boilerplate. 
-
-Main features:
-
-- A global configuration object mapping as command line arguments defined as a single dataclass
-    - Default values
-    - Type casting
-    - Function docstrings double as `--help` description on the command line
-- Configuration for arguments
-    - Declaring defaults in a config file
-    - Parsing env variables
-    - Parsing .env files
-    - Decrypting secrets using gnugpg (if installed)
+- **Config cascade** — CLI args → env vars → `.env` file → config file → defaults, resolved automatically
+- **Type casting** — Schema field annotations are used to cast string CLI/env values to the right type
+- **Help from field comments** — docstrings on Schema fields appear in `--help` output
+- **`--verbose` / `--quiet` logging** — add `verbose: bool` or `quiet: bool` to Schema and get preconfigured logging
+- **Undefined param warnings** — unknown `--flags` on the command line produce a clear warning
+- **`version` subcommand** — `myscript version` prints the package version automatically
+- **Config file support** — declare defaults in an INI-style `.conf` file keyed to your package name
+- **`.env` file and env var support** — Schema fields are also read from environment variables and `.env` files
+- **Optional gpg secrets** — decrypt secrets via `pass` / gnupg if installed
 
 Create a command-line interface:
 
