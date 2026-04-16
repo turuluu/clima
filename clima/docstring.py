@@ -22,9 +22,7 @@ def wrap_method_docstring(cls: object, nt):
         replace_docstring(m, args)
 
 
-# TODO: rename - append args to docstring
 def replace_docstring(func, args):
-    # TODO: subcommand level args replacement with something (see TODO)
     docstring = func.__doc__
     docstring = (docstring if docstring is not None else '') + '\nArgs:\n' + args
     func.__doc__ = docstring
@@ -41,7 +39,6 @@ def attr_map(parsed_params):
             param = param_type
             _type = None
 
-        # TODO: this won't handle # in strings ...
         if '#' in def_desc:
             default, description = def_desc.split('#', 1)
             default = default.strip()
@@ -90,7 +87,6 @@ def argument_help(attr_name, attr):
     return fmt.format(attr_name, _type, attr['description'], attr['default'])
 
 
-# TODO: rename - list_of_source_lines
 def filter_params(N):
     """Filter source lines of the class
     Returns:
@@ -105,21 +101,17 @@ def filter_params(N):
     return filtered_source
 
 
-# TODO: rename - parse_args_for_help
 def prepare_docstring_help(N):
     """Replace docstrings to include the parameters (schema)"""
-    # at this point, the params have not yet been populated
-
     args = []
     if hasattr(N, '__annotations__'):
-        for attr_name, cls in N.__annotations__.items():
-
-            filtered = filter_params(N)
-            parsed = parse_source_for_params(filtered)
-            attr = attr_map(parsed).get(attr_name)
+        filtered = filter_params(N)
+        parsed = parse_source_for_params(filtered)
+        mapped = attr_map(parsed)
+        for attr_name in N.__annotations__:
+            attr = mapped.get(attr_name)
             if attr is None:
                 continue
-
             args.append(argument_help(attr_name, attr))
 
     return '\n'.join(args)
