@@ -14,6 +14,10 @@ pip install clima
 
 Requires Python 3.9+.
 
+## Why clima?
+
+clima eliminates CLI boilerplate: define a `Schema` dataclass and a `Cli` class — that's it. Unlike click, typer, or argparse, clima gives you a built-in config cascade (CLI args → env vars → `.env` file → config file → defaults) with zero extra code. Schema fields double as CLI flags, environment variables, and config file keys automatically.
+
 ### Features
 
 Clima handles loading and parsing command line arguments without the boilerplate. 
