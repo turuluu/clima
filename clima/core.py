@@ -139,6 +139,18 @@ def cast_as_annotated(_schema, attr, container=None, value=None):
     return result
 
 
+def _auto_setup_logging(schema, configured):
+    """Set up logging if Schema has verbose or quiet fields."""
+    fields = schema._fields
+    if 'verbose' not in fields and 'quiet' not in fields:
+        return
+    from clima.logging import setup_logging
+    verbose = getattr(configured, 'verbose', False)
+    quiet = getattr(configured, 'quiet', False)
+    log_file = f'{Path(sys.argv[0]).stem}.debug.log'
+    setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)
+
+
 def cli(cls):
     """Decorator that wraps the command line interface specific class with fire"""
     state = DECORATORS_STATE
@@ -201,8 +213,8 @@ def cli(cls):
 
         for attr in tmp_c._get_configured():
             setattr(c, attr, getattr(tmp_c, attr))
-            # setattr(c, attr, cast_as_annotated(s, attr, container=tmp_c))
-            # c._set_configured(tmp_c._get_configured())
+
+        _auto_setup_logging(s, c)
 
     cls_attrs = dict(
         __init__=init,
