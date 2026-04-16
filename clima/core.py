@@ -207,6 +207,7 @@ def cli(cls):
     cls_attrs = dict(
         __init__=init,
         __repr__=cls.__repr__,
+        __doc__=cls.__doc__,
         **{m_name: m for m_name, m in cls.__dict__.items() if not m_name.startswith('_')}
     )
 
