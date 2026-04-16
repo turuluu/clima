@@ -3,8 +3,6 @@
 [![PyPI](https://img.shields.io/pypi/v/clima)](https://pypi.org/project/clima/)
 [![Python versions](https://img.shields.io/pypi/pyversions/clima)]()
 [![PyPI license](https://img.shields.io/pypi/l/clima)]() 
-[![Build status](https://app.travis-ci.com/turuluu/clima.svg?branch=master)](https://app.travis-ci.com/github/turuluu/clima)
-[![Dependencies](https://badges.hiptest.com/librariesio/release/github/turuluu/clima)](https://libraries.io/pypi/clima) 
 
 # clima - command line interface with a schema 
 
