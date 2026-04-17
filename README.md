@@ -14,6 +14,29 @@ pip install clima
 
 Requires Python 3.9+.
 
+## Quick example
+
+```python
+from clima import c, Schema
+
+class S(Schema):
+    place = 'Finland'
+
+@c
+class Cli:
+    def say_hi(self):
+        print(f'Hi from {c.place}')
+```
+
+```
+$ cli.py say_hi
+Hi from Finland
+$ cli.py say_hi --place 'Sweden'
+Hi from Sweden
+```
+
+![example ascii](https://raw.githubusercontent.com/turuluu/clima/master/example.svg)
+
 ## Why clima?
 
 clima eliminates CLI boilerplate: define a `Schema` dataclass and a `Cli` class — that's it. Unlike click, typer, or argparse, clima gives you a built-in config cascade (CLI args → env vars → `.env` file → config file → defaults) with zero extra code. Schema fields double as CLI flags, environment variables, and config file keys automatically.
@@ -30,38 +53,6 @@ clima eliminates CLI boilerplate: define a `Schema` dataclass and a `Cli` class 
 - **`.env` file and env var support** — Schema fields are also read from environment variables and `.env` files
 - **Optional gpg secrets** — decrypt secrets via `pass` / gnupg if installed
 
-Create a command-line interface:
-
-    from clima import c
-    
-    @c
-    class Cli:
-        def say_hi(self):
-            print('oh hi - whatever this is..')
-
-![example ascii](https://raw.githubusercontent.com/turuluu/clima/master/example.svg)
-
-Create a cli program with arguments:
-
-    from clima import c, Schema
-    
-    # Defining the settings (configuration object)
-    class S(Schema):
-        place = 'Finland'
-        
-    @c
-    class Cli:
-        def say_hi(self):
-            print(f'Hi from {c.place}')
-            
-            
-Usage example:
-  
-     cli.py say_hi
-     > Hi from Finland
-     cli.py say_hi --place 'Sweden'
-     > Hi from Sweden
- 
 ## Documentation
 
 Full documentation at [python-clima.readthedocs.io](https://python-clima.readthedocs.io/).
