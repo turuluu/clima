@@ -114,7 +114,10 @@ def cast_as_annotated(_schema, attr, container=None, value=None):
         container = _schema
 
     if value is None:
-        value = getattr(container, attr)
+        try:
+            value = getattr(container, attr)
+        except RequiredParameterException:
+            return None
     result = value
 
     if hasattr(type(_schema), '__annotations__'):
@@ -193,7 +196,9 @@ def cli(cls):
                     setattr(tmp_c, attr, cast_as_annotated(s, attr, container=tmp_c))
 
         for attr in tmp_c._get_configured():
-            setattr(c, attr, getattr(tmp_c, attr))
+            val = tmp_c._get_configured()[attr]
+            if val is not None:
+                setattr(c, attr, getattr(tmp_c, attr))
 
         _auto_setup_logging(s, c)
 
