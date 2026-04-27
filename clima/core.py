@@ -62,7 +62,7 @@ class Configurable:
         """
         Decorator to define the Cli object
         """
-        _cli = cli(cls)
+        _cli = _build_cli(cls)
         if not noprepare:
             global DECORATORS_STATE
             prepare(DECORATORS_STATE['generated'], DECORATORS_STATE['schema'])
@@ -146,7 +146,7 @@ def _auto_setup_logging(schema, configured):
     setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)
 
 
-def cli(cls):
+def _build_cli(cls):
     """Decorator that wraps the command line interface specific class with fire"""
     state = DECORATORS_STATE
 
