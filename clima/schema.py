@@ -187,3 +187,17 @@ class MetaSchema(type):
 
     def __init__(cls, name, bases, namespace, **kwds):
         super().__init__(name, bases, namespace)
+
+    def cli(cls, cli_cls):
+        """Decorator to define the CLI class, equivalent to @c.
+
+        Usage::
+
+            @C.cli
+            class MyCli:
+                def greet(self):
+                    print(C.name)
+        """
+        # Delegate to Configurable.__call__ to keep both entry points in sync
+        from clima import core
+        return core.c(cli_cls)
