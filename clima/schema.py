@@ -143,6 +143,7 @@ class MetaSchema(type):
 
     def __new__(mcs, name, bases, namespace, **kwds):
         cls = type.__new__(mcs, name, bases, namespace)
+        cls._schema_ready = False
 
         # post init hook
         cls.post_init(cls)
@@ -183,10 +184,31 @@ class MetaSchema(type):
         # Wrap schema with c (configuration decorator
         cls._wrap(cls)
 
+        cls._schema_ready = True
         return cls
 
     def __init__(cls, name, bases, namespace, **kwds):
         super().__init__(name, bases, namespace)
+
+    def __getattribute__(cls, name):
+        value = super().__getattribute__(name)
+        # Guard: raise for annotated fields that are None (required parameters)
+        # Only active after class construction is complete (_schema_ready flag)
+        if value is None and not name.startswith('_'):
+            try:
+                ready = super().__getattribute__('_schema_ready')
+            except AttributeError:
+                ready = False
+            if ready:
+                annotations = {}
+                try:
+                    annotations = super().__getattribute__('__annotations__')
+                except AttributeError:
+                    pass
+                if name in annotations:
+                    from clima.core import RequiredParameterException
+                    raise RequiredParameterException(f'Missing argument for "{name}"')
+        return value
 
     def cli(cls, cli_cls):
         """Decorator to define the CLI class, equivalent to @c.

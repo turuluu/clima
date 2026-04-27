@@ -135,3 +135,42 @@ class TestSchemaClassAttrsWriteback(TestCase, SysArgvRestore):
                 pass
 
         assert C.a == 2, f'Schema class attr should reflect post_init mutation, got {C.a!r}'
+
+
+class TestSchemaRequiredParameterGuard(TestCase, SysArgvRestore):
+    """Test that accessing None-defaulting Schema fields raises RequiredParameterException."""
+
+    def tearDown(self):
+        self.c._clear()
+        super().tearDown()
+
+    def test_none_field_raises(self):
+        from clima import c, Schema
+        from clima.core import RequiredParameterException
+        self.c = c
+
+        class C(Schema):
+            name: str = None
+
+        with self.assertRaises(RequiredParameterException):
+            _ = C.name
+
+    def test_non_none_field_works(self):
+        from clima import c, Schema
+        self.c = c
+
+        class C(Schema):
+            a: int = 42
+
+        assert C.a == 42, 'Non-None fields should be accessible normally'
+
+    def test_internal_attrs_work(self):
+        from clima import c, Schema
+        self.c = c
+
+        class C(Schema):
+            a: int = 1
+
+        # These should not raise
+        assert hasattr(C, 'cli')
+        assert hasattr(C, '_fields')
