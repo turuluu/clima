@@ -36,3 +36,11 @@ from clima.core import c  # Deprecated: use @YourSchema.cli instead of @c
 from clima.helputils import print_help, HelpString
 from clima.utils import suppress_traceback
 from clima.logging import setup_logging
+
+__all__ = [
+    'c', 'Schema', 'Configurable',
+    'fire',
+    'print_help', 'HelpString',
+    'suppress_traceback',
+    'setup_logging',
+]
