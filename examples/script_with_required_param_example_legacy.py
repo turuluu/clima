@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from clima import Schema
+from clima import c, Schema
 
 class C(Schema):
     name: str = None  # (Required) Your first name
@@ -7,21 +7,24 @@ class C(Schema):
     age: int = '132'  # Age is just a number
 
 
-@C.cli
+c: C = c
+
+
+@c
 class Something:
     def print_name(self):
         """This command prints name. If the 'name' parameter is not provided, it will
         throw an error upon usage (in code). In other words, the check for the required parameters
         is defined by using 'None' as the default value in the configuration class i.e. C(Schema).
         """
-        print(f'{C.name} {C.surname}')
+        print(f'{c.name} {c.surname}')
 
     def print_age(self):
         """This here, prints my age. This shouldn't trigger an error even if 'name' is not provided
-        as C.name is not used in the code. Thus subcommand level required parameters need only be defined
+        as c.name is not used in the code. Thus subcommand level required parameters need only be defined
         in the configuration class i.e. C(Schema)
         """
-        print(C.age)
+        print(c.age)
 
 
 ############################################################

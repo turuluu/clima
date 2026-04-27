@@ -1,4 +1,4 @@
-from clima import c, Schema
+from clima import Schema
 import pathlib
 
 class Conf(Schema):
@@ -7,16 +7,16 @@ class Conf(Schema):
     i: int = '2'  # This int should be cast to str
 
 
-@c
+@Conf.cli
 class Cli:
     def run(self):
         """run this to verify the casting"""
-        print(f'Checking casting of c.p {repr(c.p)}')
-        assert type(c.p) is pathlib.PurePosixPath, f'Should have cast to path instead of {type(c.p)}'
-        print(f'Checking casting of c.s {repr(c.s)}')
-        assert type(c.s) is str, f'Should have cast to str instead of {type(c.s)}'
-        print(f'Checking casting of c.i {repr(c.i)}')
-        assert type(c.i) is int, f'Should have cast to int instead of {type(c.i)}'
+        print(f'Checking casting of Conf.p {repr(Conf.p)}')
+        assert type(Conf.p) is pathlib.PurePosixPath, f'Should have cast to path instead of {type(Conf.p)}'
+        print(f'Checking casting of Conf.s {repr(Conf.s)}')
+        assert type(Conf.s) is str, f'Should have cast to str instead of {type(Conf.s)}'
+        print(f'Checking casting of Conf.i {repr(Conf.i)}')
+        assert type(Conf.i) is int, f'Should have cast to int instead of {type(Conf.i)}'
 
         print('Types were cast correctly!')
 

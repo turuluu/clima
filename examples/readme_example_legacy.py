@@ -1,12 +1,12 @@
-from clima import Schema
+from clima import c, Schema
 
 class Configuration(Schema):
     a: str = 'A'  # a description
     x: int = 1  # x description
 
-@Configuration.cli
+@c
 class Cli:
     def foo(self):
         # using configuration
-        print(Configuration.a)
+        print(c.a)
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from clima import Schema
+from clima import c, Schema
 
 
 class C(Schema):
@@ -8,17 +8,20 @@ class C(Schema):
     age: int = '132'  # Age is just a number
 
 
-@C.cli
+c: C = c
+
+
+@c
 class Something:
     """This gets printed with -h"""
 
     def print_name(self):
         """This command prints name"""
-        print(f'{C.name} {C.surname}')
+        print(f'{c.name} {c.surname}')
 
     def print_age(self):
         """This here, prints my age"""
-        print(C.age)
+        print(c.age)
 
 
 ############################################################

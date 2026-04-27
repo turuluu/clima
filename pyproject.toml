@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "clima"
-version = "0.13.4"
+version = "0.13.5"
 description = "Command line interface (cli) boilerplate using a schema"
 keywords = ["cli", "schema", "boilerplate", "cli-boilerplate", "cli-schema", "cli-tool", "cli-tools", "cli-interface", "cli-interfaces", "cli-application", "cli-applications"]
 classifiers = [
