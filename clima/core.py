@@ -200,6 +200,16 @@ def cli(cls):
             if val is not None:
                 setattr(c, attr, getattr(tmp_c, attr))
 
+        # Write resolved values back onto Schema class attributes
+        # so C.field works in the new @C.cli API
+        schema_cls = type(s)
+        for attr in s._asdict():
+            try:
+                val = getattr(c, attr)
+                setattr(schema_cls, attr, val)
+            except (RequiredParameterException, AttributeError):
+                pass
+
         _auto_setup_logging(s, c)
 
     cls_attrs = dict(

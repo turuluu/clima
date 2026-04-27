@@ -92,3 +92,46 @@ class TestNewSchemaCliPostInit(TestCase, SysArgvRestore):
                 pass
 
         assert c.a == 2, 'post_init should mutate values when using @C.cli'
+
+
+class TestSchemaClassAttrsWriteback(TestCase, SysArgvRestore):
+    """Test that resolved values are written back onto Schema class attributes."""
+
+    def tearDown(self):
+        self.c._clear()
+        super().tearDown()
+
+    def test_schema_attrs_reflect_resolved_values(self):
+        from clima import c, Schema
+        self.c = c
+        sys.argv = ['test', 'x', '--name', 'override']
+
+        class C(Schema):
+            name: str = 'default'
+
+        @C.cli
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        assert C.name == 'override', f'Schema class attr should reflect resolved CLI arg, got {C.name!r}'
+
+    def test_schema_attrs_reflect_post_init(self):
+        from clima import c, Schema
+        self.c = c
+        sys.argv = ['test', 'x']
+
+        class C(Schema):
+            a: int = 1
+
+            def post_init(self, *args):
+                self.a = 2
+
+        @C.cli
+        class Cli:
+            def x(self):
+                """docstring"""
+                pass
+
+        assert C.a == 2, f'Schema class attr should reflect post_init mutation, got {C.a!r}'
