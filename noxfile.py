@@ -11,6 +11,16 @@ def tests(session):
     session.run("poetry", "run", "pytest", "tests", "-s", external=True)
 
 
+PYTHON_VERSIONS = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+
+@nox.session(python=PYTHON_VERSIONS)
+def multi_python(session):
+    """Run the test suite across multiple Python versions."""
+    session.run("poetry", "install", "--no-root", "--sync", "--with", "dev", external=True)
+    session.run("poetry", "run", "pytest", "tests", "-s", external=True)
+
+
 @nox.session
 def integration(session):
     """Build wheel, install into clean venv, run consumer script from temp dir."""
