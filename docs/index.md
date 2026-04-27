@@ -9,15 +9,15 @@ Create a command line interface with minimal setup.
 ## Quick example
 
 ```python
-from clima import c, Schema
+from clima import Schema
 
 class S(Schema):
     name: str = 'world'
 
-@c
+@S.cli
 class Cli:
     def greet(self):
-        print(f'Hello, {c.name}!')
+        print(f'Hello, {S.name}!')
 ```
 
 ```
@@ -33,6 +33,7 @@ python app.py greet --name Ada
 - Configuration cascade: CLI args > env > .env > config file > Schema defaults
 - Type casting from annotations
 - Auto `--help` from docstrings and field comments
+- IDE completions work natively — `S.name` is typed as `str`
 - Optional logging with `--verbose` / `--quiet`
 - Version subcommand for poetry-packaged tools
 
@@ -40,6 +41,7 @@ python app.py greet --name Ada
 
 - [Getting started](getting-started.md) -- install and first CLI in 5 minutes
 - [Configuration](configuration.md) -- config files, env, type casting, logging
+- [Examples](examples.md) -- runnable examples
 - [Reference](reference.md) -- full API reference
 
 ## Install

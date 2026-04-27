@@ -23,22 +23,24 @@ Save as `app.py` and run:
 python app.py hello
 ```
 
+This schema-less form is handy for quick scripts that need no arguments.
+
 ## Adding arguments
 
-Define a `Schema` to declare CLI arguments with defaults and types:
+Define a `Schema` to declare CLI arguments with defaults and types. Use `@S.cli` to connect the schema to the CLI class:
 
 ```python
-from clima import c, Schema
+from clima import Schema
 
 class S(Schema):
     name: str = 'world'  # who to greet
     count: int = 1  # how many times
 
-@c
+@S.cli
 class Cli:
     def greet(self):
-        for _ in range(c.count):
-            print(f'Hello, {c.name}!')
+        for _ in range(S.count):
+            print(f'Hello, {S.name}!')
 ```
 
 ```
@@ -51,25 +53,27 @@ python app.py greet --name Ada --count 3
 # Hello, Ada!
 ```
 
+Access resolved values directly on the Schema class (`S.name`, `S.count`). Type annotations ensure the values are cast correctly — `count` is always an `int`, even when passed as a string from the command line.
+
 ## Subcommands
 
 Every public method on the `Cli` class becomes a subcommand:
 
 ```python
-from clima import c, Schema
+from clima import Schema
 
 class S(Schema):
     name: str = 'world'
 
-@c
+@S.cli
 class Cli:
     def greet(self):
         """Say hello."""
-        print(f'Hello, {c.name}!')
+        print(f'Hello, {S.name}!')
 
     def farewell(self):
         """Say goodbye."""
-        print(f'Goodbye, {c.name}!')
+        print(f'Goodbye, {S.name}!')
 ```
 
 ```
@@ -92,7 +96,26 @@ my_tool version
 # 0.1.0
 ```
 
+## Legacy API
+
+Older code uses `from clima import c` and the `@c` decorator. This still works and will be maintained:
+
+```python
+from clima import c, Schema
+
+class S(Schema):
+    name: str = 'world'
+
+@c
+class Cli:
+    def greet(self):
+        print(f'Hello, {c.name}!')
+```
+
+The `@S.cli` form is preferred because `S.name` gives IDE completions with correct types.
+
 ## Next steps
 
 - [Configuration](configuration.md) -- config files, env variables, `.env`, type casting
+- [Examples](examples.md) -- runnable examples for common patterns
 - [Reference](reference.md) -- full API reference

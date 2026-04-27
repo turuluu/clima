@@ -17,15 +17,15 @@ Requires Python 3.9.2+.
 ## Quick example
 
 ```python
-from clima import c, Schema
+from clima import Schema
 
 class S(Schema):
     place = 'Finland'
 
-@c
+@S.cli
 class Cli:
     def say_hi(self):
-        print(f'Hi from {c.place}')
+        print(f'Hi from {S.place}')
 ```
 
 ```
@@ -40,17 +40,14 @@ Hi from Sweden
 ## Thorough example
 
 ```python
-from clima import c, Schema
+from clima import Schema
 
 class C(Schema):
     name: str = None  # (Required) Your first name
     surname: str = 'Ma'  # Surname
     age: int = '132'  # Age is just a number
 
-# Enables IDE completions
-c: C = c
-
-@c
+@C.cli
 class Something:
     """Python docstrings are parsed to use for the help printout on the command line.
     This would show as the main help, while the class method docstrings show as subcommand helps.
@@ -61,14 +58,14 @@ class Something:
         This command prints name.
         Required parameters are defined by using 'None' as the default value in the configuration class i.e. C(Schema).
         """
-        print(f'{c.name} {c.surname}')
+        print(f'{C.name} {C.surname}')
 
     def print_age(self):
         """
         This here, prints my age.
         The parameter name is not required here, as it is not used within this subcommand.
         """
-        print(c.age)
+        print(C.age)
 
 # Example printouts
 
@@ -107,6 +104,7 @@ Schema fields double as CLI flags, environment variables, and config file keys a
 - **Config cascade** :: CLI args → env vars → `.env` file → config file → defaults, resolved automatically
 - **Type casting** :: Schema field annotations are used to cast string CLI/env values to the right type
 - **Help from field comments** :: Docstrings on Schema fields act as `--help` output
+- **IDE completions** :: `C.name` is typed as `str` — completions and type checking work natively
 - **`--verbose` / `--quiet` logging** :: Add `verbose: bool` or `quiet: bool` to Schema and get preconfigured logging
 - **Undefined param warnings** :: Unknown `--flags` on the command line produce a clear warning
 - **`version` subcommand** :: `myscript version` prints the package version automatically
@@ -114,6 +112,24 @@ Schema fields double as CLI flags, environment variables, and config file keys a
 - **`.env` file and env var support** :: Schema fields are also read from environment variables and `.env` files
 - **Optional gpg secrets** :: Decrypt secrets via `pass` / gnupg if installed
 - **Optional shortened tracebacks** :: Truncate python tracebacks into an opinionated format
+
+## Legacy API
+
+Older code uses `from clima import c` and the `@c` decorator. This still works:
+
+```python
+from clima import c, Schema
+
+class S(Schema):
+    place = 'Finland'
+
+@c
+class Cli:
+    def say_hi(self):
+        print(f'Hi from {c.place}')
+```
+
+The `@S.cli` form is preferred because `S.place` gives IDE completions with correct types.
 
 ## Documentation
 
@@ -128,4 +144,3 @@ This work started in 2019 as my hobby project and continues as so. Claude was us
 Before merging to main and uploading to pypi the code is hand-vetted to find all code assistance related issues.
 
 ![Contributions ratios](./docs/assets/contributions.png)
-

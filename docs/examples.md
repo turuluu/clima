@@ -1,10 +1,11 @@
 # Examples
 
 All examples live in the `examples/` directory and can be run directly.
+Legacy versions using the `@c` API are preserved as `*_legacy.py` for comparison.
 
 ## Simplest example
 
-A minimal CLI with no schema — just a class with methods.
+A minimal CLI with no schema — just a class with methods. Uses `@c` since there is no Schema to bind to.
 
 ```python
 from clima import c
@@ -21,16 +22,16 @@ class Cli:
 Basic schema with typed fields and inline descriptions.
 
 ```python
-from clima import c, Schema
+from clima import Schema
 
 class Configuration(Schema):
     a: str = 'A'  # a description
     x: int = 1  # x description
 
-@c
+@Configuration.cli
 class Cli:
     def foo(self):
-        print(c.a)
+        print(Configuration.a)
 ```
 
 ## Script example
@@ -38,26 +39,24 @@ class Cli:
 Multiple subcommands, positional arguments, and piping.
 
 ```python
-from clima import c, Schema
+from clima import Schema
 
 class C(Schema):
     name: str = 'Klimenko'  # Your first name
     surname: str = 'Ma'  # Surname
     age: int = '132'  # Age is just a number
 
-c: C = c
-
-@c
+@C.cli
 class Something:
     """This gets printed with -h"""
 
     def print_name(self):
         """This command prints name"""
-        print(f'{c.name} {c.surname}')
+        print(f'{C.name} {C.surname}')
 
     def print_age(self):
         """This here, prints my age"""
-        print(c.age)
+        print(C.age)
 ```
 
 ```
@@ -70,27 +69,25 @@ YoYo Ma
 
 ## Required parameters
 
-Use `None` as the default to mark a parameter as required.
+Use `None` as the default to mark a parameter as required. Accessing it without providing a value raises `RequiredParameterException`.
 
 ```python
-from clima import c, Schema
+from clima import Schema
 
 class C(Schema):
     name: str = None  # (Required) Your first name
     surname: str = 'Ma'  # Surname
     age: int = '132'  # Age is just a number
 
-c: C = c
-
-@c
+@C.cli
 class Something:
     def print_name(self):
         """If 'name' is not provided, it will raise an error on usage."""
-        print(f'{c.name} {c.surname}')
+        print(f'{C.name} {C.surname}')
 
     def print_age(self):
-        """This works even without 'name' since c.name is not used here."""
-        print(c.age)
+        """This works even without 'name' since C.name is not used here."""
+        print(C.age)
 ```
 
 ## Type casting
@@ -98,7 +95,7 @@ class Something:
 Schema annotations are used to cast values to the correct type.
 
 ```python
-from clima import c, Schema
+from clima import Schema
 import pathlib
 
 class Conf(Schema):
@@ -106,19 +103,19 @@ class Conf(Schema):
     s: str = 1  # This int should be cast to str
     i: int = '2'  # This str should be cast to int
 
-@c
+@Conf.cli
 class Cli:
     def run(self):
         """run this to verify the casting"""
-        assert type(c.p) is pathlib.PurePosixPath
-        assert type(c.s) is str
-        assert type(c.i) is int
+        assert type(Conf.p) is pathlib.PurePosixPath
+        assert type(Conf.s) is str
+        assert type(Conf.i) is int
         print('Types were cast correctly!')
 ```
 
 ## Traceback example
 
-Demonstrates clima's truncated error display.
+Demonstrates clima's truncated error display. Uses `@c` since there is no Schema.
 
 ```python
 from clima import c

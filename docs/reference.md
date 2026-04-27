@@ -1,29 +1,5 @@
 # API Reference
 
-## `c`
-
-```python
-from clima import c
-```
-
-The global configuration object. Used as both a decorator and an attribute accessor.
-
-**As a decorator:** wraps a `Cli` class to register its methods as subcommands.
-
-```python
-@c
-class Cli:
-    def my_command(self):
-        pass
-```
-
-**As an accessor:** provides access to all resolved configuration values.
-
-```python
-print(c.name)   # attribute access
-print(c['name'])  # dict-style access
-```
-
 ## `Schema`
 
 ```python
@@ -38,15 +14,28 @@ class S(Schema):
     count: int = 1  # another description
 ```
 
+### `@S.cli` decorator
+
+Use `@S.cli` to connect a Schema to a CLI class:
+
+```python
+@S.cli
+class Cli:
+    def greet(self):
+        print(f'Hello, {S.name}!')
+```
+
+After decoration, resolved values are available as class attributes on the Schema (`S.name`, `S.count`). IDE completions and type checking work natively.
+
 ### Field format
 
 ```
 attribute[: type] = default  [# description]
 ```
 
-- **attribute**: becomes a `--attribute` CLI flag and `c.attribute` accessor
+- **attribute**: becomes a `--attribute` CLI flag and `S.attribute` accessor
 - **type** (optional): used for casting values from all sources
-- **default**: the fallback value
+- **default**: the fallback value; use `None` to mark as required
 - **description** (optional): shown in `--help` output
 
 ### Special fields
@@ -72,12 +61,21 @@ class S(Schema):
             self.bin_path = 'C:/tools/bin'
 ```
 
+### Required parameters
+
+Set a field's default to `None` to make it required. Accessing it before a value is provided raises `RequiredParameterException`:
+
+```python
+class S(Schema):
+    name: str = None  # must be provided via CLI, env, or config
+```
+
 ## `Cli.post_init`
 
 A `@staticmethod` on the `Cli` class. Runs after configuration resolution. Has access to CLI args but cannot introduce new fields.
 
 ```python
-@c
+@S.cli
 class Cli:
     @staticmethod
     def post_init(s):
@@ -85,8 +83,34 @@ class Cli:
             s.bin_path = 'C:/tools/bin'
 
     def run(self):
-        print(c.bin_path)
+        print(S.bin_path)
 ```
+
+## `c` (legacy)
+
+```python
+from clima import c
+```
+
+The global configuration object. Used as both a decorator and an attribute accessor. **Deprecated in favour of `@S.cli`**, but maintained for backward compatibility.
+
+**As a decorator** (schema-less CLIs or legacy code):
+
+```python
+@c
+class Cli:
+    def my_command(self):
+        pass
+```
+
+**As an accessor** (legacy code):
+
+```python
+print(c.name)   # attribute access
+print(c['name'])  # dict-style access
+```
+
+The `@S.cli` form is preferred because `S.name` gives IDE completions with correct types.
 
 ## `setup_logging`
 
