@@ -45,7 +45,7 @@ run_py ./examples/type_casting_example.py
 run_py ./examples/type_casting_example.py run
 
 run_py ./examples/config_example/my_curl.py headers
-run_py ./examples/config_example/my_curl.py headers --url "https://oeksound.com"
+run_py ./examples/config_example/my_curl.py headers --url "https://example.com"
 
 cd examples
 
