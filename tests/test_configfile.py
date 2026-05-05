@@ -9,7 +9,130 @@ from pathlib import Path
 import os
 import sys
 
-from clima.configfile import find_cfg
+from clima.configfile import find_cfg, read_config
+
+
+class TestTomlConfig:
+    """read_config should parse .toml files preserving native types (lists, bools, etc.)."""
+
+    def test_toml_list_preserves_type(self, tmp_path):
+        cfg = tmp_path / 'foo.toml'
+        cfg.write_text('[Clima]\ntwo = ["a", "bcd"]\n')
+
+        result = read_config(cfg)
+
+        assert result == {'two': ['a', 'bcd']}
+        assert isinstance(result['two'], list)
+        assert result['two'][0] == 'a'
+
+    def test_toml_list_of_list_preserves_type(self, tmp_path):
+        cfg = tmp_path / 'foo.toml'
+        cfg.write_text('[Clima]\nthree = [["a"], ["b", "cd"]]\n')
+
+        result = read_config(cfg)
+
+        assert result == {'three': [['a'], ['b', 'cd']]}
+        assert isinstance(result['three'], list)
+        assert isinstance(result['three'][0], list)
+
+    def test_toml_bool_preserves_type(self, tmp_path):
+        cfg = tmp_path / 'foo.toml'
+        cfg.write_text('[Clima]\none = true\n')
+
+        result = read_config(cfg)
+
+        assert result == {'one': True}
+        assert isinstance(result['one'], bool)
+
+    def test_toml_package_section_takes_precedence(self, tmp_path):
+        cfg = tmp_path / 'foo.toml'
+        cfg.write_text('[mypkg]\nx = 1\n[Clima]\nx = 2\n')
+
+        result = read_config(cfg, package_name='mypkg')
+
+        assert result == {'x': 1}
+
+    def test_toml_falls_back_to_clima_section(self, tmp_path):
+        cfg = tmp_path / 'foo.toml'
+        cfg.write_text('[Clima]\nx = 7\n')
+
+        result = read_config(cfg, package_name='mypkg')
+
+        assert result == {'x': 7}
+
+    def test_find_cfg_picks_toml(self, tmp_path):
+        (tmp_path / 'app.toml').write_text('[Clima]\nfoo = "bar"\n')
+
+        result = find_cfg(tmp_path)
+
+        assert result is not None
+        assert result.name == 'app.toml'
+
+
+class TestIniListTypes:
+    """INI .cfg/.conf list-typed values should round-trip through cast_as_annotated."""
+
+    def test_list_string_literal_parses_via_cast(self):
+        from clima import c, Schema
+        from clima.core import cast_as_annotated, DECORATORS_STATE
+
+        try:
+            class C(Schema):
+                two: list = []
+                three: list = [[]]
+
+            schema_inst = DECORATORS_STATE['schema']
+
+            assert cast_as_annotated(schema_inst, 'two', value='["a", "bcd"]') == ['a', 'bcd']
+            assert cast_as_annotated(schema_inst, 'three', value='[["a"], ["b", "cd"]]') == [['a'], ['b', 'cd']]
+        finally:
+            c._clear()
+
+    def test_non_list_string_unchanged(self):
+        from clima import c, Schema
+        from clima.core import cast_as_annotated, DECORATORS_STATE
+
+        try:
+            class C(Schema):
+                name: str = ''
+
+            schema_inst = DECORATORS_STATE['schema']
+
+            assert cast_as_annotated(schema_inst, 'name', value='hello') == 'hello'
+        finally:
+            c._clear()
+
+    def test_lists_round_trip_from_cfg_file(self, tmp_path, monkeypatch):
+        """Full end-to-end: write a .cfg with list values, run through Cli, c.two/c.three populated."""
+        from clima import c, Schema
+
+        cfg = tmp_path / 'app.cfg'
+        cfg.write_text(
+            '[Clima]\n'
+            'one = true\n'
+            'two = ["a", "bcd"]\n'
+            'three = [["a"], ["b", "cd"]]\n'
+        )
+
+        monkeypatch.setattr(sys, 'argv', ['test', 'x', '--cwd', str(tmp_path)])
+
+        try:
+            class C(Schema):
+                cwd: Path = '.'
+                one: bool = False
+                two: list = []
+                three: list = [[]]
+
+            @c
+            class Cli:
+                def x(self):
+                    pass
+
+            assert c.one is True
+            assert c.two == ['a', 'bcd']
+            assert c.three == [['a'], ['b', 'cd']]
+        finally:
+            c._clear()
 
 
 class TestFindCfgSectionFilter:

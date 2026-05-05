@@ -1,8 +1,13 @@
-"""Configuration file (sth.cfg) handling"""
+"""Configuration file (sth.cfg / sth.toml) handling"""
 import configparser
 import sys
 
 from pathlib import Path
+
+try:
+    import tomllib  # Python 3.11+
+except ModuleNotFoundError:  # pragma: no cover - 3.9/3.10 fallback
+    import tomli as tomllib  # type: ignore[no-redef]
 
 from clima import utils
 
@@ -12,13 +17,28 @@ def is_in_module(f):
 
 
 def cfgs_gen(p):
+    yield from Path(p).glob('*.toml')
     yield from Path(p).glob('*.conf')
     yield from Path(p).glob('*.cfg')
+
+
+def _read_toml(path):
+    with open(path, 'rb') as f:
+        return tomllib.load(f)
 
 
 def _has_relevant_section(path, package_name):
     """Return True if `path` parses as a config file containing either
     [<package_name>] or [Clima]."""
+    suffix = Path(path).suffix.lower()
+    if suffix == '.toml':
+        try:
+            data = _read_toml(path)
+        except (tomllib.TOMLDecodeError, OSError):
+            return False
+        if package_name is not None and package_name in data:
+            return True
+        return 'Clima' in data
     try:
         parser = configparser.ConfigParser()
         parser.read(path)
@@ -78,20 +98,29 @@ def read_config(_filepath='test.cfg', package_name=None) -> dict:
     if not filepath.exists():
         return parsed_conf
 
+    if package_name is None:
+        package_name = utils.deduce_package()
+
+    if filepath.suffix.lower() == '.toml':
+        try:
+            data = _read_toml(filepath)
+        except (tomllib.TOMLDecodeError, OSError):
+            print(f'warning: inferred {_filepath} to be a valid config file, but could not read it.', file=sys.stderr)
+            return parsed_conf
+        if package_name is not None and package_name in data:
+            parsed_conf = dict(data[package_name])
+        elif 'Clima' in data:
+            parsed_conf = dict(data['Clima'])
+        return parsed_conf
+
     try:
         file_config = configparser.ConfigParser()
         file_config.read(filepath)
-        # TODO: When fixing version printing with reflection, use this to alternatively use
-        # package name for the config section
-        if package_name is None:
-            package_name = utils.deduce_package()
 
         if package_name is not None and package_name in file_config:
             parsed_conf = dict(file_config[package_name])
         elif 'Clima' in file_config:
             parsed_conf = dict(file_config['Clima'])
-        # else:
-        #     print('warning: config file found at {}, but it was missing section named [Clima]'.format(str(filepath)))
     except:
         print(f'warning: inferred {_filepath} to be a valid config file, but could not read it.', file=sys.stderr)
 

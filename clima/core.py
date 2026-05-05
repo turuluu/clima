@@ -1,3 +1,4 @@
+import ast
 import fileinput
 import inspect
 import os
@@ -124,7 +125,17 @@ def cast_as_annotated(_schema, attr, container=None, value=None):
         annotated_type = type(_schema).__annotations__.get(attr)
         if annotated_type is not None:
 
-            if schema.should_wrap_as_list(value, annotated_type):
+            if (
+                isinstance(value, str)
+                and schema.is_iterable(annotated_type)
+                and value[:1] in '[({'
+            ):
+                try:
+                    parsed = ast.literal_eval(value)
+                except (ValueError, SyntaxError):
+                    parsed = value
+                result = annotated_type(parsed) if not isinstance(parsed, str) else parsed
+            elif schema.should_wrap_as_list(value, annotated_type):
                 result = annotated_type([value])
             elif annotated_type is bool and isinstance(value, str):
                 # Special handling for boolean strings from config files
@@ -235,7 +246,10 @@ class Schema(object, metaclass=schema.MetaSchema):
         configfile_path = configfile.get_config_path(self)
         if configfile_path is not None:
             result = utils.filter_fields(configfile.read_config(configfile_path, self._package_name), self)
-            result = utils.type_correct_with(result, self)
+            # Type coercion is handled downstream by cast_as_annotated, which
+            # correctly handles list literals, booleans, and TOML's native
+            # types — `type(default)(raw)` here would split list strings into
+            # characters and treat 'false' as True.
 
         return result
 
