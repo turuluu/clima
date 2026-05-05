@@ -68,9 +68,20 @@ class TestTomlConfig:
         assert result is not None
         assert result.name == 'app.toml'
 
+    def test_malformed_toml_returns_empty_with_warning(self, tmp_path, capsys):
+        """Malformed .toml files should be handled gracefully — empty dict + warning."""
+        cfg = tmp_path / 'broken.toml'
+        cfg.write_text('this is = not [valid toml\n')
 
-class TestIniListTypes:
-    """INI .cfg/.conf list-typed values should round-trip through cast_as_annotated."""
+        result = read_config(cfg)
+
+        assert result == {}
+        captured = capsys.readouterr()
+        assert 'warning' in captured.err.lower()
+
+
+class TestCastAsAnnotated:
+    """Unit tests for cast_as_annotated — coercion of raw string values into Schema-typed values."""
 
     def test_list_string_literal_parses_via_cast(self):
         from clima import c, Schema
@@ -168,16 +179,9 @@ class TestIniListTypes:
         finally:
             c._clear()
 
-    def test_malformed_toml_returns_empty_with_warning(self, tmp_path, capsys):
-        """Malformed .toml files should be handled gracefully — empty dict + warning."""
-        cfg = tmp_path / 'broken.toml'
-        cfg.write_text('this is = not [valid toml\n')
 
-        result = read_config(cfg)
-
-        assert result == {}
-        captured = capsys.readouterr()
-        assert 'warning' in captured.err.lower()
+class TestIniRoundTrip:
+    """End-to-end test: write a real .cfg file and run it through @c."""
 
     def test_lists_round_trip_from_cfg_file(self, tmp_path, monkeypatch):
         """Full end-to-end: write a .cfg with list values, run through Cli, c.two/c.three populated."""
