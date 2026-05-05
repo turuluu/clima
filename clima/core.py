@@ -3,6 +3,7 @@ import fileinput
 import inspect
 import os
 import sys
+import typing
 from collections import ChainMap
 from functools import partial
 from pathlib import Path
@@ -106,6 +107,17 @@ def add_to_decorators(key, value):
     DECORATORS_STATE[key] = value
 
 
+def _concrete_type(t):
+    """Return a constructable concrete type for `t`.
+
+    For parameterized generics like ``list[str]``, ``typing.get_origin`` yields
+    the underlying ``list`` (or ``tuple``/``set``). For plain types it returns
+    the type unchanged. We need this because parameterized generics from PEP
+    585 cannot be instantiated directly — ``list[str]([...])`` raises.
+    """
+    return typing.get_origin(t) or t
+
+
 def cast_as_annotated(_schema, attr, container=None, value=None):
     """Schema is annotated with types. These types are used to
     recast the value (value == container[attr] if not specified in kwargs)
@@ -124,24 +136,43 @@ def cast_as_annotated(_schema, attr, container=None, value=None):
     if hasattr(type(_schema), '__annotations__'):
         annotated_type = type(_schema).__annotations__.get(attr)
         if annotated_type is not None:
+            concrete = _concrete_type(annotated_type)
 
-            if (
+            looks_like_literal = (
                 isinstance(value, str)
                 and schema.is_iterable(annotated_type)
                 and value[:1] in '[({'
-            ):
+            )
+            _parsed_ok = False
+            parsed = None
+            if looks_like_literal:
                 try:
                     parsed = ast.literal_eval(value)
+                    _parsed_ok = True
                 except (ValueError, SyntaxError):
-                    parsed = value
-                result = annotated_type(parsed) if not isinstance(parsed, str) else parsed
+                    print(
+                        f'clima: warning: failed to parse list/tuple literal '
+                        f'for {attr!r}: {value!r}; falling back to raw value.',
+                        file=sys.stderr,
+                    )
+
+            if _parsed_ok:
+                if isinstance(parsed, str):
+                    # ``ast.literal_eval`` round-tripped a string (e.g. value
+                    # was ``"'foo'"``). Wrap it the same way the
+                    # ``should_wrap_as_list`` branch would.
+                    result = concrete([parsed])
+                elif schema.is_iterable(parsed):
+                    result = concrete(parsed)
+                else:
+                    result = concrete([parsed])
             elif schema.should_wrap_as_list(value, annotated_type):
-                result = annotated_type([value])
+                result = concrete([value])
             elif annotated_type is bool and isinstance(value, str):
                 # Special handling for boolean strings from config files
                 result = value.lower() in ('true', '1', 'yes', 'on')
             else:
-                result = annotated_type(value)
+                result = concrete(value)
     return result
 
 

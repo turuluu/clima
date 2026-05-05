@@ -102,6 +102,83 @@ class TestIniListTypes:
         finally:
             c._clear()
 
+    def test_malformed_list_literal_falls_back_with_warning(self, capsys):
+        """Unparseable list-like value should NOT silently leak the raw string;
+        instead, the wrap-as-list path runs and the result is a single-element
+        list containing the raw string, plus a warning to stderr."""
+        from clima import c, Schema
+        from clima.core import cast_as_annotated, DECORATORS_STATE
+
+        try:
+            class C(Schema):
+                two: list = []
+
+            schema_inst = DECORATORS_STATE['schema']
+
+            result = cast_as_annotated(schema_inst, 'two', value='[abc]')
+            assert result == ['[abc]']
+            captured = capsys.readouterr()
+            assert 'warning' in captured.err.lower()
+        finally:
+            c._clear()
+
+    def test_bool_false_from_ini_string(self):
+        """cast_as_annotated should coerce the strings 'false'/'true' into bool."""
+        from clima import c, Schema
+        from clima.core import cast_as_annotated, DECORATORS_STATE
+
+        try:
+            class C(Schema):
+                flag: bool = False
+
+            schema_inst = DECORATORS_STATE['schema']
+
+            assert cast_as_annotated(schema_inst, 'flag', value='false') is False
+            assert cast_as_annotated(schema_inst, 'flag', value='true') is True
+        finally:
+            c._clear()
+
+    def test_tuple_field_round_trip(self):
+        """cast_as_annotated should parse a tuple-literal string into a tuple."""
+        from clima import c, Schema
+        from clima.core import cast_as_annotated, DECORATORS_STATE
+
+        try:
+            class C(Schema):
+                pair: tuple = ()
+
+            schema_inst = DECORATORS_STATE['schema']
+
+            assert cast_as_annotated(schema_inst, 'pair', value='("a", "b")') == ('a', 'b')
+        finally:
+            c._clear()
+
+    def test_pep585_generic_list_round_trip(self):
+        """PEP 585 parameterized generics like list[str] should also parse."""
+        from clima import c, Schema
+        from clima.core import cast_as_annotated, DECORATORS_STATE
+
+        try:
+            class C(Schema):
+                items: list[str] = []
+
+            schema_inst = DECORATORS_STATE['schema']
+
+            assert cast_as_annotated(schema_inst, 'items', value='["a", "b"]') == ['a', 'b']
+        finally:
+            c._clear()
+
+    def test_malformed_toml_returns_empty_with_warning(self, tmp_path, capsys):
+        """Malformed .toml files should be handled gracefully — empty dict + warning."""
+        cfg = tmp_path / 'broken.toml'
+        cfg.write_text('this is = not [valid toml\n')
+
+        result = read_config(cfg)
+
+        assert result == {}
+        captured = capsys.readouterr()
+        assert 'warning' in captured.err.lower()
+
     def test_lists_round_trip_from_cfg_file(self, tmp_path, monkeypatch):
         """Full end-to-end: write a .cfg with list values, run through Cli, c.two/c.three populated."""
         from clima import c, Schema

@@ -50,12 +50,13 @@ def _has_relevant_section(path, package_name):
 
 
 def find_cfg(p, level=2, package_name=None):
-    """Find a `.conf`/`.cfg` file starting at `p`, optionally walking up.
+    """Find a `.toml`, `.conf`, or `.cfg` file starting at `p`, optionally walking up.
 
     Discovery rules:
-    - Glob `p` for `*.conf` then `*.cfg`; returns the first match (first
-      `.conf` preferred, then `.cfg`). Ordering within each extension is
-      whatever `Path.glob` yields (typically filesystem order).
+    - Glob `p` for `*.toml` then `*.conf` then `*.cfg`; returns the first
+      match (first `.toml` preferred, then `.conf`, then `.cfg`). Ordering
+      within each extension is whatever `Path.glob` yields (typically
+      filesystem order).
     - If `package_name` is provided, candidates are filtered to files that
       parse as INI and contain either a `[<package_name>]` or `[Clima]`
       section. Files that cannot be parsed as INI are skipped.
@@ -121,7 +122,7 @@ def read_config(_filepath='test.cfg', package_name=None) -> dict:
             parsed_conf = dict(file_config[package_name])
         elif 'Clima' in file_config:
             parsed_conf = dict(file_config['Clima'])
-    except:
+    except (configparser.Error, OSError):
         print(f'warning: inferred {_filepath} to be a valid config file, but could not read it.', file=sys.stderr)
 
     return parsed_conf

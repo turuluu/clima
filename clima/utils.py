@@ -78,15 +78,6 @@ def filter_fields(d: dict, nt):
     return res
 
 
-def type_correct_with(cdict, cfg_tuple):
-    """Use type hints of the cfg tuple to cast parameters i.e. attributes into their intended types"""
-    res = {}
-    for k, v in cdict.items():
-        typename = getattr(cfg_tuple, k)
-        res.update({k: type(typename)(v)})
-    return res
-
-
 @contextmanager
 def suppress_traceback():
     """Better exception printout

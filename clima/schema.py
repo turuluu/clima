@@ -1,6 +1,7 @@
 import inspect
 import sys
 import tomllib
+import typing
 # Until poetry fixes this https://github.com/python-poetry/poetry/issues/144
 # This hack is necessary to report correct __version__
 # inside the project
@@ -121,7 +122,11 @@ def get_pkg_version():
 def is_iterable(value):
     iterables = [tuple, list, set]
 
-    return (type(value) in iterables or value in iterables)
+    if type(value) in iterables or value in iterables:
+        return True
+    # Recognize parameterized generics like list[str], tuple[int, ...], set[bytes].
+    origin = typing.get_origin(value)
+    return origin in {tuple, list, set}
 
 
 def should_wrap_as_list(value, target_type):
