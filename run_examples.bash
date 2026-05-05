@@ -47,6 +47,8 @@ run_py ./examples/type_casting_example.py run
 run_py ./examples/config_example/my_curl.py headers
 run_py ./examples/config_example/my_curl.py headers --url "https://example.com"
 
+run_py ./examples/toml_example/show_config.py print --cwd ./examples/toml_example
+
 cd examples
 
 run_py -m advanced_module_example subcommand-foo

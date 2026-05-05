@@ -1,0 +1,29 @@
+# All field values live under the [Clima] section (or a section named after
+# your package). Every schema field below has a matching key here, with a
+# value in the type that TOML can express natively.
+
+[Clima]
+# str — plain quoted string.
+name = "clima-toml-demo"
+
+# int — TOML number.
+port = 8080
+
+# float — TOML number with a fractional part.
+ratio = 0.75
+
+# bool — TOML true/false (no quoting).
+debug = true
+
+# list[str] — TOML array. Element type comes from the PEP 585 annotation.
+tags = ["alpha", "beta", "gamma"]
+
+# list[list[int]] — array of arrays.
+matrix = [[1, 2], [3, 4]]
+
+# tuple — TOML has no tuple type, so write an array; clima coerces to tuple
+# from the schema annotation.
+pair = ["host", 5432]
+
+# list — plain list, no element annotation.
+items = [1, "two", 3.0]
