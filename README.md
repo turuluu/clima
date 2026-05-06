@@ -50,7 +50,7 @@ Schema fields double as CLI flags, environment variables, and config file keys a
 - **`--verbose` / `--quiet` logging** :: Add `verbose: bool` or `quiet: bool` to Schema and get preconfigured logging
 - **Undefined param warnings** :: Unknown `--flags` on the command line produce a clear warning
 - **`version` subcommand** :: `myscript version` prints the package version automatically
-- **Config file support** :: Declare defaults in an INI-style `.conf` file keyed to your package name
+- **Config file support** :: Declare defaults in toml `.toml` or INI-style `.conf` file keyed to your package name
 - **`.env` file and env var support** :: Schema fields are also read from environment variables and `.env` files
 - **Optional gpg secrets** :: Decrypt secrets via `pass` / gnupg if installed
 - **Optional shortened tracebacks** :: Truncate python tracebacks into an opinionated format
