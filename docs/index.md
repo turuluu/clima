@@ -1,7 +1,6 @@
 # clima
 
 Create a command line interface with minimal setup.
-
 [![PyPI](https://img.shields.io/pypi/v/clima)](https://pypi.org/project/clima/)
 [![Python versions](https://img.shields.io/pypi/pyversions/clima)]()
 [![PyPI license](https://img.shields.io/pypi/l/clima)]()
