@@ -35,62 +35,6 @@ $ cli.py say_hi --place 'Sweden'
 Hi from Sweden
 ```
 
-## Thorough example
-
-```python
-from clima import Schema
-
-class C(Schema):
-    name: str = None  # (Required) Your first name
-    surname: str = 'Ma'  # Surname
-    age: int = '132'  # Age is just a number
-
-@C.cli
-class Something:
-    """Python docstrings are parsed to use for the help printout on the command line.
-    This would show as the main help, while the class method docstrings show as subcommand helps.
-    """
-
-    def print_name(self):
-        """
-        This command prints name.
-        Required parameters are defined by using 'None' as the default value in the configuration class i.e. C(Schema).
-        """
-        print(f'{C.name} {C.surname}')
-
-    def print_age(self):
-        """
-        This here, prints my age.
-        The parameter name is not required here, as it is not used within this subcommand.
-        """
-        print(C.age)
-
-# Example printouts
-
-# $ python main.py
-# Usage:       main.py
-#              main.py print-age
-#              main.py print-name
-# Description: Python docstrings are parsed to use for the help printout on the command line.
-# This would show as the main help, while the class method docstrings show as subcommand helps.
-
-# $ python main.py print-name -h
-# Usage:       main.py print-name [ARGS]
-#
-# Description: This command prints name.
-# Required parameters are defined by using 'None' as the default value in the configuration class i.e. C(Schema).
-#
-# Args:
-#     --name (str): (Required) Your first name (Default is None)
-#     --surname (str): Surname (Default is 'Ma')
-#     --age (int): Age is just a number (Default is '132')
-
-# $ python main.py print-name --name YoYo
-# YoYo Ma
-
-# $ python main.py print-age
-# 132
-```
 ## Why Clima?
 
 Clima eliminates CLI boilerplate: just define a `Schema` dataclass and a `Cli` class. Opinionated for convenience; Unlike click, typer, or argparse, clima gives you a built-in config cascade (CLI args → env vars → `.env` file → config file → defaults) with zero extra code. 
