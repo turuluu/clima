@@ -7,7 +7,10 @@ import nox
 @nox.session
 def tests(session):
     """Run the test suite."""
-    session.run("poetry", "install", "--no-root", "--sync", "--with", "dev", external=True)
+    session.run(
+        "poetry", "install", "--no-root", "--sync", "--with", "dev", "--all-extras",
+        external=True,
+    )
     session.run("poetry", "run", "pytest", "tests", "-s", external=True)
 
 
@@ -17,7 +20,10 @@ PYTHON_VERSIONS = ["3.9", "3.10", "3.11", "3.12", "3.13"]
 @nox.session(python=PYTHON_VERSIONS)
 def multi_python(session):
     """Run the test suite across multiple Python versions."""
-    session.run("poetry", "install", "--no-root", "--sync", "--with", "dev", external=True)
+    session.run(
+        "poetry", "install", "--no-root", "--sync", "--with", "dev", "--all-extras",
+        external=True,
+    )
     session.run("poetry", "run", "pytest", "tests", "-s", external=True)
 
 

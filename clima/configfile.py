@@ -153,7 +153,7 @@ def get_config_path(_schema):
         # concate getattr cwd/'' getattr cfg/''
         cfg_filepath = Path(getattr(_schema, 'cwd', '')) / cfg_filepath
         if not cfg_filepath.is_file():
-            package_name = utils.deduce_package()
+            package_name = getattr(_schema, '_package_name', None) or utils.deduce_package()
             # Makes non-installed scripts work with config files
             if package_name is None:
                 package_name = 'Clima'
