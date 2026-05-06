@@ -35,8 +35,6 @@ $ cli.py say_hi --place 'Sweden'
 Hi from Sweden
 ```
 
-![example ascii](https://raw.githubusercontent.com/turuluu/clima/master/example.svg)
-
 ## Thorough example
 
 ```python
