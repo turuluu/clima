@@ -9,7 +9,7 @@ Or from anywhere by passing --cwd:
 
     python show_config.py print --cwd path/to/toml_example
 """
-from clima import c, Schema
+from clima import Schema
 
 
 class C(Schema):
@@ -24,14 +24,11 @@ class C(Schema):
     items: list = []
 
 
-c: C = c
-
-
-@c
+@C.cli
 class Cli:
     def print(self):
         """Print every resolved value with its runtime type."""
         fields = ('name', 'port', 'ratio', 'debug', 'tags', 'matrix', 'pair', 'items')
         for field in fields:
-            value = getattr(c, field)
+            value = getattr(C, field)
             print(f'{field:>8} = {value!r:<40}  ({type(value).__name__})')

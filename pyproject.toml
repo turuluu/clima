@@ -38,6 +38,8 @@ pytest = "*"
 hypothesis = "*"
 mock = "*"
 requests = ">=2.25.0"
+nox = "*"
+mkdocs = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

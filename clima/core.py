@@ -217,7 +217,7 @@ def _build_cli(cls):
 
         # Handle cwd if not already set from CLI (apply relative path logic)
         if hasattr(s, 'cwd'):
-            p: Path = getattr(s, 'cwd')
+            p: Path = Path(getattr(s, 'cwd'))
             if p and not p.is_absolute():
                 setattr(s, 'cwd', Path.cwd() / p)
 
