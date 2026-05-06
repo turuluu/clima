@@ -26,14 +26,22 @@ python app.py greet --name Ada
 # Hello, Ada!
 ```
 
+## Install
+
+```
+pip install clima
+```
+
+Python 3.9+.
+
 ## Features
 
-- Define CLI arguments as a Schema class with defaults and types
 - Subcommands from class methods
-- Configuration cascade: CLI args > env > .env > config file > Schema defaults
+- Configuration cascade, in order of priority: CLI args > env > .env > config file > Schema defaults
+- Parses `--help` from docstrings and field comments
+- Define CLI parameters as a Schema class with defaults and types
 - Type casting from annotations
-- Auto `--help` from docstrings and field comments
-- IDE completions work natively — `S.name` is typed as `str`
+- IDE completions work out-of-the-box
 - Optional logging with `--verbose` / `--quiet`
 - Version subcommand for poetry-packaged tools
 
@@ -44,10 +52,4 @@ python app.py greet --name Ada
 - [Examples](examples.md) -- runnable examples
 - [Reference](reference.md) -- full API reference
 
-## Install
 
-```
-pip install clima
-```
-
-Python 3.9+.
