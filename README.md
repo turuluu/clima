@@ -113,24 +113,6 @@ Schema fields double as CLI flags, environment variables, and config file keys a
 - **Optional gpg secrets** :: Decrypt secrets via `pass` / gnupg if installed
 - **Optional shortened tracebacks** :: Truncate python tracebacks into an opinionated format
 
-## Legacy API
-
-Older code uses `from clima import c` and the `@c` decorator. This still works:
-
-```python
-from clima import c, Schema
-
-class S(Schema):
-    place = 'Finland'
-
-@c
-class Cli:
-    def say_hi(self):
-        print(f'Hi from {c.place}')
-```
-
-The `@S.cli` form is preferred because `S.place` gives IDE completions with correct types.
-
 ## Documentation
 
 Full documentation at [python-clima.readthedocs.io](https://python-clima.readthedocs.io/).
